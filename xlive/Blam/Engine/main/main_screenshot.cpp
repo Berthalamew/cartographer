@@ -12,6 +12,7 @@
 #include "main/console.h"
 #include "main/main.h"
 #include "rasterizer/dx9/rasterizer_dx9_main.h"
+#include "rasterizer/rasterizer_dynamic_reflect.h"
 #include "rasterizer/rasterizer_main.h"
 #include "render/render.h"
 #include "shell/shell.h"
@@ -59,8 +60,6 @@ static void screenshot_cubemap_retrieve_rotation_info(
 
 /* dumps camera info to a text file */
 static void __cdecl dump_camera_to_file(const char* camera_name, const render_camera* camera);
-
-static void __cdecl screenshot_cubemap_set_camera_rotation(int32 face_index, int32 resolution, const real_point3d* location, render_camera* camera);
 
 static void screenshot_calculate_bloom(bitmap_data* bitmap, int32 horizontal_tile, int32 vertical_tile);
 
@@ -295,7 +294,7 @@ bool __cdecl screenshot_render(window_bound* window)
 							}
 							else
 							{
-								screenshot_cubemap_set_camera_rotation(face_index, k_screenshot_cubemap_size, &window->render_camera.point, &window->rasterizer_camera);
+								rasterizer_dynamic_reflect_set_camera_rotation(face_index, k_screenshot_cubemap_size, &window->render_camera.point, &window->rasterizer_camera);
 								window->render_camera = window->rasterizer_camera;
 							}
 							frame_render_type = 7;
@@ -684,12 +683,6 @@ static void screenshot_cubemap_retrieve_rotation_info(
 static void __cdecl dump_camera_to_file(const char* camera_name, const render_camera* camera)
 {
 	INVOKE(0x2735CA, 0x0, dump_camera_to_file, camera_name, camera);
-	return;
-}
-
-static void __cdecl screenshot_cubemap_set_camera_rotation(int32 face_index, int32 resolution, const real_point3d* location, render_camera* camera)
-{
-	INVOKE(0x2788CB, 0x0, screenshot_cubemap_set_camera_rotation, face_index, resolution, location, camera);
 	return;
 }
 
