@@ -165,7 +165,7 @@ struct XVirtualSocket
 	u_short GetNetworkOrderSocketVirtualPort() const { return name.sin_port; }
 
 	/* sets the socket send/recv buffer size */
-	int SetBufferSize(int optName, INT bufSize);
+	int SetBufferSize(int optName, INT bufSize) const;
 
 	static bool SockAddrInEqual(const sockaddr_in* a1, const sockaddr_in* a2)
 	{

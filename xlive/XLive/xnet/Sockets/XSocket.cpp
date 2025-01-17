@@ -880,7 +880,7 @@ u_short WINAPI XSocketHTONS(u_short hostshort)
 	return htons(hostshort);
 }
 
-int XVirtualSocket::SetBufferSize(int optname, INT bufSize)
+int XVirtualSocket::SetBufferSize(int optname, INT bufSize) const
 {
 	if (optname != SO_SNDBUF && optname != SO_RCVBUF)
 	{

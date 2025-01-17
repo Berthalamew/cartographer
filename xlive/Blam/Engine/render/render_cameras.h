@@ -1,5 +1,4 @@
 #pragma once
-#include "camera/observer.h"
 
 struct render_camera
 {

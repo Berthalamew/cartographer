@@ -81,8 +81,7 @@ void c_animation_channel::reset(void)
 void c_animation_channel::set_frame_position(real32 position)
 {
 	typedef void(__thiscall* set_frame_position_t)(c_animation_channel*, real32);
-	set_frame_position_t set_frame_position = Memory::GetAddress<set_frame_position_t>(0x112F0A, 0x10442A);
-	set_frame_position(this, position);
+	INVOKE_TYPE(0x112F0A, 0x10442A, set_frame_position_t, this, position);
 	return;
 }
 

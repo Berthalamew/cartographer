@@ -141,7 +141,7 @@ bool scenario_tags_load_process_shared_tags()
 {
 	s_cache_file_memory_globals* cache_file_memory = cache_file_memory_globals_get();
 
-	cache_file_tags_header* tag_header = cache_file_memory->tags_header;
+	const cache_file_tags_header* tag_header = cache_file_memory->tags_header;
 	cache_file_tags_header* unmasked_tag_header = (cache_file_tags_header*)cache_file_memory->tag_cache_base_address;
 	cache_file_header* cache_header = cache_files_get_header();
 	cache_file_header shared_header;
@@ -175,7 +175,7 @@ bool scenario_tags_load_process_shared_tags()
 	unmasked_tag_header->tag_group_link_set = (s_tag_group_link*)&unmasked_tag_header[1];
 	unmasked_tag_header->tag_instances = (cache_file_tag_instance*)(((char*)&unmasked_tag_header[1]) + sizeof(s_tag_group_link) * unmasked_tag_header->tag_group_link_set_count);
 
-	if(tag_header->tag_count >= FIRST_SHARED_TAG_INSTANCE_INDEX)
+	if (tag_header->tag_count >= FIRST_SHARED_TAG_INSTANCE_INDEX)
 	{
 		// Update cache tag_header's instances referencing shared tags
 		int32 absolute_index = FIRST_SHARED_TAG_INSTANCE_INDEX;
@@ -415,6 +415,7 @@ const char* tag_get_name(datum tag_index)
 	uint16 tag_name_index = DATUM_INDEX_TO_ABSOLUTE_INDEX(tag_index);
 
 	s_cache_file_memory_globals* g_cache_file_memory_globals = cache_file_memory_globals_get();
+#ifdef ASSERTS_ENABLED
 	ASSERT(g_cache_file_memory_globals->tags_loaded);
 	
 	// We added a second check if the first one fails, since we're going to be passing it tag indexes in the injected tag area
