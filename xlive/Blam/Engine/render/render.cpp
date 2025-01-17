@@ -185,9 +185,9 @@ int32* global_user_render_index_get(void)
 	return Memory::GetAddress<int32*>(0x4E6800);
 }
 
-uint32* global_effect_flag_get(void)
+s_render_scene_parameters* global_render_scene_parameters_get(void)
 {
-	return Memory::GetAddress<uint32*>(0xA3DA34);
+    return Memory::GetAddress<s_render_scene_parameters*>(0xA3DA30);
 }
 
 uint32* global_frame_index_get(void)

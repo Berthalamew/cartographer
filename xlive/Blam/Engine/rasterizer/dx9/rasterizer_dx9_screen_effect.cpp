@@ -129,7 +129,7 @@ void rasterizer_dx9_postprocess_scene(int32 render_layer_debug_view, bool lens_f
 	{
 		if (!frame_parameters_type_is_above_or_equal_to_7()
 			&& !global_window_parameters->is_texture_camera
-			&& !*global_effect_flag_get()
+			&& !global_render_scene_parameters_get()->effect_flags
 			&& g_render_scenario_screen_effects)
 		{
 			if (cinematic_in_progress())

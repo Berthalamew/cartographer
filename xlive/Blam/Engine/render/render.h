@@ -124,7 +124,7 @@ s_scenario_fog_result* global_fog_result_get(void);
 
 int32* global_user_render_index_get(void);
 
-uint32* global_effect_flag_get(void);
+s_render_scene_parameters* global_render_scene_parameters_get(void);
 
 // ### TODO: better function name
 bool frame_parameters_type_is_above_or_equal_to_7(void);
