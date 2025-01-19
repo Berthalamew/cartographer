@@ -23,7 +23,7 @@ bool __cdecl rasterizer_dx9_weather_plate_setup_pipeline(const c_animated_backgr
 bool __cdecl rasterizer_dx9_weather_plate_build_vertex_buffer(
 	int32 output_type,
 	real_rectangle2d* bounds,
-	real_vector4d* location,
+	const real_point2d* location,
 	void* output,
 	c_animated_background_plate* ctx);
 

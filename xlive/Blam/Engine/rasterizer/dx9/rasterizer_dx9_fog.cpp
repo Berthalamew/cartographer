@@ -40,6 +40,9 @@ void rasterizer_dx9_fog_apply_patches(void)
 {
 	rasterizer_fog_speed_apply_patch();
 	rasterizer_dx9_atmospheric_fog_patch();
+
+	// Set ZENABLE to D3DZB_USEW like xbox, they changed it in vista for some reason
+	WriteValue<uint8>(Memory::GetAddress(0x2769B0 + 1), D3DZB_USEW);	// rasterizer_dx9_draw_fog_sky_only
 	return;
 }
 
@@ -82,7 +85,7 @@ bool __cdecl rasterizer_dx9_atmospheric_fog_pipeline_setup(void* data)
 	{
 		rasterizer_dx9_set_render_state(D3DRS_STENCILENABLE, FALSE);
 	}
-	rasterizer_dx9_set_render_state(D3DRS_ZENABLE, FALSE);
+	rasterizer_dx9_set_render_state(D3DRS_ZENABLE, D3DZB_FALSE);
 	rasterizer_dx9_set_render_state(D3DRS_ZWRITEENABLE, FALSE);
 	rasterizer_dx9_set_render_state(D3DRS_ZFUNC, D3DCMP_ALWAYS);
 	rasterizer_dx9_set_render_state(D3DRS_DEPTHBIAS, 0);
@@ -163,7 +166,7 @@ bool rasterizer_dx9_patchy_fog_apply_separate_layers_pipeline_setup(void* data)
 	rasterizer_dx9_set_render_state(D3DRS_BLENDFACTOR, global_white_pixel32);
 	rasterizer_dx9_set_render_state(D3DRS_ALPHATESTENABLE, false);
 	rasterizer_dx9_set_render_state(D3DRS_CULLMODE, D3DCULL_NONE);
-	rasterizer_dx9_set_render_state(D3DRS_ZENABLE, FALSE);
+	rasterizer_dx9_set_render_state(D3DRS_ZENABLE, D3DZB_FALSE);
 	rasterizer_dx9_set_render_state(D3DRS_ZWRITEENABLE, FALSE);
 	rasterizer_dx9_set_render_state(D3DRS_ZFUNC, D3DBLEND_INVDESTALPHA);
 	rasterizer_dx9_set_render_state(D3DRS_DEPTHBIAS, 0);
@@ -225,7 +228,7 @@ bool __cdecl rasterizer_dx9_patchy_fog_composite_pipeline_setup(void* data)
 bool __cdecl rasterizer_dx9_patchy_fog_composite_build_vertex_buffer(
 	int32 output_type,
 	real_rectangle2d* bounds,
-	real_vector4d* location,
+	const real_point2d* location,
 	void* output,
 	void* ctx)
 {
@@ -235,7 +238,7 @@ bool __cdecl rasterizer_dx9_patchy_fog_composite_build_vertex_buffer(
 bool __cdecl rasterizer_dx9_atmospheric_fog_build_vertex_buffer(
 	int32 output_type,
 	real_rectangle2d* bounds,
-	real_vector4d* location,
+	const real_point2d* location,
 	void* output,
 	void* ctx)
 {
@@ -297,7 +300,7 @@ bool __cdecl rasterizer_dx9_atmospheric_fog_build_vertex_buffer(
 bool __cdecl rasterizer_dx9_patchy_fog_apply_build_vertex_buffer(
 	int32 output_type,
 	real_rectangle2d* bounds,
-	real_vector4d* location,
+	const real_point2d* location,
 	void* output,
 	void* ctx)
 {
@@ -344,7 +347,7 @@ bool __cdecl rasterizer_dx9_patchy_fog_apply_build_vertex_buffer(
 bool __cdecl rasterizer_dx9_patchy_fog_apply_from_stencil_build_vertex_buffer(
 	int32 output_type,
 	real_rectangle2d* bounds,
-	real_vector4d* location,
+	const real_point2d* location,
 	void* output,
 	void* ctx)
 {
@@ -379,7 +382,7 @@ bool __cdecl rasterizer_dx9_patchy_fog_apply_from_stencil_build_vertex_buffer(
 bool __cdecl rasterizer_dx9_sky_only_fog_build_vertex_buffer(
 	int32 output_type,
 	real_rectangle2d* bounds,
-	real_vector4d* location,
+	const real_point2d* location,
 	void* output,
 	void* ctx)
 {

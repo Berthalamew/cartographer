@@ -215,23 +215,23 @@ bool __cdecl rasterizer_dx9_depth_of_field_pipeline_setup(s_rasterizer_dx9_dof_o
 	rasterizer_dx9_set_sampler_state(2, D3DSAMP_MIPMAPLODBIAS, 0);
 	rasterizer_dx9_set_sampler_state(2, D3DSAMP_MAXMIPLEVEL, 0);
 
-	rasterizer_dx9_set_render_state(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
-	rasterizer_dx9_set_render_state(D3DRS_ALPHABLENDENABLE, TRUE);
-	rasterizer_dx9_set_render_state(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	rasterizer_dx9_set_render_state(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-	rasterizer_dx9_set_render_state(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-	rasterizer_dx9_set_render_state(D3DRS_ALPHATESTENABLE, FALSE);
-	rasterizer_dx9_set_render_state(D3DRS_CULLMODE, D3DCULL_NONE);
-	rasterizer_dx9_set_render_state(D3DRS_ZENABLE, FALSE);
-	rasterizer_dx9_set_render_state(D3DRS_ZWRITEENABLE, FALSE);
-	rasterizer_dx9_set_render_state(D3DRS_ZFUNC, D3DCMP_ALWAYS);
-	rasterizer_dx9_set_render_state(D3DRS_DEPTHBIAS, 0);
-	rasterizer_dx9_set_render_state(D3DRS_SLOPESCALEDEPTHBIAS, 0);
-	if (!*rasterizer_dx9_disable_stencil_get())
-	{
-		rasterizer_dx9_set_render_state(D3DRS_STENCILENABLE, FALSE);
-	}
-	rasterizer_dx9_submit_resolve();
+    rasterizer_dx9_set_render_state(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
+    rasterizer_dx9_set_render_state(D3DRS_ALPHABLENDENABLE, TRUE);
+    rasterizer_dx9_set_render_state(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+    rasterizer_dx9_set_render_state(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+    rasterizer_dx9_set_render_state(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+    rasterizer_dx9_set_render_state(D3DRS_ALPHATESTENABLE, FALSE);
+    rasterizer_dx9_set_render_state(D3DRS_CULLMODE, D3DCULL_NONE);
+    rasterizer_dx9_set_render_state(D3DRS_ZENABLE, D3DZB_FALSE);
+    rasterizer_dx9_set_render_state(D3DRS_ZWRITEENABLE, FALSE);
+    rasterizer_dx9_set_render_state(D3DRS_ZFUNC, D3DCMP_ALWAYS);
+    rasterizer_dx9_set_render_state(D3DRS_DEPTHBIAS, 0);
+    rasterizer_dx9_set_render_state(D3DRS_SLOPESCALEDEPTHBIAS, 0);
+    if (!*rasterizer_dx9_disable_stencil_get())
+    {
+        rasterizer_dx9_set_render_state(D3DRS_STENCILENABLE, FALSE);
+    }
+    rasterizer_dx9_submit_resolve();
 
 	if (rasterizer_get_main_pixel_shader_cache()->test_cache(0, dof_data->constants, NUMBEROF(dof_data->constants)))
 	{

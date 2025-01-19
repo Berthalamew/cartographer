@@ -414,8 +414,8 @@ const char* tag_get_name(datum tag_index)
 {
 	uint16 tag_name_index = DATUM_INDEX_TO_ABSOLUTE_INDEX(tag_index);
 
-	s_cache_file_memory_globals* g_cache_file_memory_globals = cache_file_memory_globals_get();
 #ifdef ASSERTS_ENABLED
+	s_cache_file_memory_globals* g_cache_file_memory_globals = cache_file_memory_globals_get();
 	ASSERT(g_cache_file_memory_globals->tags_loaded);
 	
 	// We added a second check if the first one fails, since we're going to be passing it tag indexes in the injected tag area

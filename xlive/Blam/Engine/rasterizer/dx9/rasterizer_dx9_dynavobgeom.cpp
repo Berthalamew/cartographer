@@ -64,7 +64,7 @@ void rasterizer_dx9_dynamic_screen_geometry_draw(const rasterizer_dynamic_screen
 		rasterizer_dx9_set_render_state(D3DRS_COLORWRITEENABLE, D3DCOLORWRITEENABLE_RED | D3DCOLORWRITEENABLE_GREEN | D3DCOLORWRITEENABLE_BLUE);
 		rasterizer_dx9_set_render_state(D3DRS_ALPHABLENDENABLE, D3DBLEND_ZERO);
 		rasterizer_dx9_set_render_state(D3DRS_ALPHATESTENABLE, FALSE);
-		rasterizer_dx9_set_render_state(D3DRS_ZENABLE, FALSE);
+		rasterizer_dx9_set_render_state(D3DRS_ZENABLE, D3DZB_FALSE);
 		rasterizer_dx9_set_render_state(D3DRS_DEPTHBIAS, 0);
 		rasterizer_dx9_set_blend_render_state(parameters->framebuffer_blend_function);
 

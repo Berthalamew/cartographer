@@ -47,7 +47,7 @@ bool __cdecl rasterizer_dx9_weather_plate_setup_pipeline(const c_animated_backgr
 	rasterizer_dx9_set_render_state(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 	rasterizer_dx9_set_render_state(D3DRS_BLENDOP, D3DBLENDOP_ADD);
 	rasterizer_dx9_set_render_state(D3DRS_BLENDFACTOR, global_white_pixel32);
-	rasterizer_dx9_set_render_state(D3DRS_ZENABLE, FALSE);
+	rasterizer_dx9_set_render_state(D3DRS_ZENABLE, D3DZB_FALSE);
 	rasterizer_dx9_set_render_state(D3DRS_ZWRITEENABLE, FALSE);
 	rasterizer_dx9_set_render_state(D3DRS_ZFUNC, D3DCMP_ALWAYS);	// D3DCMP_LESSEQUAL on xbox?
 	rasterizer_dx9_set_render_state(D3DRS_DEPTHBIAS, 0);
@@ -126,7 +126,7 @@ bool __cdecl rasterizer_dx9_weather_plate_setup_pipeline(const c_animated_backgr
 bool __cdecl rasterizer_dx9_weather_plate_build_vertex_buffer(
 	int32 output_type,
 	real_rectangle2d* bounds,
-	real_vector4d* location,
+	const real_point2d* location,
 	void* output,
 	c_animated_background_plate* ctx)
 {
@@ -167,9 +167,8 @@ bool __cdecl rasterizer_dx9_weather_plate_build_vertex_buffer(
 		window_data = &ctx->window[global_window_parameters->window_bound_index];
 		val = window_data->field_6C[tex_num];
 
-		((real_point2d*)output)->u = window_data->texture_positions[tex_num].u * ctx->texture_scale[tex_num] + val * location->i;
-		((real_point2d*)output)->v = window_data->texture_positions[tex_num].v * ctx->texture_scale[tex_num] + val * location->j;
-		result = true;
+		((real_point2d*)output)->u = window_data->texture_positions[tex_num].u * ctx->texture_scale[tex_num] + val * location->x;
+		((real_point2d*)output)->v = window_data->texture_positions[tex_num].v * ctx->texture_scale[tex_num] + val * location->y;
 		break;
 	case _rasterizer_dx9_weather_plate_output_type_color:
 		*(pixel32*)output = global_white_pixel32;
@@ -226,7 +225,7 @@ bool rasterizer_dx9_draw_weather_particles(c_particle_system_lite* system)
 		rasterizer_dx9_set_render_state(D3DRS_ALPHAREF, 0);
 		rasterizer_dx9_set_render_state(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
 		rasterizer_dx9_set_render_state(D3DRS_ZWRITEENABLE, FALSE);
-		rasterizer_dx9_set_render_state(D3DRS_ZENABLE, TRUE);
+		rasterizer_dx9_set_render_state(D3DRS_ZENABLE, D3DZB_TRUE);
 		rasterizer_dx9_set_render_state(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 
 		if (!is_rain)

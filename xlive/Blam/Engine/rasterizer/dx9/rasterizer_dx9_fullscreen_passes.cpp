@@ -23,15 +23,15 @@ void rasterizer_dx9_fullscreen_passes_apply_patches(void)
 	return;
 }
 
-void rasterizer_dx9_viewport_calculate_position(const real_vector4d* location, real32 z_far, real_vector4d* output)
+void rasterizer_dx9_viewport_calculate_position(const real_point2d* location, real32 z_far, real_vector4d* output)
 {
 	ASSERT(location);
 	ASSERT(output);
 
 	real32 z = (z_far != 0.f ? rasterizer_dx9_fullscreen_effect_calculate_position_z(z_far, 1) : 1.f);
 
-	output->i = location->i * 2.f - 1.f;    // x
-	output->j = -(location->j * 2.f - 1.f); // y
+	output->i = location->x * 2.f - 1.f;    // x
+	output->j = -(location->y * 2.f - 1.f); // y
 	output->k = z;                          // z
 	output->l = 1.f;                        // scale
 	return;
@@ -84,21 +84,56 @@ void rasterizer_dx9_fullscreen_texture_window_calculate_texcoords(const real_rec
 }
 
 void __cdecl rasterizer_dx9_render_fullscreen_overlay_geometry(
-	real_rectangle2d* a1,
-	bool(__cdecl* a2)(void*),
-	bool(__cdecl* a3)(
+	real_rectangle2d* rectangle,
+	bool(__cdecl* setup_rasterizer_stage_proc)(void*),
+	bool(__cdecl* build_vertex_buffer_proc)(
 		int32 output_type,
 		real_rectangle2d* bounds,
-		real_vector4d* location,
+		const real_point2d* location,
 		void* output,
 		void* ctx),
-	int32(__cdecl* a4)(int32),
-	int32 a5,
-	int16 a6,
-	bool a7)
+	int32(__cdecl* cleanup_proc)(real_vector4d* output),
+	real_vector4d* output,
+	int16 texture_stages,
+	bool use_screen_stage_vertex_shader)
 {
-	INVOKE(0x27D4EF, 0x0, rasterizer_dx9_render_fullscreen_overlay_geometry, a1, a2, a3, a4, a5, a6, a7);
+	INVOKE(0x27D4EF, 0x0, rasterizer_dx9_render_fullscreen_overlay_geometry,
+		rectangle,
+		setup_rasterizer_stage_proc,
+		build_vertex_buffer_proc,
+		cleanup_proc,
+		output,
+		texture_stages,
+		use_screen_stage_vertex_shader);
 	return;
+}
+
+bool __cdecl rasterizer_dx9_build_default_vertex_buffer(
+	int32 output_type,
+	real_rectangle2d* bounds,
+	const real_point2d* location,
+	void* output,
+	void* ctx)
+{
+	bool result = true;
+
+	switch (output_type)
+	{
+	case _vertex_output_type_position:
+		rasterizer_dx9_viewport_calculate_position(location, 1.f, (real_vector4d*)output);
+		break;
+	case _vertex_output_type_texcoord:
+		rasterizer_dx9_fullscreen_texture_window_calculate_texcoords(bounds, (real_point2d*)location, (real_point2d*)output);
+		break;
+	case _vertex_output_type_color:
+		*(pixel32*)output = global_white_pixel32;
+		break;
+	default:
+		DISPLAY_ASSERT("unreachable");
+		result = false;
+	}
+
+	return result;
 }
 
 void __cdecl rasterizer_dx9_apply_gamma_and_brightness(e_rasterizer_target rasterizer_target)
@@ -189,7 +224,7 @@ void __cdecl rasterizer_dx9_apply_gamma_and_brightness(e_rasterizer_target raste
 bool __cdecl rasterizer_dx9_fullscreen_default_with_window_location_build_vertex_buffer(
 	int32 output_type,
 	real_rectangle2d* bounds,
-	real_vector4d* location,
+	const real_point2d* location,
 	void* output,
 	void* ctx)
 {
@@ -224,7 +259,7 @@ bool __cdecl rasterizer_dx9_fullscreen_default_with_window_location_build_vertex
 bool __cdecl rasterizer_fullscreen_effects_build_vertex_buffer_color_ctx_cb(
 	int32 output_type,
 	real_rectangle2d* bounds,
-	real_vector4d* location,
+	const real_point2d* location,
 	void* output,
 	void* ctx
 )
