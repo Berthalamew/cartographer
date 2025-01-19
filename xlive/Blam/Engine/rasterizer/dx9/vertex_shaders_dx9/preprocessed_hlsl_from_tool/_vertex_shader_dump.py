@@ -41,9 +41,33 @@ for f in vertex_shaders:
 		
 		with open(fxpath, "rt") as fin:
 			data = fin.read()
+			# Replace dp* product function calls with dot instructions instead
 			data = re.sub(r"dp2\((.*?)\ , (.*?) \)", r"dot(\1.xy, \2.xy)", data)
 			data = re.sub(r"dp3\((.*?)\ , (.*?) \)", r"dot(\1.xyz, \2.xyz)", data)
 			data = re.sub(r"dp4\((.*?)\ , (.*?) \)", r"dot(\1.xyzw, \2.xyzw)", data)
+			
+			# add the depth interpolation into dx9 shaders
+			if (f == "lens_flare.vertex_shader" or 
+				"_stage.vertex_shader" in f or
+				f == "convolution.vertex_shader" or
+				f == "shadow_buffer_generation.vertex_shader" or
+				f == "shadow_buffer_generation_cinematic.vertex_shader" or
+				f == "shadow_buffer_generation_lightmap.vertex_shader"):
+				data = re.sub(r"\n\treturn output", r"\toutput.oPos=lerp(oPos, float4(oPos.x, oPos.y, c[10].z + c[10].w * oPos.w, oPos.w), 0.0f);\n\n\treturn output", data)
+			else:
+				data = re.sub(r"\n\treturn output", r"\toutput.oPos=lerp(oPos, float4(oPos.x, oPos.y, c[10].z + c[10].w * oPos.w, oPos.w), 1.0f);\n\n\treturn output", data)
+			
+			#if (f == "transparent_generic_reflection_sky.vertex_shader"):
+				# add code to deal with z direction in sky shader
+				#data = re.sub(
+				#	r"temptemp = dot\(_POSITION.xyz, c\[3\].xyz\)",
+				#	r"temptemp = dot(_POSITION.xyz, c[2].xyz);\n\ttemptemp = temptemp + c[2].wwww ;\n\t{\n\t\tr10.z=temptemp;\n\t}\n}\n{\n\tfloat temptemp;\n\ttemptemp = dot(_POSITION.xyz, c[3].xyz)",
+				#	data)
+				#data = re.sub(r"r10.xyww", r"r10.xyzw", data)
+			
+			# hack for dx11 shaders in dx9, we need the extra register provided to us by PSIZE0
+			#data = re.sub(r"oFog : FOG", r"oFog : PSIZE0", data)
+			
 
 		with open(fxpath, "wt") as fout:
 			fout.write(data)

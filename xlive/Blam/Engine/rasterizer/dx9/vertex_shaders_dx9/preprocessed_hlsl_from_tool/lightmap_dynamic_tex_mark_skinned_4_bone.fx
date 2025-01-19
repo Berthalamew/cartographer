@@ -420,6 +420,7 @@ output.oPos=oPos;
 
 	output.oT7.xyzw = oPos; //float4(oPos.z, oPos.w); 
 	
+	output.oPos=lerp(oPos, float4(oPos.x, oPos.y, c[10].z + c[10].w * oPos.w, oPos.w), 1.0f);
 
 	return output;
 }
