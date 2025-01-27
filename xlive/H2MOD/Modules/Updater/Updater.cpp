@@ -296,7 +296,7 @@ static void FetchUpdateDetails() {
 
 				wchar_t* existingfpdir = dir_temp_h2;
 				if (UpdateFileEntries[i]->location_id == 1) {
-					existingfpdir = g_h2_process_file_path;
+					existingfpdir = L".\\";
 				}
 				else if (UpdateFileEntries[i]->location_id == 2) {
 					existingfpdir = g_h2_appdata_local_path;
@@ -487,7 +487,7 @@ void GSDownloadInstall()
 
 			wchar_t* existingfpdir = 0;
 			if (UpdateFileEntries[i]->location_id == 1) {
-				existingfpdir = g_h2_process_file_path;
+				existingfpdir = L".\\";
 			}
 			else if (UpdateFileEntries[i]->location_id == 2) {
 				existingfpdir = g_h2_appdata_local_path;

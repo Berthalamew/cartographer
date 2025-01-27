@@ -240,8 +240,6 @@ public:
 			//std::string subip_address("");
 			//size_t cur_offset = 0;
 
-			//unsigned long new_address = 0;
-
 			if (str.length() < std::string("0.0.0.0").length()
 				|| str.length() > std::string("255.255.255.255").length()
 				|| str.find_first_not_of("0123456789.") != std::string::npos)

@@ -168,6 +168,10 @@ public:
 		OperationFinished,
 	};
 
+	// mainly used for resource discard
+	std::mutex m_itemQueryMutex;
+
+private:
 	PXOVERLAPPED m_pOverlapped = nullptr;
 	std::atomic<int> m_itemsLeftInDoc = 0;
 	std::atomic<int> m_operationState = OperationPending;
@@ -185,12 +189,8 @@ public:
 
 	std::atomic<bool> m_cancelOperation = false;
 	std::atomic<bool> m_operationOnPause = false;
-
-	// mainly used for resource discard
-	std::mutex m_itemQueryMutex;
 	std::mutex m_ioWriteMutex;
 
-private:
 	bool ShouldCancelOperation() const
 	{
 		return m_cancelOperation;

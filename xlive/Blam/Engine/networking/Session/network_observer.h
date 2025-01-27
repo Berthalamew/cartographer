@@ -227,7 +227,7 @@ public:
 		uint8* out_voice_chat_data_buffer);
 
 	bool __thiscall get_bandwidth_results(int32 *out_throughput, real32 *out_satiation, int32 *a4);
-	int32 get_observer_channel_state(int32 observer_index) { return m_observer_channels[observer_index].state; };
+	int32 get_observer_channel_state(int32 observer_index) const { return m_observer_channels[observer_index].state; };
 	void send_message(int32 session_index, int32 observer_index, bool send_out_of_band, int32 type, int32 size, void* data);
 
 	int32 observer_channel_find_by_network_channel(

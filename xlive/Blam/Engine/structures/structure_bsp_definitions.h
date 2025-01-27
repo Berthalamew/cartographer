@@ -377,4 +377,4 @@ struct structure_bsp
 ASSERT_STRUCT_SIZE(structure_bsp, 572);
 
 int16 get_global_structure_bsp_index(void);
-structure_bsp* get_global_structure_bsp(void);
+structure_bsp* global_structure_bsp_get(void);

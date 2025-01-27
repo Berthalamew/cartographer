@@ -26,7 +26,7 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 	return size * nmemb;
 }
 
-void AchievementUnlock(unsigned long long xuid, int achievement_id, XOVERLAPPED* pOverlapped)
+void AchievementUnlock(uint64 xuid, int achievement_id, XOVERLAPPED* pOverlapped)
 {
 	event(_event_status, "h2mod:achievements: - Unlocking achievement ID: %d", achievement_id);
 

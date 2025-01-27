@@ -33,7 +33,7 @@ bool __cdecl rasterizer_dx9_update_water_refraction_surface(void)
 	{
 		rasterizer_dx9_perf_event_begin("water refraction", NULL);
 		rasterizer_dx9_reset_depth_buffer();
-		if (get_global_structure_bsp()->water_definitions.count > 0)
+		if (global_structure_bsp_get()->water_definitions.count > 0)
 		{
 			IDirect3DSurface9* surface = rasterizer_dx9_target_get_main_mip_surface(_rasterizer_target_water_refraction);
 
@@ -46,7 +46,6 @@ bool __cdecl rasterizer_dx9_update_water_refraction_surface(void)
 		}
 		g_water_refraction_surface_updated = true;
 		rasterizer_dx9_reset_depth_buffer();
-
 		rasterizer_dx9_perf_event_end("water refraction");
 	}
 	return true;
