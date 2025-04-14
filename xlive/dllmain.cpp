@@ -25,11 +25,10 @@ HMODULE hThis = NULL;
 
 /* prototypes */
 
-void discord_initialize(void);
-void discord_dispose(void);
-void heap_debug_initialize(void);
-void initialize_instance(void);
-void exit_instance(void);
+static void discord_initialize(void);
+static void discord_dispose(void);
+static void heap_debug_initialize(void);
+static void exit_instance(void);
 
 /* entry point */
 
@@ -54,50 +53,7 @@ BOOL APIENTRY DllMain( HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpRese
 	return TRUE;
 }
 
-/* private code */
-
-void discord_initialize(void)
-{
-	HMODULE module = LoadLibraryW(k_discord_dll_filename);
-	if (module && !shell_is_dedicated_server()
-		&& H2Config_discord_enable
-#ifdef TEST_DISCORD_INSTANCE
-		&& g_instance_number == 1
-#endif
-		)
-	{
-		discord_game_status_create(module);
-	}
-
-	return;
-}
-
-void discord_dispose(void)
-{
-	if (!shell_is_dedicated_server()
-		&& H2Config_discord_enable
-#ifdef TEST_DISCORD_INSTANCE
-		&& g_instance_number == 1
-#endif
-		)
-	{
-		discord_game_status_dispose();
-	}
-	return;
-}
-
-void heap_debug_initialize(void)
-{
-#if CARTOGRAPHER_HEAP_DEBUG
-	int CurrentFlags;
-	CurrentFlags = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
-	CurrentFlags |= _CRTDBG_DELAY_FREE_MEM_DF;
-	CurrentFlags |= _CRTDBG_LEAK_CHECK_DF;
-	CurrentFlags |= _CRTDBG_CHECK_ALWAYS_DF;
-	_CrtSetDbgFlag(CurrentFlags);
-#endif
-	return;
-}
+/* public code */
 
 void initialize_instance(void)
 {
@@ -113,7 +69,52 @@ void initialize_instance(void)
 	return;
 }
 
-void exit_instance(void)
+/* private code */
+
+static void discord_initialize(void)
+{
+	HMODULE module = LoadLibraryW(k_discord_dll_filename);
+	if (module && !shell_is_dedicated_server()
+		&& H2Config_discord_enable
+#ifdef TEST_DISCORD_INSTANCE
+		&& g_instance_number == 1
+#endif
+		)
+	{
+		discord_game_status_create(module);
+	}
+
+	return;
+}
+
+static void discord_dispose(void)
+{
+	if (!shell_is_dedicated_server()
+		&& H2Config_discord_enable
+#ifdef TEST_DISCORD_INSTANCE
+		&& g_instance_number == 1
+#endif
+		)
+	{
+		discord_game_status_dispose();
+	}
+	return;
+}
+
+static void heap_debug_initialize(void)
+{
+#if CARTOGRAPHER_HEAP_DEBUG
+	int CurrentFlags;
+	CurrentFlags = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+	CurrentFlags |= _CRTDBG_DELAY_FREE_MEM_DF;
+	CurrentFlags |= _CRTDBG_LEAK_CHECK_DF;
+	CurrentFlags |= _CRTDBG_CHECK_ALWAYS_DF;
+	_CrtSetDbgFlag(CurrentFlags);
+#endif
+	return;
+}
+
+static void exit_instance(void)
 {
 	discord_dispose();
 	tag_injection_deinitialize();
