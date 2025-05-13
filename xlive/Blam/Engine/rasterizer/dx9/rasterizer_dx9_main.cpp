@@ -347,7 +347,33 @@ void rasterizer_dx9_present(bitmap_data* screenshot_bitmap, bool a2)
 		}
 
 		rasterizer_set_stream_source();
-		HRESULT present_result = dx9_globals->global_d3d_device->Present(NULL, NULL, *Memory::GetAddress<HWND*>(0x46D9C8), NULL);
+		HRESULT present_result;
+		if (rasterizer_globals->use_d3d9_ex)
+		{
+			const bool is_fullscreen = rasterizer_globals->display_parameters.window_mode == _rasterizer_window_mode_real_fullscreen;
+			 
+			// Don't force immediate present when vsync is enabled or we're in fullscreen
+			const uint32 flags = H2Config_use_vsync || is_fullscreen ? 0 : D3DPRESENT_FORCEIMMEDIATE;
+			present_result = dx9_globals->global_d3d_device->PresentEx(NULL, NULL, NULL, NULL, flags);
+			if (FAILED(present_result))
+			{
+				rasterizer_dx9_errors_log(present_result, "dx9_globals->global_d3d_device->PresentEx(NULL, NULL, NULL, NULL, flags)");
+			}
+		}
+		else
+		{
+			present_result = dx9_globals->global_d3d_device->Present(NULL, NULL, *Memory::GetAddress<HWND*>(0x46D9C8), NULL);
+			if (FAILED(present_result))
+			{
+				rasterizer_dx9_errors_log(present_result, "dx9_globals->global_d3d_device->Present(NULL, NULL, *Memory::GetAddress<HWND*>(0x46D9C8), NULL)");
+			}
+		}
+		
+		if (FAILED(present_result))
+		{
+			error(2, "### ERROR rasterizer_present failed");
+		}
+
 		if (result && SUCCEEDED(present_result))
 		{
 
@@ -488,11 +514,20 @@ bool __cdecl rasterizer_dx9_device_initialize(s_rasterizer_parameters* parameter
 	d3d_present_parameters.BackBufferHeight = rectangle2d_height(&rasterizer_globals->screen_bounds);
 	d3d_present_parameters.MultiSampleType = D3DMULTISAMPLE_NONE;
 	d3d_present_parameters.MultiSampleQuality = 0;
-	d3d_present_parameters.SwapEffect = D3DSWAPEFFECT_DISCARD;
+
+	// Use the FLIPEX swap effect so we can take advantage of the changes made in d3d9ex
+	// The frame is passed instead of copied to the Desktop Window Manager(DWM)
+	d3d_present_parameters.SwapEffect = rasterizer_globals->use_d3d9_ex ? D3DSWAPEFFECT_FLIPEX : D3DSWAPEFFECT_DISCARD;
 	d3d_present_parameters.FullScreen_RefreshRateInHz = is_fullscreen ? rasterizer_globals->display_parameters.refresh_rate : d3d_present_parameters.FullScreen_RefreshRateInHz;
 	d3d_present_parameters.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
+	
+	
+	// Use 2 backbuffers when using D3DSWAPEFFECT_FLIPEX
+	if (rasterizer_globals->use_d3d9_ex)
+	{
+		d3d_present_parameters.BackBufferCount = 2;
+	}
 
-	// ### FIXME: make VSYNC configurable (UI required) !!
 	if (shell_command_line_flag_is_set(_shell_command_line_flag_novsync)
 		/* || *rasterizer_low_level_texture_detail_get() */ // low detail textures checked for no vsync
 		|| !H2Config_use_vsync)
@@ -553,7 +588,7 @@ bool __cdecl rasterizer_dx9_device_initialize(s_rasterizer_parameters* parameter
 				rasterizer_dx9_errors_log(reset_hr, "global_d3d_device->Reset(&d3d_present_parameters)");
 			}
 
-			if (!d3d_present_parameters.SwapEffect)
+			if (d3d_present_parameters.SwapEffect == 0)
 			{
 				// Introduced in Windows Vista and depreciated in Windows 8
 #if WINVER > 0x0600 && WINVER < 0x0602
