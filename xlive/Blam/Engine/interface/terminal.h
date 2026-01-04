@@ -6,15 +6,26 @@
 #include "input/input_windows.h"
 #include "math/color_math.h"
 
+/* constants */
+
+enum
+{
+	TERMINAL_PRINTF_MAXIMUM_LINE_LENGTH = 255,
+	TERMINAL_GETS_MAXIMUM_KEYS = 32,
+	TERMINAL_GETS_MAXIMUM_LINE_LENGTH = 255,
+	TERMINAL_GETS_MAXIMUM_PROMPT_LENGTH = 31,
+	TERMINAL_TAB_STOP_COUNT = 3,
+};
+
 /* structures */
 
 struct terminal_gets_state
 {
 	int16 key_count;
-	key_stroke keys[32];
+	key_stroke keys[TERMINAL_GETS_MAXIMUM_KEYS];
 	real_argb_color color;
-	char prompt[32];
-	char result[256];
+	char prompt[TERMINAL_GETS_MAXIMUM_PROMPT_LENGTH+1];
+	char result[TERMINAL_PRINTF_MAXIMUM_LINE_LENGTH+1];
 	int16 horizontal_scroll_amount;
 	edit_text edit;
 };

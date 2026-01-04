@@ -91,11 +91,11 @@ extern bool g_catch_exceptions;
 #define J( symbol1, symbol2 ) _DO_JOIN( symbol1, symbol2 )
 #define _DO_JOIN( symbol1, symbol2 ) symbol1##symbol2
 
-// Returns the maximum of the two values
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
-
 // Returns the minimum of the two values
-#define MIN(a, b) ((a) > (b) ? (b) : (a))
+#define MIN(a, b) ((a)>(b)?(b):(a))
+
+// Returns the maximum of the two values
+#define MAX(a, b) ((a)>(b)?(a):(b))
 
 // Ensure a value stays within a certain range
 #define PIN(v, v_min, v_max) MAX(v_min, MIN(v, v_max))
@@ -109,9 +109,9 @@ extern bool g_catch_exceptions;
 #define DATUM_INDEX_TO_IDENTIFIER(_datum_index) ((uint16)((_datum_index) >> 16))
 
 #define NUMBEROF(_array) (sizeof(_array) / sizeof(*_array))
-#define IN_RANGE(value, begin, end) (((value) >= (begin)) && ((value) <= (end)))
-#define VALID_INDEX(index, count) ((index) >= 0 && (index) < (count))
-#define VALID_COUNT(index, count) ((index) >= 0 && (index) <= (count))
+#define IN_RANGE(value, begin, end) (((value)>=(begin)) && ((value)<=(end)))
+#define VALID_INDEX(index, count) ((index)>=0 && (index)<(count))
+#define VALID_COUNT(index, count) ((index)>=0 && (index)<=(count))
 
 // Use this for setting up enum bitfields
 #define FLAG(bit) ( (unsigned)1 << (unsigned)(bit) )

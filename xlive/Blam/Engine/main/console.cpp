@@ -393,7 +393,7 @@ static void console_complete(void)
 			{
 				csstrncat(print_buffer, matching_items[token_num], NUMBEROF(print_buffer));
 				csstrncat(print_buffer, "|t", NUMBEROF(print_buffer));
-				if (token_num % 4 == 3)
+				if (token_num % 4 == TERMINAL_TAB_STOP_COUNT)
 				{
 					console_printf(print_buffer);
 					csstrncpy(print_buffer, "", NUMBEROF(print_buffer));
@@ -405,7 +405,7 @@ static void console_complete(void)
 			}
 		}
 
-		if (print_second_column && (token_num - 1) % 4 != 3)
+		if (print_second_column && (token_num - 1) % 4 != TERMINAL_TAB_STOP_COUNT)
 		{
 			console_printf(print_buffer);
 		}

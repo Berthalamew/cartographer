@@ -157,7 +157,7 @@ bool terminal_update_input(real32 dt)
 		key_stroke key;
 		while (input_abstraction_get_key(&key))
 		{
-			if (terminal_globals.input_state->key_count < 32)
+			if (terminal_globals.input_state->key_count < NUMBEROF(terminal_globals.input_state->keys))
 			{
 				terminal_globals.input_state->keys[terminal_globals.input_state->key_count] = key;
 				++terminal_globals.input_state->key_count;
@@ -269,24 +269,24 @@ void __cdecl terminal_draw(void)
 
 		if (terminal_globals.input_state)
 		{
-			char string[288];
-			string[0] = '\0';
+			char buffer[288];
+			buffer[0] = '\0';
 
 			terminal_globals.input_state->prompt[31] = '\0';
-			csstrncat(string, terminal_globals.input_state->prompt, NUMBEROF(string));
+			csstrncat(buffer, terminal_globals.input_state->prompt, NUMBEROF(buffer));
 			terminal_globals.input_state->result[255] = '\0';
 
-			const int16 prompt_length = (int16)cstrlen(string);
-			csstrncat(string, terminal_globals.input_state->result, NUMBEROF(string));
+			const int16 prompt_length = (int16)cstrlen(buffer);
+			csstrncat(buffer, terminal_globals.input_state->result, NUMBEROF(buffer));
 
 
-			rectangle2d rect;
-			rect.top = global_camera->window_bounds.bottom - font_size_scaled;
-			rect.left = global_camera->window_bounds.left;
-			rect.bottom = global_camera->window_bounds.bottom;
-			rect.right = global_camera->window_bounds.right;
+			rectangle2d terminal_gets_bounds;
+			terminal_gets_bounds.top = global_camera->window_bounds.bottom - font_size_scaled;
+			terminal_gets_bounds.left = global_camera->window_bounds.left;
+			terminal_gets_bounds.bottom = global_camera->window_bounds.bottom;
+			terminal_gets_bounds.right = global_camera->window_bounds.right;
 
-			offset_rectangle2d(&rect, -global_camera->viewport_bounds.left, -global_camera->viewport_bounds.top);
+			offset_rectangle2d(&terminal_gets_bounds, -global_camera->viewport_bounds.left, -global_camera->viewport_bounds.top);
 
 			draw_string_set_tab_stops(NULL, 0);
 			draw_string_set_draw_mode(0, NONE, 0, 0, &terminal_globals.input_state->color, global_real_argb_black, 0);
@@ -294,15 +294,15 @@ void __cdecl terminal_draw(void)
 			if (terminal_globals.insertion_point_visible)
 			{
 				const int16 index = (prompt_length + terminal_globals.input_state->edit.insertion_point_index);
-				if (!string[index])
+				if (!buffer[index])
 				{
-					string[index + 1] = '\0';
+					buffer[index + 1] = '\0';
 				}
-				string[index] = '_';
+				buffer[index] = '_';
 			}
 
-			const int16 starting_index = PIN(terminal_globals.input_state->horizontal_scroll_amount, 0, (int16)cstrlen(string));
-			rasterizer_draw_string(&rect, 0, 0, 0, &string[starting_index]);
+			const int16 starting_index = PIN(terminal_globals.input_state->horizontal_scroll_amount, 0, (int16)cstrlen(buffer));
+			rasterizer_draw_string(&terminal_gets_bounds, 0, 0, 0, &buffer[starting_index]);
 		}
 
 		if (g_terminal_render_enable
@@ -323,21 +323,21 @@ void __cdecl terminal_draw(void)
 				color.alpha *= fade_progress;
 				shadow_color.alpha = color.alpha;
 
-				rectangle2d bounds;
+				rectangle2d terminal_render_bounds;
 				
-				bounds.left = global_camera->window_bounds.left;
-				bounds.right = global_camera->window_bounds.right;
-				bounds.bottom = font_size;
+				terminal_render_bounds.left = global_camera->window_bounds.left;
+				terminal_render_bounds.right = global_camera->window_bounds.right;
+				terminal_render_bounds.bottom = font_size;
 
 				font_size -= font_size_scaled;
-				bounds.top = font_size;
-				offset_rectangle2d(&bounds, -global_camera->viewport_bounds.left, -global_camera->viewport_bounds.top);
+				terminal_render_bounds.top = font_size;
+				offset_rectangle2d(&terminal_render_bounds, -global_camera->viewport_bounds.left, -global_camera->viewport_bounds.top);
 
 				if (line->tabstop)
 				{
 					const int16* tab_stops = k_terminal_tab_stops;
 
-					const int16 width = rectangle2d_width(&bounds);
+					const int16 width = rectangle2d_width(&terminal_render_bounds);
 					const int16 width_per_stop = width / 4;
 					const int16 scaled_tab_stops[3] =
 					{
@@ -351,7 +351,7 @@ void __cdecl terminal_draw(void)
 				}
 
 				draw_string_set_draw_mode(0, NONE, 0, 0, &color, &shadow_color, 0);
-				rasterizer_draw_string(&bounds, 0, 0, 0, line->buffer);
+				rasterizer_draw_string(&terminal_render_bounds, 0, 0, 0, line->buffer);
 				draw_string_set_tab_stops(k_terminal_tab_stops, 0);
 			}
 		}

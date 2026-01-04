@@ -72,6 +72,8 @@ bool* get_render_fog_enabled(void);
 
 s_rasterizer_settings* rasterizer_settings_get(void);
 
+int32* rasterizer_low_level_texture_detail_get(void);
+
 void __cdecl rasterizer_settings_set_antialiasing(uint32* out_quality);
 
 void __cdecl rasterizer_settings_update_window_position(void);
