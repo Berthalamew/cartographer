@@ -3,9 +3,9 @@
 
 /* public code */
 
-void rasterizer_dx9_errors_log(HRESULT hr, const char* format, ...)
-{
 #ifdef ERRORS_ENABLED
+void rasterizer_dx9_errors(HRESULT hr, const char* format, ...)
+{
 	va_list va;
 	va_start(va, format);
 
@@ -96,6 +96,6 @@ void rasterizer_dx9_errors_log(HRESULT hr, const char* format, ...)
 	}
 
 	va_end(va);
-#endif
 	return;
 }
+#endif

@@ -4,7 +4,7 @@
 
 #if ERRORS_ENABLED
 
-void rasterizer_dx9_errors_log(HRESULT hr, const char* format, ...);
+void rasterizer_dx9_errors(HRESULT hr, const char* format, ...);
 
 #endif
 
@@ -17,7 +17,7 @@ do													\
 	HRESULT hr = (statement);						\
 	if (FAILED(hr))									\
 	{												\
-		rasterizer_dx9_errors_log(hr, (#statement));\
+		rasterizer_dx9_errors(hr, (#statement));\
 	}												\
 }													\
 while(0)
@@ -29,7 +29,7 @@ do													\
 	hr = (statement);								\
 	if (FAILED(hr))									\
 	{												\
-		rasterizer_dx9_errors_log(hr, (#statement));\
+		rasterizer_dx9_errors(hr, (#statement));\
 	}												\
 }													\
 while (0)
