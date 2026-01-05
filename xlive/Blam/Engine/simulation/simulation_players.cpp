@@ -5,6 +5,7 @@
 
 #include "cartographer/discord/discord_interface.h"
 #include "networking/logic/life_cycle_manager.h"
+#include "networking/session/network_session.h"
 #include "shell/shell.h"
 
 #include "H2MOD/Modules/EventHandler/EventHandler.hpp"

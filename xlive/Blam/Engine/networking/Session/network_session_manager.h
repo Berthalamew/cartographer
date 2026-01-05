@@ -1,5 +1,5 @@
 #pragma once
-#include "network_session.h"
+#include "networking/network_constants.h"
 
 class c_network_session_manager
 {

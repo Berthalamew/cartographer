@@ -1,8 +1,8 @@
 #pragma once
 #include "game_allegiance.h"
 #include "player_constants.h"
+#include "networking/network_constants.h"
 #include "networking/network_game_definitions.h"
-#include "networking/session/network_session.h"
 #include "saved_games/game_variant.h"
 #include "simulation/machine_id.h"
 

@@ -48,6 +48,7 @@
 #include "main/main_screenshot.h"
 #include "main/main_time.h"
 #include "networking/logic/life_cycle_manager.h"
+#include "networking/session/network_session.h"
 #include "networking/transport/transport.h"
 #include "networking/network_event.h"
 #include "networking/network_globals.h"

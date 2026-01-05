@@ -7,6 +7,7 @@
 #include "network_time.h"
 
 #include "game/game.h"
+#include "networking/delivery/network_link.h"
 #include "networking/locator/network_locator.h"
 #include "networking/logic/network_bandwidth.h"
 #include "networking/logic/network_broadcast_search.h"
@@ -14,6 +15,7 @@
 #include "networking/logic/network_search.h"
 #include "networking/logic/network_session_interface.h"
 #include "networking/logic/storage/network_storage.h"
+#include "networking/messages/network_message_gateway.h"
 #include "networking/messages/network_messages_cartographer.h"
 #include "networking/messages/network_messages_connect.h"
 #include "networking/messages/network_messages_out_of_band.h"
@@ -28,6 +30,9 @@
 #include "networking/online/online_cheater.h"
 #include "networking/online/online_strings.h"
 #include "networking/online/voice_engine.h"
+#include "networking/session/network_session.h"
+#include "networking/session/network_session_manager.h"
+#include "networking/session/network_text_chat_manager.h"
 
 #include "shell/shell.h"
 

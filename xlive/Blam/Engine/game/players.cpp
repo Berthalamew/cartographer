@@ -5,6 +5,7 @@
 #include "game/game_engine.h"
 #include "game/game_globals.h"
 #include "interface/user_interface_controller.h"
+#include "networking/session/network_session.h"
 #include "saved_games/game_variant.h"
 #include "scenario/scenario.h"
 #include "scenario/scenario_definitions.h"

@@ -9,6 +9,7 @@
 #include "interface/user_interface_controller.h"
 #include "items/item_collection_definition.h"
 #include "networking/logic/life_cycle_manager.h"
+#include "networking/session/network_session.h"
 #include "networking/network_event.h"
 #include "networking/network_game_definitions.h"
 #include "scenario/scenario.h"

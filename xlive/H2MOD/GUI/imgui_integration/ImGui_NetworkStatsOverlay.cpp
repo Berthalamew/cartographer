@@ -7,6 +7,7 @@
 #include "game/game_time.h"
 #include "networking/network_memory.h"
 #include "networking/logic/life_cycle_manager.h"
+#include "networking/session/network_session.h"
 #include "simulation/simulation.h"
 
 #include "XLive/xnet/IpManagement/XnIp.h"

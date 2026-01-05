@@ -2,6 +2,7 @@
 #include "game/game_allegiance.h"
 #include "game/player_constants.h"
 #include "input/controllers.h"
+#include "networking/network_constants.h"
 #include "networking/network_game_definitions.h"
 #include "networking/transport/transport.h"
 #include "networking/transport/transport_security.h"
@@ -11,7 +12,7 @@
 
 enum e_network_session_map_status : int32
 {
-	_network_session_map_status_none,
+	_network_session_map_status_none= 0,
 	_network_session_map_status_unable_to_precache,
 	_network_session_map_status_precaching,
 	_network_session_map_status_precached,
@@ -23,7 +24,7 @@ enum e_network_session_map_status : int32
 
 enum e_network_session_state : int32
 {
-	_network_session_state_none,
+	_network_session_state_none= 0,
 	_network_session_state_peer_joining,
 	_network_session_state_peer_join_abort,
 	_network_session_state_peer_established,
@@ -40,24 +41,27 @@ enum e_network_session_state : int32
 
 enum e_network_session_class
 {
-	_network_session_class_unknown = NONE,
-	_network_session_class_offline = 0x0,
-	_network_session_class_system_link = 0x1,
-	_network_session_class_xbox_live = 0x2,
+	_network_session_class_offline= 0,
+	_network_session_class_system_link,
+	_network_session_class_xbox_live,
+	k_network_session_class_count,
 
-	k_network_session_class_count = 0x3,
+	_network_session_class_unknown = NONE
 };
 
 enum e_network_session_mode
 {
-	_network_session_mode_none = 0,
-	_network_session_mode_idle = 1,
-	_network_session_mode_in_game = 4,
-	_network_session_mode_migration_start = 6,
-	_network_session_mode_migration_joining = 7,
-	_network_session_mode_migration_disbanding = 9,
-
-	k_network_session_mode_count = 10
+	_network_session_mode_none= 0,
+	_network_session_mode_idle,
+	_network_session_mode_setup,
+	_network_session_mode_ready,
+	_network_session_mode_in_game,
+	_network_session_mode_post_game,
+	_network_session_mode_migration_start,
+	_network_session_mode_migration_joining,
+	_network_session_mode_migration_waiting,
+	_network_session_mode_migration_disbanding,
+	k_network_session_mode_count
 };
 
 enum e_network_game_privacy : int32
@@ -71,18 +75,12 @@ enum e_network_game_privacy : int32
 
 enum e_network_session_type : uint32
 {
-	_network_session_type_none = 0,
-	_network_session_type_one = 1,
+	_network_session_type_none= 0,
+	_network_session_type_one,
 	k_network_session_type_count,
 };
 
 /* constants */
-
-enum
-{
-	k_network_maximum_sessions = 2,
-	k_network_maximum_machines_per_session = k_maximum_players + 1
-};
 
 extern const char* const k_network_protocols_text[];
 

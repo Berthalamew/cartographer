@@ -1,6 +1,15 @@
 #include "stdafx.h"
 #include "network_memory.h"
 
+#include "memory/rockall_heap_manager.h"
+
+#include "networking/delivery/network_link.h"
+#include "networking/messages/network_message_gateway.h"
+#include "networking/messages/network_message_handler.h"
+#include "networking/messages/network_message_type_collection.h"
+#include "networking/session/network_session_manager.h"
+#include "networking/session/network_text_chat_manager.h"
+
 /* typedefs */
 
 typedef uint8* (__cdecl* t_network_heap_allocate_block)(uint32 size);

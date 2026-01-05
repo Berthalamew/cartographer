@@ -1,7 +1,8 @@
 #pragma once
 #include "game/player_constants.h"
 #include "main/map_manager.h"
-#include "networking/session/network_session.h"
+#include "networking/network_constants.h"
+#include "networking/network_game_definitions.h"
 #include "saved_games/game_variant.h"
 #include "simulation/machine_id.h"
 

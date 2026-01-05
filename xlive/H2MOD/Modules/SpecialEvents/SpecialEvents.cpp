@@ -8,10 +8,11 @@
 #include "Events/Paddy.h"
 
 #include "game/game.h"
+#include "networking/Session/network_session.h"
+#include "tag_files/tag_loader/tag_injection.h"
 
 #include "H2MOD/GUI/imgui_integration/imgui_handler.h"
 #include "H2MOD/Modules/Shell/Config.h"
-#include "tag_files/tag_loader/tag_injection.h"
 
 const char k_cartographer_shared_missing_message[] =
 	"Error: Cartographer Shared map content is missing. Try updating your game from the mainmenu.\r\n\r\n"

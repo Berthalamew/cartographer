@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "network_time.h"
 
+#include "networking/session/network_session.h"
+#include "networking/session/network_session_manager.h"
+
 /* prototypes */
 
 static s_network_time_globals* network_time_globals_get(void);

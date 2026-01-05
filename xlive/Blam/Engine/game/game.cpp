@@ -21,6 +21,7 @@
 #include "main/main.h"
 #include "main/main_time.h"
 #include "networking/logic/life_cycle_manager.h"
+#include "networking/session/network_session.h"
 #include "objects/lights.h"
 #include "physics/havok.h"
 #include "physics/impacts.h"

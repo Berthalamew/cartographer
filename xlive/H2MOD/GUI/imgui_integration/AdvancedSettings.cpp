@@ -16,6 +16,7 @@
 #include "interface/first_person_weapons.h"
 #include "networking/messages/network_messages_cartographer.h"
 #include "networking/logic/life_cycle_manager.h"
+#include "networking/session/network_session.h"
 #include "rasterizer/rasterizer_globals.h"
 
 #include "H2MOD.h"
