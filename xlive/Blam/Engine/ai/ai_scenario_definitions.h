@@ -1,6 +1,5 @@
 #pragma once
 #include "game/game_allegiance.h"
-#include "tag_files/tag_groups.h"
 #include "tag_files/tag_block.h"
 #include "tag_files/tag_reference.h"
 

@@ -20,16 +20,12 @@
 #include "squads.h"
 #include "swarms.h"
 
-#include "game/game.h"
-
 /* prototypes */
 
 /* public code */
 
 void ai_apply_patches(void)
 {
-	// Replace function so we can initialize ai in MP
-	WritePointer((uintptr_t)&get_game_systems()[59].initialize_for_new_map_proc, ai_initialize_for_new_map);
 	return;
 }
 

@@ -2,7 +2,6 @@
 
 #include "tag_files/tag_reference.h"
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_groups.h"
 
 /* constants */
 
@@ -52,7 +51,8 @@ struct flock_definition
 
 	real_vector2d scale;
 	tag_reference creature;     // crea
-	short_bounds boid_count;
+	int16 boid_count_min;
+	int16 boid_count_max;
 
 	// Explaination("Flock parameters", "Recommended initial values (for a sentinel-sized unit): 
 	/*neighborhood radius = 6.0

@@ -1,11 +1,12 @@
 #pragma once
-#include "units/units.h"
-#include "tag_files/tag_groups.h"
 #include "tag_files/tag_block.h"
 #include "tag_files/tag_reference.h"
 
-#define k_maximum_variants_per_model 64
-#define k_style_attitude_count 3
+enum
+{
+	k_maximum_variants_per_model = 64,
+	k_style_attitude_count = 3
+};
 
 enum e_character_vehicle_flags : uint32
 {
@@ -336,7 +337,7 @@ ASSERT_STRUCT_SIZE(character_vehicle_properties, 180);
 struct character_grenade_properties
 {
 	c_flags_no_init<e_character_grenade_flags, uint32, k_character_grenade_flags_count> flags;
-	e_unit_grenade_type type;
+	uint16 type; /*e_unit_grenade_type*/
 	e_character_grenade_trajectory_type trajectory;
 
 	int16 pad;

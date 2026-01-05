@@ -20,7 +20,7 @@ struct environment_object_bsp_reference
 };
 ASSERT_STRUCT_SIZE(environment_object_bsp_reference, 16);
 
-enum e_projection_sign_flag : byte
+enum e_projection_sign_flag : uint8
 {
 	projection_sign_flag_projection_sign = FLAG(0)
 };
@@ -28,8 +28,8 @@ enum e_projection_sign_flag : byte
 // max count: MAXIMUM_NODES_PER_MODEL 255
 struct environment_object_node_reference
 {
-	short reference_frame_index;
-	byte projection_axis;
+	int16 reference_frame_index;
+	uint8 projection_axis;
 	e_projection_sign_flag projection_sign;
 };
 ASSERT_STRUCT_SIZE(environment_object_node_reference, 4);
