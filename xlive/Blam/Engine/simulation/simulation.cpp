@@ -12,6 +12,12 @@
 #include "units/units.h"
 #include "simulation/game_interface/simulation_game_action.h"
 
+/* prototypes */
+
+static void simulation_synchronous_game_patches(void);
+
+/* public code */
+
 s_simulation_globals* simulation_get_globals()
 {
 	return Memory::GetAddress<s_simulation_globals*>(0x5178D0, 0x520B60);
@@ -27,9 +33,9 @@ bool simulation_engine_initialized()
 	return simulation_get_globals()->initialized;
 }
 
-bool simulation_is_paused()
+bool simulation_aborted()
 {
-	return simulation_get_globals()->engine_paused;
+	return simulation_get_globals()->simulation_aborted;
 }
 
 bool simulation_reset_in_progress()
@@ -51,7 +57,7 @@ bool simulation_starting_up(void)
 	if (simulation_globals->initialized)
 	{
 		ASSERT(simulation_globals->world);
-		if (!simulation_globals->engine_paused && simulation_globals->world->exists())
+		if (!simulation_globals->simulation_aborted && simulation_globals->world->exists())
 		{
 			result = !simulation_globals->world->is_active();
 		}
@@ -63,9 +69,14 @@ bool simulation_starting_up(void)
 void simulation_notify_reset_complete(void)
 {
 	s_simulation_globals* sim_globals = simulation_get_globals();
-	if (!game_is_playback())
+
+	if (!game_is_playback() && simulation_reset_in_progress())// // make sure simulation is still in resetting
 	{
-		sim_globals->world->send_player_acknowledgements(true);
+		if (sim_globals->world->exists() && !sim_globals->world->is_authority())
+		{
+			// dont need this if we are not authority
+			sim_globals->world->send_player_acknowledgements(true);
+		}
 	}
 	sim_globals->simulation_reset_in_progress = false;
 	return;
@@ -112,9 +123,9 @@ void __cdecl simulation_reset(void)
 	ASSERT(simulation_globals->world);
 	//ASSERT(simulation_globals->world->is_authority());
 
-	if (simulation_globals->simulation_invalidate)
+	if (simulation_globals->simulation_in_initial_state)
 	{
-		simulation_globals->simulation_invalidate = false;
+		simulation_globals->simulation_in_initial_state = false;
 	}
 	else
 	{
@@ -135,7 +146,7 @@ bool simulation_in_progress(void)
 	if (simulation_engine_initialized()
 		&& game_in_progress()
 		&& game_get_active_structure_bsp_index() != NONE
-		&& !simulation_is_paused())
+		&& !simulation_aborted())
 	{
 		ASSERT(simulation_get_globals()->world);
 		if (simulation_get_world()->is_active())
@@ -271,7 +282,7 @@ void __cdecl simulation_build_update(struct simulation_update* update)
 	ASSERT(simulation_globals->initialized);
 	ASSERT(simulation_globals->world);
 
-	if (simulation_globals->engine_paused)
+	if (simulation_globals->simulation_aborted)
 	{
 		DISPLAY_ASSERT("simulation aborted inside game update");
 	}
@@ -298,7 +309,7 @@ void simulation_update_pregame(void)
 	struct simulation_update update;
 	s_simulation_globals* simulation_globals = simulation_get_globals();
 
-	if (simulation_globals->initialized && game_in_progress() && !simulation_is_paused())
+	if (simulation_globals->initialized && game_in_progress() && !simulation_aborted())
 	{
 		if (simulation_globals->watcher->need_to_generate_updates())
 		{
@@ -355,5 +366,15 @@ void simulation_apply_patches(void)
 	PatchCall(Memory::GetAddress(0x1DD22F, 0x1C46E3), simulation_build_player_updates);	// c_simulation_world::build_update
 
 	WriteJmpTo(Memory::GetAddress(0x1AE6D8, 0x1A8932), simulation_reset);
+	simulation_synchronous_game_patches();
 	return;
+}
+
+
+static void simulation_synchronous_game_patches(void)
+{
+	PatchCall(Memory::GetAddress(0x1AE002), synchronous_update_encode);
+	PatchCall(Memory::GetAddress(0x1ED08E), synchronous_update_encode);
+	PatchCall(Memory::GetAddress(0x1AE084), synchronous_update_decode);
+	PatchCall(Memory::GetAddress(0x1ED0A3), synchronous_update_decode);
 }
