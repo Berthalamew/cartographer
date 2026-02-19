@@ -410,6 +410,14 @@ static bool __cdecl OnMapLoad(s_game_options* options)
 		WriteValue(Memory::GetAddress(0x41F6B1), 0);
 	}
 
+	if (options
+		&& (options->game_mode == _game_mode_campaign
+			|| options->game_mode == _game_mode_multiplayer
+			|| options->game_mode == _game_mode_ui_shell && options->menu_context == 7))
+	{
+		network_loading_create_thread();
+	}
+
 	EventHandler::MapLoadEventExecute(EventExecutionType::execute_before, options->game_mode);
 	CustomVariantHandler::OnMapLoad(ExecTime::_preEventExec, options);
 
