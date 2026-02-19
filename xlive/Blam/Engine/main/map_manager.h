@@ -1,4 +1,5 @@
 #pragma once
+#include "math/crypto_windows.h"
 
 /* constants */
 

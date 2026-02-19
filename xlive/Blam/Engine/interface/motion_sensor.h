@@ -10,7 +10,7 @@ enum e_motion_sensor_blip_size : int16
 
 struct s_local_player_motion_sensor_sample
 {
-	byte gap[68];
+	uint8 gap[68];
 };
 ASSERT_STRUCT_SIZE(s_local_player_motion_sensor_sample, 0x44);
 
@@ -18,7 +18,7 @@ class c_local_player_motion_sensor_data
 {
 public:
 	s_local_player_motion_sensor_sample samples[9];
-	byte gap_264[130];
+	uint8 gap_264[130];
 	int32 field_2E8;
 	int32 field_2EC;
 

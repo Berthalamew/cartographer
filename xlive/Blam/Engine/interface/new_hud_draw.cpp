@@ -44,15 +44,15 @@ typedef void(__cdecl* t_render_ingame_user_interface_hud_indicators_element_hook
 
 static const pixel32 k_draw_hud_bitmap_widget_shield_pixel_colors[9]
 {
-	D3DCOLOR_ARGB(0, 0, 0, 0),
-	D3DCOLOR_ARGB(0, 255, 0, 0),
-	D3DCOLOR_ARGB(0, 0, 255, 0),
-	D3DCOLOR_ARGB(0, 255, 255, 0),
-	D3DCOLOR_ARGB(0, 127, 0, 255),
-	D3DCOLOR_ARGB(0, 69, 5, 154),
-	D3DCOLOR_ARGB(0, 156, 70, 193),
-	D3DCOLOR_ARGB(0, 00, 85, 170),
-	D3DCOLOR_ARGB(0, 0,120,240),
+	PIXEL32_ARGB(0, 0, 0, 0),
+	PIXEL32_ARGB(0, 255, 0, 0),
+	PIXEL32_ARGB(0, 0, 255, 0),
+	PIXEL32_ARGB(0, 255, 255, 0),
+	PIXEL32_ARGB(0, 127, 0, 255),
+	PIXEL32_ARGB(0, 69, 5, 154),
+	PIXEL32_ARGB(0, 156, 70, 193),
+	PIXEL32_ARGB(0, 00, 85, 170),
+	PIXEL32_ARGB(0, 0,120,240),
 };
 
 /* globals */

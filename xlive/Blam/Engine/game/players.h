@@ -190,3 +190,7 @@ void players_update_for_checkpoint(void);
 void players_joined_in_progress_allow_spawn(void);
 
 void players_apply_patches(void);
+
+/* macros */
+
+#define player_get(index) datum_get(player_data_get(), index);

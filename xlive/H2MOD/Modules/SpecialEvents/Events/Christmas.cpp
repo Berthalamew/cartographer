@@ -88,7 +88,7 @@ void christmas_event_map_load(void)
 		const scenario_structure_bsp_reference* reference = TAG_BLOCK_GET_ELEMENT(&scenario->structure_bsps, 0, scenario_structure_bsp_reference);
 		structure_bsp* bsp_definition = (structure_bsp*)tag_get_fast(reference->structure_bsp.index);
 
-		structure_weather_palette_entry* weat_block = (structure_weather_palette_entry*)tag_injection_extend_block(&bsp_definition->weather_palette, bsp_definition->weather_palette.type_size(), 1);
+		structure_weather_palette_entry* weat_block = (structure_weather_palette_entry*)tag_injection_extend_block(&bsp_definition->weather_palette, sizeof(structure_weather_palette_entry), 1);
 
 		const char new_name[] = "snow_cs";
 		csstrncpy(weat_block->name, new_name, NUMBEROF(new_name));
@@ -97,7 +97,8 @@ void christmas_event_map_load(void)
 
 		for (int32 i = 0; i < bsp_definition->clusters.count; ++i)
 		{
-			bsp_definition->clusters[i]->weather_index = (int16)bsp_definition->weather_palette.count - 1;
+			structure_cluster* cluster = TAG_BLOCK_GET_ELEMENT(&bsp_definition->clusters, i, structure_cluster);
+			cluster->weather_index = (int16)bsp_definition->weather_palette.count - 1;
 		}
 
 		// Change sword model to candy cane

@@ -147,7 +147,7 @@ ASSERT_STRUCT_SIZE(tag_iterator, 20);
 
 void cache_files_apply_patches(void);
 
-HANDLE* cache_file_handle_get();
+void* cache_file_handle_get(void);
 
 s_cache_file_memory_globals* cache_file_memory_globals_get(void);
 

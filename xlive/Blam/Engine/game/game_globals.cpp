@@ -1,14 +1,14 @@
 #include "stdafx.h"
 #include "game_globals.h"
 
-#include "units/unit_definitions.h"
 
 #include "cache/cache_files.h"
+#include "main/level_definitions.h"
 #include "models/models.h"
 #include "scenario/scenario.h"
 #include "scenario/scenario_definitions.h"
-#include "shell/shell.h"
 #include "tag_files/tag_loader/tag_injection.h"
+#include "units/unit_definitions.h"
 
 #include "H2MOD/Modules/Shell/Config.h"
 #include "H2MOD/Modules/SpecialEvents/SpecialEvents.h"
@@ -41,9 +41,9 @@ static void game_globals_prepare_lmao_representation(s_game_globals_custom_repre
 static void add_new_representations(s_game_globals_custom_representation_result* representations);
 static void add_simulation_table_entries(s_game_globals_custom_representation_result* representations);
 
-/* constants */
+/* globals */
 
-void (*k_game_globals_custom_representation_function_table[k_cartographer_custom_representation_count])(s_game_globals_custom_representation_result*)
+static void (*const k_game_globals_custom_representation_function_table[k_cartographer_custom_representation_count])(s_game_globals_custom_representation_result*)
 {
 	game_globals_prepare_skeleton_representation,
 	game_globals_prepare_flood_representation,
@@ -64,7 +64,7 @@ s_game_globals* scenario_get_game_globals(void)
 	return *Memory::GetAddress<s_game_globals**>(0x479E70, 0x4A642C);
 }
 
-s_camera_track_definition* game_globals_get_default_camera_track()
+s_camera_track_definition* game_globals_get_default_camera_track(void)
 {
 	s_game_globals* game_globals = scenario_get_game_globals();
 
@@ -81,7 +81,7 @@ s_ui_levels_definition* game_globals_get_ui_levels(void)
 	s_game_globals* globals = scenario_get_game_globals();
 	if (globals->ui_level_data.count > 0 && globals->ui_level_data.data != NONE)
 	{
-		return globals->ui_level_data[0];
+		return (s_ui_levels_definition*)TAG_BLOCK_GET_ELEMENT(&globals->ui_level_data, 0, s_ui_levels_definition);
 	}
 
 	return NULL;

@@ -82,10 +82,10 @@ ASSERT_STRUCT_SIZE(c_decorator_cache_block, 52);
 // max count: k_maximum_group_count 131072
 struct s_decorator_group
 {
-	byte decorator_set;                 // Block Index: scenario_decorator_set_palette_entry
+	uint8 decorator_set;                 // Block Index: scenario_decorator_set_palette_entry
 	e_decorator_type decorator_type;
-	byte shader_index;
-	byte compressed_radius;
+	uint8 shader_index;
+	uint8 compressed_radius;
 	short cluster;
 	short cache_block;                   // Block Index: c_decorator_cache_block
 	short decorator_start_index;

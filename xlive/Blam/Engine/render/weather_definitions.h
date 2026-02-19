@@ -1,10 +1,12 @@
 #pragma once
 #include "math/color_math.h"
-#include "render/render_weather.h"
 #include "tag_files/tag_reference.h"
 
-#define MAX_WIND_PRIMITIVES 128
-#define k_animated_background_plate_textures 3
+enum
+{
+	MAX_WIND_PRIMITIVES = 128,
+	k_animated_background_plate_textures = 3,
+};
 
 enum  e_wind_primitive_type : uint16
 {
@@ -50,7 +52,7 @@ public:
 	real32 turbulence_rate_of_change;
 	real_vector3d turbulence_scale;
 	real32 gravity_constant;
-	tag_block<c_wind_primitive> wind_primitives;
+	s_tag_block wind_primitives;	// struct: c_wind_primitive
 	int32 pad_3;
 };
 ASSERT_STRUCT_SIZE(c_wind_model, 156);
@@ -110,8 +112,8 @@ ASSERT_STRUCT_SIZE(c_animated_background_plate, 936);
 class c_weather_system
 {
 public:
-	tag_block<c_particle_system_lite> m_particle_system;
-	tag_block<c_animated_background_plate> m_background_plates;
+	s_tag_block m_particle_system;		// struct: c_particle_system_lite
+	s_tag_block m_background_plates;	// struct: c_animated_background_plate
 	c_wind_model m_wind_model;
 	real32 m_fade_radius;
 };

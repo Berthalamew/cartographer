@@ -71,16 +71,6 @@ struct ascii_key
 	wchar_t remapped_character;
 };
 
-struct key_stroke
-{
-	uint8 modifier_flags;
-	int8 ascii_code;
-	wchar_t utf16_code;
-	e_input_key_code key_code;
-	bool repeating;
-};
-ASSERT_STRUCT_SIZE(key_stroke, 0x8);
-
 struct s_gamepad_input_button_state
 {
 	uint8 trigger_msec_down[2];
@@ -125,7 +115,7 @@ struct input_globals_windows
 	bool feedback_suppress;
 	uint32 update_time;
 	uint32 update_msec;
-	IDirectInput8A* direct_input;
+	struct IDirectInput8A* direct_input;
 	s_keyboard_input_state keyboard;
 	int16 buffered_key_read_index;
 	int16 buffered_key_read_count;

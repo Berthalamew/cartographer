@@ -1,9 +1,12 @@
 #pragma once
-
-#define k_maximum_shapes_per_physics_model 1024
 #include "havok/physics/collide/shape/capsule/hkCapsuleShape.h"
 #include "havok/physics/collide/shape/misc/transform/hkTransformShape.h"
 #include "havok/physics/collide/shape/shpere/hkShpere.h"
+
+enum
+{
+	k_maximum_shapes_per_physics_model = 1024,
+};
 
 enum e_physics_constraint : int16
 {

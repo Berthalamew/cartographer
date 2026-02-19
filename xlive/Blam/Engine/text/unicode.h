@@ -317,43 +317,43 @@ wchar_t utoupper(wchar_t c);
 
 wchar_t utolower(wchar_t c);
 
-wchar_t ufgetc(_iobuf* stream);
+wchar_t ufgetc(struct _iobuf* stream);
 
-wchar_t ufputc(wchar_t c, _iobuf* stream);
+wchar_t ufputc(wchar_t c, struct _iobuf* stream);
 
-wchar_t uungetc(wchar_t c, _iobuf* stream);
+wchar_t uungetc(wchar_t c, struct _iobuf* stream);
 
-wchar_t* ufgets(wchar_t* string, int32 size, _iobuf* stream);
+wchar_t* ufgets(wchar_t* string, int32 size, struct _iobuf* stream);
 
-int32 ufputs(const wchar_t* string, _iobuf* stream);
+int32 ufputs(const wchar_t* string, struct _iobuf* stream);
 
 wchar_t* ugets(wchar_t* string, size_t count);
 
 int32 uputs(const wchar_t* string);
 
-int32 ufprintf(_iobuf* stream, const wchar_t* format, ...);
+int32 ufprintf(struct _iobuf* stream, const wchar_t* format, ...);
 
 int32 uprintf(const wchar_t* format, ...);
 
 int32 usnprintf(wchar_t* string, size_t size, const wchar_t* format, ...);
 
-int32 uvfprintf(_iobuf* stream, const wchar_t* format, char* ap);
+int32 uvfprintf(struct _iobuf* stream, const wchar_t* format, char* ap);
 
 int32 uvprintf(const wchar_t* format, char* ap);
 
 int32 uvsnprintf(wchar_t* string, size_t size, const wchar_t* format, char* ap);
 
-_iobuf* ufdopen(int32 fd, const wchar_t* path);
+struct _iobuf* ufdopen(int32 fd, const wchar_t* path);
 
-_iobuf* ufopen(const wchar_t* path, const wchar_t* mode);
+struct _iobuf* ufopen(const wchar_t* path, const wchar_t* mode);
 
-int32 ufclose(_iobuf* stream);
+int32 ufclose(struct _iobuf* stream);
 
-_iobuf* ufreopen(const wchar_t* path, const wchar_t* mode, _iobuf* stream);
+struct _iobuf* ufreopen(const wchar_t* path, const wchar_t* mode, struct _iobuf* stream);
 
 void uperror(const wchar_t* string);
 
-_iobuf* upopen(const wchar_t* command, const wchar_t* mode);
+struct _iobuf* upopen(const wchar_t* command, const wchar_t* mode);
 
 int32 uremove(const wchar_t* path);
 

@@ -141,12 +141,12 @@ static void tag_fixes_brute(void)
 		s_shader_definition* shader = (s_shader_definition*)tag_get_fast(brute_shader_index);
 		s_shader_postprocess_definition_new* postprocess = TAG_BLOCK_GET_ELEMENT(&shader->postprocess_definition, 0, s_shader_postprocess_definition_new);
 
-		*postprocess->pixel_constants[0] = D3DCOLOR_RGBA(87, 79, 69, 0);
-		*postprocess->pixel_constants[1] = D3DCOLOR_RGBA(180, 179, 189, 0);
+		*postprocess->pixel_constants[0] = PIXEL32_RGBA(87, 79, 69, 0);
+		*postprocess->pixel_constants[1] = PIXEL32_RGBA(180, 179, 189, 0);
 
 		shader = (s_shader_definition*)tag_get_fast(brute_head_shader_index);
-		*postprocess->pixel_constants[0] = D3DCOLOR_RGBA(255, 255, 255, 0);
-		*postprocess->pixel_constants[1] = D3DCOLOR_RGBA(180, 179, 189, 0);
+		*postprocess->pixel_constants[0] = PIXEL32_RGBA(255, 255, 255, 0);
+		*postprocess->pixel_constants[1] = PIXEL32_RGBA(180, 179, 189, 0);
 	}
 	return;
 }
@@ -234,7 +234,7 @@ static void tag_fixes_misty_rain(void)
 				{
 					const scenario_structure_bsp_reference* reference = TAG_BLOCK_GET_ELEMENT(&scenario_definition->structure_bsps, i, scenario_structure_bsp_reference);
 					structure_bsp* bsp_definition = (structure_bsp*)tag_get_fast(reference->structure_bsp.index);
-					structure_weather_palette_entry* bsp_palette = bsp_definition->weather_palette[0];
+					structure_weather_palette_entry* bsp_palette = TAG_BLOCK_GET_ELEMENT(&bsp_definition->weather_palette, 0, structure_weather_palette_entry);
 					csstrncpy(bsp_palette->name, name, NUMBEROF(name));
 					bsp_palette->weather_system.group.group = _tag_group_weather_system;
 					bsp_palette->weather_system.index = misty_rain_datum;

@@ -525,6 +525,6 @@ ASSERT_STRUCT_SIZE(weapon_definition, 796);
 
 /* prototypes */
 
-weapon_first_person_interface_definition* first_person_interface_definition_get(const weapon_definition* definition, enum e_character_type : int8 character_type);
+weapon_first_person_interface_definition* first_person_interface_definition_get(const weapon_definition* definition, int8 character_type);
 
 void weapon_definitions_apply_patches(void);

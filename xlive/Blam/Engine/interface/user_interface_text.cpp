@@ -5,6 +5,7 @@
 
 #include "interface/hud.h"
 #include "input/input_constants.h"
+#include "input/input_windows.h"
 #include "main/game_preferences.h"
 
 c_user_interface_text::c_user_interface_text()

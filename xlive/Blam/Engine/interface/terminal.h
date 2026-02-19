@@ -3,7 +3,7 @@
 #ifdef TERMINAL_ENABLED
 
 #include "dialogs/edit_text.h"
-#include "input/input_windows.h"
+#include "input/input_abstraction.h"
 #include "math/color_math.h"
 
 /* constants */

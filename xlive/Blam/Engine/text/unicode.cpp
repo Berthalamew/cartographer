@@ -78,7 +78,7 @@ wchar_t* ustrncpy(wchar_t* dest, const wchar_t* src, size_t count)
 	ASSERT(dest != NULL);
 	ASSERT(src != NULL);
 	ASSERT(count > 0);
-	wcsncpy_s(dest, count, src, UINT_MAX);
+	wcsncpy_s(dest, count, src, _TRUNCATE);
 	return dest;
 }
 

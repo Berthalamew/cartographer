@@ -1,6 +1,5 @@
 #pragma once
 #include "animations/animation_manager.h"
-#include "saved_games/player_profile.h"
 
 /* constants */
 
@@ -83,9 +82,9 @@ ASSERT_STRUCT_SIZE(first_person_weapon_data, 4112);
 
 struct first_person_weapon
 {
-	/*e_first_person_weapon_flags*/ uint32 flags;
+	uint32 flags; /*e_first_person_weapon_flags*/
 	datum unit_index;
-	e_character_type character_type;
+	int8 character_type; /*e_character_type*/
 	int8 pad[3];
 	first_person_weapon_data weapon[k_first_person_max_weapons];
 	c_interpolator_control rate_interpolator_control;

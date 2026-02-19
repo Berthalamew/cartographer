@@ -13,6 +13,7 @@
 #include "networking/network_event.h"
 #include "physics/collision_model_definitions.h"
 #include "physics/physics_model_definitions.h"
+#include "render/render_weather.h"
 #include "render/weather_definitions.h"
 #include "scenario/scenario_definitions.h"
 #include "shell/shell.h"
@@ -303,7 +304,9 @@ void c_tag_injecting_manager::load_raw_data_from_cache(datum injected_index) con
 			auto weather_tag = reinterpret_cast<c_weather_system*>(tag_data);
 			for (auto i = 0; i < weather_tag->m_particle_system.count; i++)
 			{
-				pc_geometry_cache_preload_geometry(&weather_tag->m_particle_system[i]->m_geometry, (e_pc_geometry_cache_preload_flags)(_pc_geometry_cache_preload_flag_2 | _pc_geometry_cache_preload_blocking));
+				c_particle_system_lite* system_block = TAG_BLOCK_GET_ELEMENT(&weather_tag->m_particle_system, i, c_particle_system_lite);
+
+				pc_geometry_cache_preload_geometry(&system_block->m_geometry, (e_pc_geometry_cache_preload_flags)(_pc_geometry_cache_preload_flag_2 | _pc_geometry_cache_preload_blocking));
 			}
 			break;
 	}

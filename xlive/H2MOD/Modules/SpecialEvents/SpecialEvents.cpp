@@ -8,7 +8,7 @@
 #include "Events/Paddy.h"
 
 #include "game/game.h"
-#include "networking/Session/network_session.h"
+#include "networking/session/network_session.h"
 #include "tag_files/tag_loader/tag_injection.h"
 
 #include "H2MOD/GUI/imgui_integration/imgui_handler.h"

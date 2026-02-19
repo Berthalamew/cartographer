@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "simulation_encoding.h"
 
+#include "simulation/simulation_players.h"
+
 /* public code */
 
 void __cdecl simulation_player_update_encode(c_bitstream* packet, const simulation_player_update* player_update)

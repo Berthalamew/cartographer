@@ -1,5 +1,6 @@
 #pragma once
 #include "controllers.h"
+#include "input_constants.h"
 
 /* macros */
 
@@ -191,6 +192,16 @@ enum e_mouse_buttons
 
 /* structures */
 
+struct key_stroke
+{
+	uint8 modifier_flags;
+	int8 ascii_code;
+	wchar_t utf16_code;
+	e_input_key_code key_code;
+	bool repeating;
+};
+ASSERT_STRUCT_SIZE(key_stroke, 0x8);
+
 struct s_input_button
 {
 	e_input_device_types m_device_type;
@@ -270,7 +281,6 @@ struct s_game_input_state
 	uint32 field_B4;
 };
 ASSERT_STRUCT_SIZE(s_game_input_state, 0xB8);
-
 
 struct s_input_abstraction_globals
 {

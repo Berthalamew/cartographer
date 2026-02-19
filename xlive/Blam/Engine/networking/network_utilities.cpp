@@ -47,6 +47,7 @@ void __cdecl network_utilities_get_game_version(int32* executable_type, int32* e
 	*executable_type = EXECUTABLE_TYPE;
 	*executable_version = EXECUTABLE_VERSION;
 	*compatible_version = COMPATIBLE_VERSION;
+	return;
 }
 
 /* private code */

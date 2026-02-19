@@ -1,8 +1,6 @@
 #include "stdafx.h"
-
 #include "network_loading.h"
 
-#include "main/main.h"
 #include "networking/network_globals.h"
 #include "simulation/simulation.h"
 

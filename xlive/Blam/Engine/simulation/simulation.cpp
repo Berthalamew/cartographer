@@ -9,6 +9,7 @@
 #include "game/game.h"
 #include "game/players.h"
 #include "objects/objects.h"
+#include "units/units.h"
 #include "simulation/game_interface/simulation_game_action.h"
 
 s_simulation_globals* simulation_get_globals()

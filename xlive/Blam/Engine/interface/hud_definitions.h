@@ -8,7 +8,7 @@ enum e_scaling_flags : short
 	scaling_flag_dont_scale_size = FLAG(1),
 };
 
-enum e_button_icon_flags : byte
+enum e_button_icon_flags : uint8
 {
 	button_icon_flag_use_text_from_string_list_instead = FLAG(0),
 	button_icon_flag_override_default_color = FLAG(1),
@@ -22,7 +22,7 @@ struct icon_hud_element_definition
 	short width_offset;
 	point2d offset_from_reference_corner;
 	pixel32 override_icon_color;
-	byte frame_rate;
+	uint8 frame_rate;
 
 	e_button_icon_flags flags;
 	short text_index;

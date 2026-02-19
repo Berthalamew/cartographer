@@ -7,7 +7,10 @@
 
 /* constants */
 
-#define MAX_PARTICLES_LITE 4096
+enum
+{
+	MAX_PARTICLES_LITE = 4096
+};
 
 /* enums */
 
@@ -93,7 +96,7 @@ ASSERT_STRUCT_SIZE(c_particle_system_lite, 140);
 
 /* globals */
 
-extern IDirect3DPixelShader9* g_d3d9_weather_shaders[k_dx9_weather_shader_type_count];
+extern struct IDirect3DPixelShader9* g_d3d9_weather_shaders[k_dx9_weather_shader_type_count];
 
 /* prototypes */
 

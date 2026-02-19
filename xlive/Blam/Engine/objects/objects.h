@@ -6,10 +6,7 @@
 #include "math/real_math.h"
 
 /* constants */
-enum
-{
-	k_maximum_objects_per_map = 2048
-};
+
 
 /* enums */
 

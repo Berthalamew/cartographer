@@ -1,6 +1,4 @@
-
 #include "stdafx.h"
-
 #include "shell_windows_internals.h"
 
 NTSTATUS NtQueryTimerResolutionHelper(PULONG MinimumResolution, PULONG MaximumResolution, PULONG CurrentResolution)

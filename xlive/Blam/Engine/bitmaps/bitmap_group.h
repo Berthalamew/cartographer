@@ -116,7 +116,7 @@ struct bitmap_group_sequence
 };
 ASSERT_STRUCT_SIZE(bitmap_group_sequence, 0x3C);
 
-enum e_more_bitmap_data_flags : byte
+enum e_more_bitmap_data_flags : uint8
 {
 	more_bitmap_data_flag_delete_from_cache_file = FLAG(0),
 	more_bitmap_data_flag_bitmap_create_attempted = FLAG(1)
@@ -235,7 +235,7 @@ struct bitmap_data
 #pragma pack(pop)
 ASSERT_STRUCT_SIZE(bitmap_data, 116);
 
-enum e_color_subsampling : byte
+enum e_color_subsampling : uint8
 {
 	color_subsampling_400 = 0,
 	color_subsampling_420 = 1,

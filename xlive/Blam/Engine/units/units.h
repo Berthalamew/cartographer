@@ -83,30 +83,6 @@ struct s_unit_304
 	int8 gap_0[16];
 };
 
-struct unit_control_data
-{
-	string_id animation_state;
-	uint16 aiming_speed;
-	uint16 weapon_set_identifier;
-	uint8 field_8;
-	uint8 field_9;
-	uint16 grenade_index;
-	uint16 zoom_level;
-	int8 gap_E[2];
-	int64 control_flags;
-	real_vector3d throttle;
-	real32 primary_trigger;
-	real32 secondary_trigger;
-	real_vector3d facing_vector;
-	real_vector3d aiming_vector;
-	real_vector3d looking_vector;
-	int32 field_50;
-	int32 field_54;
-	int32 field_58;
-	s_aim_assist_targeting_result target_info;
-};
-ASSERT_STRUCT_SIZE(unit_control_data, 0x80);
-
 struct _unit_datum
 {
 	uint32 unit_cached_state_flags;
@@ -253,7 +229,7 @@ void __cdecl unit_get_head_position_interpolated(datum unit_index, real_point3d*
 
 void __cdecl unit_get_camera_position(datum unit_index, real_point3d* out_point);
 
-void __cdecl unit_control(datum unit_index, const unit_control_data* control_data);
+void __cdecl unit_control(datum unit_index, const struct unit_control_data* control_data);
 
 e_game_team unit_get_team_index(datum unit_index);
 

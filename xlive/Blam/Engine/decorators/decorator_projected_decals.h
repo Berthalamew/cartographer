@@ -18,10 +18,10 @@ ASSERT_STRUCT_SIZE(rasterizer_vertex_decorator_decal, 32);
 // max count: k_maximum_projected_decal_count 32768
 struct s_decorator_projected_decal
 {
-	byte decorator_set;         // Block Index: scenario_decorator_set_palette_entry 
-	byte decorator_class;
-	byte decorator_permutation;
-	byte sprite_index;
+	uint8 decorator_set;         // Block Index: scenario_decorator_set_palette_entry 
+	uint8 decorator_class;
+	uint8 decorator_permutation;
+	uint8 sprite_index;
 	real_point3d position;
 	real_vector3d left;
 	real_vector3d up;

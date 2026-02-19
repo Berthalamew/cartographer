@@ -27,4 +27,4 @@ bool __cdecl rasterizer_dx9_weather_plate_build_vertex_buffer(
 	void* output,
 	c_animated_background_plate* ctx);
 
-bool rasterizer_dx9_draw_weather_particles(c_particle_system_lite* system);
+bool rasterizer_dx9_draw_weather_particles(class c_particle_system_lite* system);

@@ -16,7 +16,7 @@ enum e_pc_file_system_type : uint32
 struct s_pc_file_type_save_path_info
 {
 	// KNOWNFOLDERID Reference: https://learn.microsoft.com/en-us/windows/win32/shell/knownfolderid#constants
-	KNOWNFOLDERID* known_folder_id;
+	struct KNOWNFOLDERID* known_folder_id;
 	// CSIDL Reference: https://github.com/tpn/winsdk-10/blob/master/Include/10.0.10240.0/um/ShlObj.h#L1113
 	uint32 cs_idl;
 	wchar_t* path;

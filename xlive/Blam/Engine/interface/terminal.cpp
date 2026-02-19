@@ -4,6 +4,7 @@
 #ifdef TERMINAL_ENABLED
 
 #include "cseries/threads_windows.h"
+#include "input/input_windows.h"
 #include "interface/hud.h"
 #include "main/console.h"
 #include "memory/data.h"

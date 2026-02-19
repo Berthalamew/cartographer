@@ -307,7 +307,7 @@ enum e_respawn_timer_starts : short
 	respawn_timer_starts_on_body_depletion = 1
 };
 
-enum e_netgame_item_classification : byte
+enum e_netgame_item_classification : uint8
 {
 	netgame_item_classification_weapon = 0,
 	netgame_item_classification_primary_light_land = 1,
@@ -333,12 +333,12 @@ struct scenario_netgame_equipment
 	short respawn_on_empty_time_seconds;
 	e_respawn_timer_starts respawn_timer_starts;
 	e_netgame_item_classification classification;
-	byte pad1[3];
-	int64_t pad2[5];
+	uint8 pad1[3];
+	int64 pad2[5];
 	real_point3d position;
 	real_euler_angles3d orientation;
 	tag_reference item_vehicle_collection;  // itmc/vehc but allows any tag
-	int64_t pad3[6];
+	int64 pad3[6];
 };
 ASSERT_STRUCT_SIZE(scenario_netgame_equipment, 144);
 

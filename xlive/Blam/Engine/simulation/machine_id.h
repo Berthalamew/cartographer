@@ -2,5 +2,5 @@
 
 struct s_machine_identifier
 {
-	byte machine_identifier[6];
+	uint8 machine_identifier[6];
 };

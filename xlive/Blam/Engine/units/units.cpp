@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "units.h"
 
+#include "unit_control.h"
 #include "unit_definitions.h"
 
 #include "cache/cache_files.h"

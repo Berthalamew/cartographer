@@ -41,7 +41,7 @@ void cache_files_apply_patches(void)
 	return;
 }
 
-HANDLE* cache_file_handle_get()
+void* cache_file_handle_get(void)
 {
 	return Memory::GetAddress<HANDLE*>(0x4AE8A8, 0x4CF128);
 }

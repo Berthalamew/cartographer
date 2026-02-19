@@ -7,6 +7,7 @@
 #include "game_time.h"
 #include "players.h"
 
+#include "ai/ai.h"
 #include "camera/director.h"
 #include "cutscene/cinematics.h"
 #include "cutscene/recorded_animations.h"
@@ -25,6 +26,8 @@
 #include "networking/logic/life_cycle_manager.h"
 #include "networking/session/network_session.h"
 #include "objects/lights.h"
+#include "objects/objects.h"
+#include "networking/session/network_session.h"
 #include "physics/havok.h"
 #include "physics/impacts.h"
 #include "sapien/editor.h"

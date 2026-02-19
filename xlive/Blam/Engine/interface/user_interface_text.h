@@ -1,6 +1,6 @@
 #pragma once
 #include "math/color_math.h"
-#include "input/input_windows.h"
+#include "input/input_constants.h"
 
 /* classes */
 

@@ -9,6 +9,7 @@
 #include "main/interpolator.h"
 #include "saved_games/cartographer_player_profile/cartographer_player_profile.h"
 #include "units/units.h"
+#include "units/unit_definitions.h"
 
 #include "H2MOD/Modules/CustomVariantSettings/CustomVariantSettings.h"
 

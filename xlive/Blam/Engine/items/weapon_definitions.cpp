@@ -11,7 +11,7 @@ void weapon_definitions_apply_patches(void)
 	return;
 }
 
-weapon_first_person_interface_definition* first_person_interface_definition_get(const weapon_definition* definition, e_character_type character_type)
+weapon_first_person_interface_definition* first_person_interface_definition_get(const weapon_definition* definition, int8 character_type)
 {
 	weapon_first_person_interface_definition* result = NULL;
 	int32 index = 0;

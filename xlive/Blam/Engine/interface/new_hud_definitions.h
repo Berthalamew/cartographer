@@ -159,7 +159,7 @@ enum e_special_hud_type : short
 	special_hud_type_territory_meter = 7
 };
 
-enum e_hud_input_type : byte
+enum e_hud_input_type : uint8
 {
 	hud_input_type_basic_zero = 0,
 	hud_input_type_basic_one = 1,
@@ -331,10 +331,10 @@ struct s_hud_widget_state_definition
 	e_widget_state_weapon_flags no_weapon_flags;
 	e_widget_state_game_engine_state_flags no_game_engine_state_flags;
 
-	byte age_cutoff;
-	byte clip_cutoff;
-	byte total_cutoff;
-	byte pad;
+	uint8 age_cutoff;
+	uint8 clip_cutoff;
+	uint8 total_cutoff;
+	uint8 pad;
 };
 ASSERT_STRUCT_SIZE(s_hud_widget_inputs_definition, 4);
 

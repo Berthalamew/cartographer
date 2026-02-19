@@ -1,6 +1,6 @@
 #pragma once
 #include "simulation_game_objects.h"
-#include "game/players.h"
+#include "saved_games/player_profile.h"
 #include "units/units.h"
 
 struct s_simulation_unit_state_data

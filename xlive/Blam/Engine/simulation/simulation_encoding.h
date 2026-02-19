@@ -1,8 +1,5 @@
 #pragma once
 #include "machine_id.h"
-#include "simulation_players.h"
-
-#include "memory/bitstream.h"
 #include "networking/network_constants.h"
 
 /* structures */
@@ -15,6 +12,6 @@ struct simulation_machine_update
 
 /* prototypes */
 
-void __cdecl simulation_player_update_encode(c_bitstream* packet, const simulation_player_update* player_update);
+void __cdecl simulation_player_update_encode(class c_bitstream* packet, const struct simulation_player_update* player_update);
 
-bool __cdecl simulation_player_update_decode(c_bitstream* packet, simulation_player_update* player_update);
+bool __cdecl simulation_player_update_decode(class c_bitstream* packet, struct simulation_player_update* player_update);

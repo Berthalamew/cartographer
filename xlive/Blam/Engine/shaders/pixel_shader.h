@@ -41,7 +41,7 @@ ASSERT_STRUCT_SIZE(s_pixel_shader_constant_defaults, 4)
 // max count: 100
 struct s_pixel_shader
 {
-	IDirect3DPixelShader9* pixel_shader_handle_runtime[3];
+	struct IDirect3DPixelShader9* pixel_shader_handle_runtime[3];
 	tag_block<s_pixel_shader_constant_defaults> constant_register_defaults;
 
 	/****************************************

@@ -14,11 +14,11 @@
 #include "game/game_time.h"
 #include "items/weapons.h"
 #include "main/interpolator.h"
-#include "main/main_game.h"
 #include "memory/memory_pool.h"
 #include "models/models.h"
 #include "objects/lights.h"
 #include "objects/widgets/widgets.h"
+#include "physics/collision_bsp.h"
 #include "physics/collisions.h"
 #include "physics/havok.h"
 #include "physics/havok_memory.h"
@@ -28,6 +28,7 @@
 #include "structures/cluster_partitions.h"
 #include "structures/structure_bsp_definitions.h"
 #include "tag_files/tag_files.h"
+#include "units/units.h"
 
 /* constants */
 

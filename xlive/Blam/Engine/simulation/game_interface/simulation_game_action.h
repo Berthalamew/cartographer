@@ -1,11 +1,13 @@
 #pragma once
 
+/* enums */
+
 enum e_simulation_action_update : uint32
 {
 	_simulation_action_update_grenade_count_bit = 22
 };
 
-
+/* prototypes */
 
 void __cdecl simulation_action_object_create(datum object_index);
 

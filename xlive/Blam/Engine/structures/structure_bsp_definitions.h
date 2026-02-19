@@ -309,10 +309,10 @@ struct structure_bsp
 
 	int8 pad_2[24];
 
-	tag_block<structure_weather_palette_entry> weather_palette;
+	s_tag_block weather_palette;	// struct: structure_weather_palette_entry
 	tag_block<structure_weather_polyhedron> weather_polyhedra;
 	tag_block<structure_detail_object_data> detail_objects;
-	tag_block<structure_cluster> clusters;
+	s_tag_block clusters;			// struct: structure_cluster
 	tag_block<geometry_material> materials;
 
 	// Max: MAXIMUM_SKIES_PER_SCENARIO

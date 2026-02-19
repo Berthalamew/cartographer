@@ -1,13 +1,8 @@
 #pragma once
-#include "materials.h"
-
 #include "bitmaps/bitmap_group.h"
-#include "camera/camera_track_definition.h"
 #include "interface/interface.h"
-#include "math/color_math.h"
 #include "main/game_preferences.h"
-#include "main/level_definitions.h"
-#include "objects/damage.h"
+#include "math/color_math.h"
 #include "saved_games/player_profile.h"
 #include "tag_files/tag_block.h"
 #include "tag_files/tag_reference.h"
@@ -132,7 +127,7 @@ ASSERT_STRUCT_SIZE(s_ai_globals_definition, 360);
 // max count: 1
 struct s_damage_globals_definition
 {
-	tag_block<s_damage_group_definition> damage_groups;
+	s_tag_block damage_groups;	// struct: s_damage_group_definition
 };
 ASSERT_STRUCT_SIZE(s_damage_globals_definition, 8);
 
@@ -454,12 +449,12 @@ struct s_game_globals_multiplayer_information
 
 	tag_reference in_game_text; // unic
 	int32 pad[10];
-	tag_block<struct s_multiplayer_event_response_definition> general_events;
-	tag_block<struct s_multiplayer_event_response_definition> slayer_events;
-	tag_block<struct s_multiplayer_event_response_definition> ctf_events;
-	tag_block<struct s_multiplayer_event_response_definition> oddball_events;
-	tag_block<> unk_block;
-	tag_block<struct s_multiplayer_event_response_definition> king_events;
+	s_tag_block general_events;	// struct: s_multiplayer_event_response_definition
+	s_tag_block slayer_events;	// struct: s_multiplayer_event_response_definition
+	s_tag_block ctf_events;		// struct: s_multiplayer_event_response_definition
+	s_tag_block oddball_events;	// struct: s_multiplayer_event_response_definition
+	s_tag_block unk_block;
+	s_tag_block king_events;	// struct: s_multiplayer_event_response_definition
 };
 ASSERT_STRUCT_SIZE(s_game_globals_multiplayer_information, 152);
 
@@ -573,15 +568,15 @@ struct s_game_globals
 	tag_block<s_game_globals_player_information> player_information;
 	tag_block<s_game_globals_player_representation> player_representation;
 	tag_block<s_game_globals_falling_damage> falling_damage;
-	tag_block<material_definition> old_materials;
-	tag_block<s_global_material_definition> materials;
+	s_tag_block old_materials;	// struct: material_definition
+	s_tag_block materials;		// struct: s_global_material_definition
 	tag_block<s_game_globals_multiplayer_ui> multiplayer_ui;
 	tag_block<real_rgb_color> profile_colors;               // max count: k_game_globals_maximum_multiplayer_colors
 
 	tag_reference multiplayer_globals;      // mulg
 
-	tag_block<s_runtime_levels_definition> runtime_level_data;
-	tag_block<s_ui_levels_definition> ui_level_data;
+	s_tag_block runtime_level_data;	// struct: s_runtime_levels_definition
+	s_tag_block ui_level_data;		// struct: s_ui_levels_definition
 
 	// Explaination("Default global lighting", "")
 	tag_reference default_global_lighting;  // gldf
@@ -597,11 +592,12 @@ void game_globals_apply_tag_patches(void);
 
 s_game_globals* scenario_get_game_globals(void);
 
-s_camera_track_definition* game_globals_get_default_camera_track();
+struct s_camera_track_definition* game_globals_get_default_camera_track(void);
 
 void scenario_set_game_globals(s_game_globals* globals);
 
-s_ui_levels_definition* game_globals_get_ui_levels(void);
+struct s_ui_levels_definition* game_globals_get_ui_levels(void);
+
 s_game_globals_player_representation* game_globals_get_representation(e_character_type type);
 
 inline s_game_globals_rasterizer_data* rasterizer_globals_get_data(void)

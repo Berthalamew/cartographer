@@ -1,5 +1,12 @@
 #pragma once
 
+/* constants */
+
+enum
+{
+    k_maximum_objects_per_map = 2048
+};
+
 /* enums */
 
 enum e_object_change_color_index

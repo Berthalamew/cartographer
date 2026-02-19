@@ -1,24 +1,7 @@
 #pragma once
 #include "game/aim_assist.h"
-#include "units/unit_definitions.h"
 
-
-class c_player_input
-{
-public:
-	real_vector2d throttle;
-	real32 trigger;
-	real32 secondary_trigger;
-	real32 yaw_change;
-	real32 pitch_change;
-	uint32 field_18;
-	uint32 flags_1C;
-	uint32 flags_20;
-	uint32 flags_24;
-	real_euler_angles2d desired_angles;
-	s_aim_assist_targeting_result targeting;
-	int8 field_50[4];
-};
+/* structs */
 
 struct s_player_action_weapons
 {
@@ -95,10 +78,31 @@ struct s_player_control_camera_info
 	datum slave_object;
 	int16 parent_seat_index;
 	int16 pad;
-	s_unit_camera* unit_camera;
+	struct s_unit_camera* unit_camera;
 	real_point3d location;
 };
 ASSERT_STRUCT_SIZE(s_player_control_camera_info, 24);
+
+/* classes */
+
+class c_player_input
+{
+public:
+	real_vector2d throttle;
+	real32 trigger;
+	real32 secondary_trigger;
+	real32 yaw_change;
+	real32 pitch_change;
+	uint32 field_18;
+	uint32 flags_1C;
+	uint32 flags_20;
+	uint32 flags_24;
+	real_euler_angles2d desired_angles;
+	s_aim_assist_targeting_result targeting;
+	int8 field_50[4];
+};
+
+/* prototypes */
 
 void __cdecl player_control_update(real32 world_seconds_elapsed, real32 game_seconds_elapsed);
 

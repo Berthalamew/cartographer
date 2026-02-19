@@ -3,9 +3,9 @@
 
 #include "cutscene/cinematics.h"
 #include "game/game_globals.h"
-#include "rasterizer/dx9/rasterizer_dx9_dynamic_geometry.h"
-#include "rasterizer/dx9/rasterizer_dx9_dynavobgeom.h"
 #include "rasterizer/rasterizer_globals.h"
+#include "rasterizer/rasterizer_main.h"
+#include "rasterizer/dx9/rasterizer_dx9_dynavobgeom.h"
 #include "render/render.h"
 
 /* constants */
@@ -13,7 +13,7 @@
 enum
 {
 	k_splitscreen_original_game_height = 480,
-	k_splitscreen_line_colour = D3DCOLOR_ARGB(255, 0, 0, 0)
+	k_splitscreen_line_colour = PIXEL32_ARGB(255, 0, 0, 0)
 };
 
 /* globals */
@@ -78,7 +78,7 @@ void __cdecl interface_draw_bitmap(
 		vertex_data[vertex_index].pos_y = pos_y;
 		vertex_data[vertex_index].bounds_x = bounds_x;
 		vertex_data[vertex_index].bounds_y = bounds_y;
-		vertex_data[vertex_index].color = { D3DCOLOR_ARGB((uint8)(alpha * 255.f), 255, 255, 255) };	// Set color to white with alpha from parameter
+		vertex_data[vertex_index].color = { PIXEL32_ARGB((uint8)(alpha * 255.f), 255, 255, 255) };	// Set color to white with alpha from parameter
 	}
 
 	rasterizer_dynamic_screen_geometry_parameters parameters;

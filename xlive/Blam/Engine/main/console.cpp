@@ -10,6 +10,7 @@
 #include "debug/menu/debug_menu_main.h"
 #endif
 #include "hs/hs.h"
+#include "input/input_windows.h"
 #include "interface/terminal.h"
 #include "interface/user_interface_guide.h"
 #include "shell/shell.h"

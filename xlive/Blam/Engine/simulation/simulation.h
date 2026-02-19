@@ -5,6 +5,7 @@
 #include "simulation_world.h"
 
 #include "game/player_control.h"
+#include "units/unit_control.h"
 
 enum
 {

@@ -1,11 +1,15 @@
 #pragma once
 #include "objects/object_identifier.h"
 #include "render/render_lights.h"
+#include "tag_files/data_reference.h"
 #include "tag_files/tag_reference.h"
 
-#define MAXIMUM_LIGHTS_PER_MAP 350
-#define MAXIMUM_LIGHTMAP_GROUPS_PER_STRUCTURE 128
-#define k_maximum_fake_lightprobes_per_structure_bsp 128
+enum
+{
+	MAXIMUM_LIGHTS_PER_MAP = 350,
+	MAXIMUM_LIGHTMAP_GROUPS_PER_STRUCTURE = 128,
+	k_maximum_fake_lightprobes_per_structure_bsp = 128,
+};
 
 enum e_structure_precomputed_lighting_type : uint16
 {
