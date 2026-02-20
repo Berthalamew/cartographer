@@ -2,6 +2,19 @@
 
 /* constants */
 
+/* enums */
+
+enum e_map_memory_configuration
+{
+	_map_memory_configuration_none = 0,
+	_map_memory_configuration_multiplayer,
+	_map_memory_configuration_online_campaign,
+	_map_memory_configuration_online_campaign_splitscreen,
+	_map_memory_configuration_solo_campaign,
+	_map_memory_configuration_campaign_splitscreen,
+	k_map_memory_configuration_count,
+};
+
 /* prototypes */
 
 void main_game_apply_patches(void);
@@ -58,6 +71,14 @@ void main_game_launch(const char* map_name);
 void main_menu_launch(uint32 context);
 
 void main_menu_launch_force(void);
+
+bool map_memory_configuration_is_campaign(e_map_memory_configuration configuration);
+
+bool map_memory_configuration_is_campaign_splitscreen(e_map_memory_configuration configuration);
+
+bool map_memory_configuration_is_campaign_online(e_map_memory_configuration configuration);
+
+bool map_memory_configuration_is_campaign_offline(e_map_memory_configuration configuration);
 
 /* globals */
 
