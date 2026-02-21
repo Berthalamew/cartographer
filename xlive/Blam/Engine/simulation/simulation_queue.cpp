@@ -3,6 +3,7 @@
 
 #include "simulation_queue_global_events.h"
 
+#include "memory/bitstream.h"
 #include "networking/network_event.h"
 #include "networking/network_memory.h"
 
@@ -266,4 +267,151 @@ void c_simulation_queue::dispose()
 		clear();
 		m_initialized = false;
 	}
+}
+
+bool c_simulation_queue::decode(c_bitstream* bitstream)
+{
+	bool result = true;
+
+	ASSERT(bitstream);
+	//ASSERT(!m_initialized);	FIXME
+
+	initialize();
+	
+	const int32 count = bitstream->read_integer("queue-count", 12);
+	const int32 size = bitstream->read_integer("queue-size", 17);
+	
+	if (VALID_INDEX(count, k_simulation_queue_count_max))
+	{
+		if (VALID_INDEX(size, k_simulation_queue_size_max))
+		{
+			for (int32 i = 0; i < count; ++i)
+			{
+				const e_event_queue_type element_type = (e_event_queue_type)bitstream->read_integer("type", k_simulation_queue_type_encoded_size_in_bits);
+				const int32 element_size = bitstream->read_integer("size", 10);
+
+				s_simulation_queue_element* element = NULL;
+				if (VALID_INDEX(element_type, k_simulation_queue_element_type_count))
+				{
+					allocate(element_size, &element);
+					if (element)
+					{
+						element->type = element_type;
+						bitstream->read_raw_data("data", element->data, SIZEOF_BITS(element_size));
+						enqueue(element);
+					}
+					else
+					{
+						event(
+							_event_fatal,
+							"networking:simulation:queue: failed to allocate element %d/%d while decoding for queue type %d size %d",
+							i,
+							count,
+							element_type,
+							element_size
+						);
+						result = false;
+					}
+				}
+				else
+				{
+					event(
+						_event_error,
+						"networking:simulation:queue: bad element type %d during decode (size %d)",
+						element_type,
+						element_size
+					);
+					result = false;
+				}
+
+				// If error stop iterating through elements
+				if (!result)
+				{
+					break;
+				}
+			}
+
+			// Verify counts match
+			if (count != m_queued_count)
+			{
+				event(
+					_event_error,
+					"networking:simulation:queue: queue count mismatch during decode %d!=%d",
+					count,
+					m_queued_count
+				);
+				result = false;
+			}
+
+			// Verify sizes match
+			if (size != m_size)
+			{
+				event(
+					_event_error,
+					"networking:simulation:queue: size mismatch during decode %d!=%d",
+					size,
+					m_size
+				);
+				result = false;
+			}
+		}
+		else
+		{
+			event(_event_error, "networking:simulation:queue: bad queue size %d during decode", size);
+			result = false;
+		}
+	}
+	else
+	{
+		event(_event_error, "networking:simulation:queue: bad queue count %d during decode", count);
+		result = false;
+	}
+
+
+	return result;
+}
+
+void c_simulation_queue::encode(c_bitstream* bitstream)
+{
+	ASSERT(bitstream);
+	ASSERT(m_initialized);
+	ASSERT(m_allocated_count == m_queued_count);
+
+	bitstream->write_integer("queue-count", m_queued_count, 12);
+	bitstream->write_integer("queue-count", m_size, 17);
+
+	s_simulation_queue_element* element = NULL;
+	if (m_initialized && m_queued_count>0)
+	{
+		ASSERT(m_head);
+
+		//network_heap_verify_block(m_head);
+		element = m_head;
+	}
+
+	for (int32 element_index = 0; element; ++element_index)
+	{
+		ASSERT(element_index < m_queued_count);
+		ASSERT(element->type!=_simulation_queue_element_type_none);
+		ASSERT(VALID_INDEX(element->type, k_simulation_queue_element_type_count));
+		ASSERT(element->data_size > 0);
+
+		bitstream->write_integer("type", element->type, k_simulation_queue_type_encoded_size_in_bits);
+		bitstream->write_integer("size", element->data_size, 10);
+		bitstream->write_raw_data("data", element->data, SIZEOF_BITS(element->data_size));
+
+		s_simulation_queue_element* next = NULL;
+		if (m_initialized)
+		{
+			ASSERT(queued_count() > 0);
+			next = element->next;
+			if (element->next)
+			{
+				//network_heap_verify_block(element->next);
+			}
+		}
+		element = next;
+	}
+
+	return;
 }

@@ -373,8 +373,8 @@ void simulation_apply_patches(void)
 
 static void simulation_synchronous_game_patches(void)
 {
-	PatchCall(Memory::GetAddress(0x1AE002), synchronous_update_encode);
-	PatchCall(Memory::GetAddress(0x1ED08E), synchronous_update_encode);
-	PatchCall(Memory::GetAddress(0x1AE084), synchronous_update_decode);
-	PatchCall(Memory::GetAddress(0x1ED0A3), synchronous_update_decode);
+	PatchCall(Memory::GetAddress(0x1AE002), simulation_update_encode);
+	PatchCall(Memory::GetAddress(0x1ED08E), simulation_update_encode);
+	PatchCall(Memory::GetAddress(0x1AE084), simulation_update_decode);
+	PatchCall(Memory::GetAddress(0x1ED0A3), simulation_update_decode);
 }

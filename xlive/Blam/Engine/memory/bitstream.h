@@ -92,10 +92,17 @@ public:
 		return 8 * m_data_size_bytes - m_current_bit_position;
 	}
 
+	int32 get_current_bit_position(void) const
+	{
+		return m_current_bit_position;
+	}
+
 	int32 get_space_used_in_bytes() const
 	{
 		return (m_current_bit_position + 7) / 8;
 	}
+
+	
 
 	void write_string_wchar(const char* name, const void* string, int32 size_in_words);
 	void read_string_wchar(const char* name, void* string, int32 size_in_words);

@@ -211,6 +211,8 @@ public:
 	void enqueue(s_simulation_queue_element* element);
 
 	void clear();
-
 	void dispose();
+
+	bool decode(class c_bitstream* bitstream);
+	void encode(class c_bitstream* bitstream);
 };
