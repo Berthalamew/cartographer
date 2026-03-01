@@ -50,7 +50,8 @@ s_random_math* random_math_get_globals()
 	return *Memory::GetAddress<s_random_math**>(0x4A8280, 0x4D2500);
 }
 
-uint32 random_math_get_seed()
+uint32 get_random_seed(
+	void)
 {
 	return random_math_get_globals()->seed;
 }

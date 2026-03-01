@@ -52,12 +52,12 @@ void __cdecl simulation_update_encode(c_bitstream* packet, struct simulation_upd
 {
 	//INVOKE(0x1E0998, 0x0, synchronous_update_encode_internal, packet, update);
 
-	const int32 starting_pos = packet->get_current_bit_position();
+	const int32 starting_pos = packet->get_space_used_in_bits();
 
 	ASSERT(packet);
 	ASSERT(update);
 
-	packet->write_integer("update-number", update->simulation_time, SIZEOF_BITS(update->simulation_time));
+	packet->write_integer("update-number", update->update_number, SIZEOF_BITS(update->update_number));
 	packet->write_bool("simulation_in_progress", update->simulation_in_progress);		//adding missing simulation_in_progress
 	packet->write_integer("player-flags", update->player_action_mask, k_maximum_players);
 
@@ -88,10 +88,10 @@ void __cdecl simulation_update_encode(c_bitstream* packet, struct simulation_upd
 	}
 	
 	packet->write_bool("flush-gamestate", update->flush_gamestate);
-	packet->write_integer("verify-game-time", update->game_time_ticks, SIZEOF_BITS(update->game_time_ticks));
-	packet->write_integer("verify-random", update->random_seed, SIZEOF_BITS(update->random_seed));
+	packet->write_integer("verify-game-time", update->verify_game_time, SIZEOF_BITS(update->verify_game_time));
+	packet->write_integer("verify-random", update->verify_random_seed, SIZEOF_BITS(update->verify_random_seed));
 
-	const int32 pre_queues_encoded_size = (packet->get_current_bit_position()-starting_pos+ 7) / 8;
+	const int32 pre_queues_encoded_size = (7 - starting_pos + packet->get_space_used_in_bits()) / 8;
 	ASSERT(pre_queues_encoded_size > 0);
 
 	if (pre_queues_encoded_size > k_simulation_update_estimated_size)
@@ -111,18 +111,20 @@ void __cdecl simulation_update_encode(c_bitstream* packet, struct simulation_upd
 	return;
 }
 
-bool __cdecl simulation_update_decode(c_bitstream* packet, struct simulation_update* update)
+bool __cdecl simulation_update_decode(
+	c_bitstream* packet, 
+	struct simulation_update* update)
 {
 	//return INVOKE(0x1E0AA2, 0x0, synchronous_update_decode_internal, packet, update);
+	
+	bool result = true;
 
 	ASSERT(packet);
 	ASSERT(update);
 
-	bool result = true;
-	update->simulation_time = packet->read_integer("update-number", SIZEOF_BITS(update->simulation_time));
+	update->update_number = packet->read_integer("update-number", SIZEOF_BITS(update->update_number));
 	update->simulation_in_progress = packet->read_bool("simulation_in_progress"); 	//adding missing simulation_in_progress
 	update->player_action_mask = packet->read_integer("player-flags", k_maximum_players);
-
 	
 	for (int8 player_index = 0; player_index < k_maximum_players; ++player_index)
 	{
@@ -153,8 +155,8 @@ bool __cdecl simulation_update_decode(c_bitstream* packet, struct simulation_upd
 	}
 
 	update->flush_gamestate = packet->read_bool("flush-gamestate");
-	update->game_time_ticks = packet->read_integer("verify-game-time", SIZEOF_BITS(update->game_time_ticks));
-	update->random_seed = packet->read_integer("verify-random", SIZEOF_BITS(update->random_seed));
+	update->verify_game_time = packet->read_integer("verify-game-time", SIZEOF_BITS(update->verify_game_time));
+	update->verify_random_seed = packet->read_integer("verify-random", SIZEOF_BITS(update->verify_random_seed));
 
 	c_simulation_world* simulation_world = simulation_get_world();
 	
@@ -162,8 +164,8 @@ bool __cdecl simulation_update_decode(c_bitstream* packet, struct simulation_upd
 	result = result && simulation_world->queue_get(_simulation_queue_bookkeeping)->decode(packet);
 	result = result && simulation_world->queue_get(_simulation_queue)->decode(packet);
 	result = result && !packet->error_occurred();
-	result = result && update->game_time_ticks >= 0;
-	result = result && update->simulation_time >= 0;
+	result = result && update->verify_game_time >= 0;
+	result = result && update->update_number >= 0;
 
 	// If something went wrong dispose of the queues
 	if (!result)

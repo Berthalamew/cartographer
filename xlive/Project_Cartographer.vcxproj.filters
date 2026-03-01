@@ -485,7 +485,7 @@
     <ClCompile Include="H2MOD\Modules\SpecialEvents\Events\MapObjectPlacements\Halloween\Coagulation.cpp" />
     <ClCompile Include="H2MOD\Modules\SpecialEvents\Events\MapObjectPlacements\Halloween\Lockout.cpp" />
     <ClCompile Include="Blam\Engine\cache\cache_files_windows.cpp" />
-    <ClCompile Include="Blam\Engine\achievements\achievement_live_interface.cpp" />
+    <ClCompile Include="Blam\Engine\achievements\achievement_manager.cpp" />
     <ClCompile Include="Blam\Engine\cseries\cseries_windows_debug.cpp" />
     <ClCompile Include="Blam\Engine\cseries\profile.cpp" />
     <ClCompile Include="Blam\Engine\debug\menu\debug_menu_main.cpp" />
@@ -556,6 +556,8 @@
     <ClCompile Include="Blam\Engine\interface\screens\screen_postgame_statistics.cpp" />
     <ClCompile Include="Blam\Engine\physics\bsp3d.cpp" />
     <ClCompile Include="Blam\Engine\cache\xbox_sound_cache.cpp" />
+    <ClCompile Include="Blam\Engine\interface\screens\screen_pause_game.cpp" />
+    <ClCompile Include="Blam\Engine\interface\user_interface_objectives.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\miniupnpc\include\miniupnpc\codelength.h" />
@@ -1963,7 +1965,7 @@
     <ClInclude Include="Blam\Engine\networking\transport\transport_address.h" />
     <ClInclude Include="Blam\Engine\networking\transport\transport_security.h" />
     <ClInclude Include="Blam\Engine\cache\cache_files_windows.h" />
-    <ClInclude Include="Blam\Engine\achievements\achievement_live_interface.h" />
+    <ClInclude Include="Blam\Engine\achievements\achievement_manager.h" />
     <ClInclude Include="Blam\Engine\cseries\cseries_windows_debug.h" />
     <ClInclude Include="Blam\Engine\cseries\profile.h" />
     <ClInclude Include="Blam\Engine\debug\menu\debug_menu_main.h" />
@@ -2089,6 +2091,8 @@
     <ClInclude Include="Blam\Engine\interface\screens\screen_postgame_statistics.h" />
     <ClInclude Include="Blam\Engine\physics\bsp3d.h" />
     <ClInclude Include="Blam\Engine\cache\xbox_sound_cache.h" />
+    <ClInclude Include="Blam\Engine\interface\screens\screen_pause_game.h" />
+    <ClInclude Include="Blam\Engine\interface\user_interface_objectives.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resources\Resource.rc" />

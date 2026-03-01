@@ -92,14 +92,17 @@ public:
 		return 8 * m_data_size_bytes - m_current_bit_position;
 	}
 
-	int32 get_current_bit_position(void) const
+	int32 get_space_used_in_bits(
+		void) const
 	{
+		ASSERT(writing());
 		return m_current_bit_position;
 	}
 
-	int32 get_space_used_in_bytes() const
+	int32 get_space_used_in_bytes(
+		void) const
 	{
-		return (m_current_bit_position + 7) / 8;
+		return (get_space_used_in_bits() + 7) / 8;
 	}
 
 	

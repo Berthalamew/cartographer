@@ -21,8 +21,8 @@ void __cdecl sound_idle(void)
 	return;
 }
 
-void __cdecl sound_pause(bool a1)
+void __cdecl sound_pause(e_sound_pause_state new_state)
 {
-	INVOKE(0x2B579, 0x0, sound_pause, a1);
+	INVOKE(0x2B579, 0x0, sound_pause, new_state);
 	return;
 }

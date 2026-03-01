@@ -9,6 +9,7 @@
 #include "networking/logic/life_cycle_manager.h"
 #include "networking/session/network_session.h"
 #include "simulation/simulation.h"
+#include "simulation/simulation_world.h"
 
 #include "XLive/xnet/IpManagement/XnIp.h"
 

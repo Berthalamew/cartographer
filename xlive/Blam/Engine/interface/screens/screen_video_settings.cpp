@@ -141,8 +141,8 @@ void c_video_settings_list::update_list_items(c_list_item_widget* item, int32 sk
 			primary_text->set_text(k_vsync_header_string[language]);
 			secondary_string = H2Config_use_vsync ? _string_id_on : _string_id_off;
 
-			primary_text->set_change_color(g_can_use_vsync ? k_default_text_change_color : k_list_item_disabled_text_change_color);
-			secondary_text->set_change_color(g_can_use_vsync ? k_default_text_change_color : k_list_item_disabled_text_change_color);			
+			primary_text->set_change_color(g_can_use_vsync ? &k_default_text_change_color : &k_list_item_disabled_text_change_color);
+			secondary_text->set_change_color(g_can_use_vsync ? &k_default_text_change_color : &k_list_item_disabled_text_change_color);			
 			if (hilite_bitmap)
 			{
 				hilite_bitmap->verify_and_change_sprite(g_can_use_vsync ? _bitmap_hilite_sprite_light : _bitmap_hilite_sprite_dark);

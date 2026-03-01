@@ -141,6 +141,8 @@ public:
 
 	void initialize_world(c_simulation_type_collection* type_collection, class c_simulation_watcher* watcher, c_simulation_distributed_world* distributed_world);
 	
+	bool claim_authority_gameworld(void);
+
 	void delete_all_actors(void);
 
 	void update_queue_reset(void);

@@ -242,6 +242,12 @@ void c_simulation_world::initialize_world(c_simulation_type_collection* type_col
 	return;
 }
 
+bool c_simulation_world::claim_authority_gameworld(
+	void)
+{
+	return INVOKE_TYPE(0x1DE3D0, 0x1C5890, bool(__thiscall*)(c_simulation_world*), this);
+}
+
 void __declspec(naked) jmp_initialize_world(void)
 {
 	CLASS_HOOK_JMP(c_simulation_world__initialize_world, c_simulation_world::initialize_world);

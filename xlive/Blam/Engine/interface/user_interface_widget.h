@@ -41,7 +41,7 @@ struct s_animation_transform
 	int16 direction;
 	uint16 m_flags;
 	int32 intro_delay_ms;
-	int32 looping_stlye;
+	int32 looping_style;
 	int32 field_18;
 	int32 last_frame_time;
 	int32 period_milliseconds;
@@ -83,62 +83,62 @@ protected:
 	bool m_visible;
 	bool m_can_handle_events;
 
-	void destroy_recursive();
+	void destroy_recursive(void);
 	void initialize_animation(s_animation_transform* animation);
 
 public:
 	c_user_interface_widget(e_user_interface_widget_type widget_type, uint16 user_flags);
 
-	e_controller_index get_any_responding_controller() const;
-	int16 get_animation_type() const;
-	e_user_interface_widget_type get_type() const;
-	c_user_interface_widget* get_next() const;
-	c_user_interface_widget* get_previous() const;
-	c_user_interface_widget* get_parent() const;
-	c_user_interface_widget* get_children() const;
+	e_controller_index get_any_responding_controller(void) const;
+	int16 get_animation_type(void) const;
+	e_user_interface_widget_type get_type(void) const;
+	c_user_interface_widget* get_next(void) const;
+	c_user_interface_widget* get_previous(void) const;
+	c_user_interface_widget* get_parent(void) const;
+	c_user_interface_widget* get_children(void) const;
 	c_user_interface_widget* try_find_child(e_user_interface_widget_type type, uint32 idx, bool recursive_search);
 	class c_text_widget* try_find_text_widget(uint32 idx);
 	class c_hud_widget* try_find_hud_widget(uint32 idx);
 	class c_bitmap_widget* try_find_bitmap_widget(uint32 idx);
 	class c_player_widget* try_find_player_widget(uint32 idx);
 	class c_model_widget* try_find_model_widget(uint32 idx);
-	class c_screen_widget* get_parent_screen();
+	class c_screen_widget* get_parent_screen(void);
 
 	void set_visible(bool visible);
 	void set_child_visible(e_user_interface_widget_type type, uint32 idx,  bool visible);
 	void set_allocated(bool allocated);
 	void add_new_child(c_user_interface_widget* child);
 	void get_bounds(rectangle2d* bounds) const;
-	void set_bounds(rectangle2d* bounds);
+	void set_bounds(const rectangle2d* bounds);
 	void set_controller_mask(uint32 user_mask);
 	void set_controller_mask_recursive(uint32 user_mask);
 	void start_widget_animation(int32 type);
-	void set_change_color(const real_rgb_color new_color);
+	void set_change_color(const real_rgb_color* new_color);
 
 	
 	// c_user_interface_widget virtual functions
 
-	virtual ~c_user_interface_widget();
-	virtual void setup_children();
-	virtual void pre_destroy();
-	virtual void update();
+	virtual ~c_user_interface_widget(void);
+	virtual void setup_children(void);
+	virtual void pre_destroy(void);
+	virtual void update(void);
 	virtual void render_widget(rectangle2d* viewport_bounds);
 	virtual void* get_mouse_region(rectangle2d* mouse_region_out);
 	virtual int32 initialize_child_animations(s_animation_transform* a2);
 	virtual int32 get_intro_delay();
 	virtual void* get_unprojected_bounds(rectangle2d* unprojected_bounds);
 	virtual void sub_612A7C(c_user_interface_widget* child);
-	virtual c_user_interface_widget* sub_612ABC();
-	virtual c_user_interface_widget* sub_612BCA();
+	virtual c_user_interface_widget* sub_612ABC(void);
+	virtual c_user_interface_widget* sub_612BCA(void);
 	virtual bool handle_event(struct s_event_record* event);
-	virtual e_user_interface_channel_type get_parent_channel();
-	virtual e_user_interface_render_window get_parent_render_window();
+	virtual e_user_interface_channel_type get_parent_channel(void);
+	virtual e_user_interface_render_window get_parent_render_window(void);
 	virtual void construct_animation_on_region_enter(int32 a1);
 	virtual void construct_animation_on_region_leave(int32 a1);
 	virtual c_user_interface_widget* sub_6121F6(rectangle2d* point);
-	virtual bool can_interact();
-	virtual class c_user_interface_text* get_interface() = 0;
-	virtual bool sub_6114B9();
+	virtual bool can_interact(void);
+	virtual class c_user_interface_text* get_interface(void) = 0;
+	virtual bool sub_6114B9(void);
 };
 ASSERT_STRUCT_SIZE(c_user_interface_widget, 0x70);
 

@@ -10,9 +10,11 @@ void main_halt_and_display_errors(void);
 
 void main_loop(void);
 
-void main_reset_map(void);
-
 void main_quit(void);
+void main_reset_map(void);
+void main_revert_map(void);
+void main_revert_map_scripting(void);
+void main_save_and_exit(void);
 
 void __cdecl main_switch_structure_bsp(void);
 

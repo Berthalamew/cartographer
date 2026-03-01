@@ -1,6 +1,5 @@
 #pragma once
 #include "user_interface_controller.h"
-#include "user_interface_widget.h"
 #include "user_interface_widget_text.h"
 #include "signal_slot.h"
 
@@ -24,7 +23,7 @@ enum
 // Note : this should be used instead of the one inside tag definitions
 enum e_user_interface_screen_id : uint32
 {
-	_screen_none = 0xFFFFFFFF,
+	_screen_none = (uint32)NONE,
 	_screen_test_1 = 0x0,
 	_screen_test_2 = 0x1,
 	_screen_test_3 = 0x2,
@@ -353,7 +352,7 @@ enum e_special_widgets_type
 struct s_interface_expected_pane
 {
 	class c_button_widget** expected_buttons;
-	c_list_widget* expected_list;
+	class c_list_widget* expected_list;
 	uint32 buttons_count;
 	bool list_exists;
 };
@@ -401,9 +400,9 @@ public:
 	
 
 	e_user_interface_screen_id get_id() const;
-	c_text_widget* get_screen_header_text();
-	c_text_widget* get_screen_button_key_text();
-	c_text_widget* try_find_screen_text(uint32 idx);
+	class c_text_widget* get_screen_header_text();
+	class c_text_widget* get_screen_button_key_text();
+	class c_text_widget* try_find_screen_text(uint32 idx);
 	void verify_and_load_from_layout(datum widget_tag, s_interface_expected_screen_layout* expected_layout);
 	void apply_new_representations_to_players(class c_player_widget_representation* representations, int32 player_count);
 	void initialize_button_keys_text(bool add_new_child);
@@ -415,7 +414,7 @@ public:
 	// c_screen_widget virtual functions
 
 	virtual ~c_screen_widget() = default;
-	virtual bool handle_event(s_event_record* event) override;
+	virtual bool handle_event(struct s_event_record* event) override;
 	virtual c_user_interface_text* get_interface() override;
 	virtual bool sub_6114B9() override;
 
@@ -427,9 +426,9 @@ public:
 	virtual void post_initialize_button_keys();
 	virtual c_user_interface_widget* sub_6102C5();
 	virtual uint8 sub_6103D6();
-	virtual int32 sub_60F1F4(s_event_record* a2);
-	virtual uint8 sub_60EFC1(s_event_record* event);
-	virtual int32 sub_60F081(s_event_record* a2);
+	virtual int32 sub_60F1F4(struct s_event_record* a2);
+	virtual uint8 sub_60EFC1(struct s_event_record* event);
+	virtual int32 sub_60F081(struct s_event_record* a2);
 	virtual e_user_interface_controller_component get_component_from_button_key(int32 special_widget_index);
 	virtual bool sub_40AD53(int32 a2);
 	virtual e_user_interface_channel_type get_channel();
@@ -459,13 +458,9 @@ ASSERT_STRUCT_SIZE(c_screen_widget, 0xA5C);
 
 class c_screen_with_menu : public c_screen_widget
 {
-protected:
-	c_list_widget* m_child_list;
-
 public:
-
-	c_screen_with_menu(e_user_interface_screen_id menu_id, e_user_interface_channel_type channel_type, e_user_interface_render_window window_index, uint16 user_flags , c_list_widget* list);
-	c_text_widget* get_screen_subheader_text();
+	c_screen_with_menu(e_user_interface_screen_id menu_id, e_user_interface_channel_type channel_type, e_user_interface_render_window window_index, uint16 user_flags , class c_list_widget* list);
+	class c_text_widget* get_screen_subheader_text();
 
 
 	// c_screen_with_menu virtual functions
@@ -475,6 +470,9 @@ public:
 	virtual bool handle_event(s_event_record* event) override;
 	virtual c_user_interface_widget* sub_6121F6(rectangle2d* point) override;
 	virtual void initialize(s_screen_parameters* parameters) override;
+
+protected:
+	class c_list_widget* m_child_list;
 
 private:
 	typedef c_screen_with_menu class_type;

@@ -15,7 +15,7 @@ enum
 
 struct simulation_update
 {
-	int32 simulation_time;
+	int32 update_number;
 	bool simulation_in_progress;
 	uint32 player_action_mask;
 	int32 field_C;
@@ -28,8 +28,8 @@ struct simulation_update
 	int32 player_update_count;
 	simulation_player_update player_updates[k_maximum_simulation_player_updates];
 	bool flush_gamestate;
-	int32 game_time_ticks;
-	uint32 random_seed;
+	int32 verify_game_time;
+	uint32 verify_random_seed;
 };
 ASSERT_STRUCT_SIZE(struct simulation_update, 0x3BD8);
 

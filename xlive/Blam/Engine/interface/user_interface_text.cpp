@@ -4,82 +4,132 @@
 #include "user_interface_utilities.h"
 
 #include "interface/hud.h"
-#include "input/input_constants.h"
 #include "input/input_windows.h"
 #include "main/game_preferences.h"
 
-c_user_interface_text::c_user_interface_text()
+/* prototypes */
+
+static void __cdecl ui_get_text_bounds_and_position_hook(int32 a1, wchar_t* string, int32 a3, int32 a4, real32 scale);
+
+/* globals */
+
+// Separated scale for the text labels (carto addition)
+static real32 g_ui_text_label_scaling = 0.0f;
+
+/* public code */
+
+void user_interface_text_apply_hooks(
+	void)
 {
-	this->m_custom_font_type = 0;
-	this->m_text_is_pulsating = 0;
-	this->field_16 = 1;
-	this->field_18 = NONE;
-	this->m_text_justification = 2;
-	this->field_20 = 1.0;
-	this->field_24 = NONE;
-	this->field_38 = 0;
-	this->field_3C = NONE;
-	this->text_length = 0;
-	this->m_ui_start_time = 0;
-	this->m_text_color.blue = 1.0;
-	this->m_text_color.green = 1.0;
-	this->m_text_color.red = 1.0;
+	// Replace the ui_scale_factor with our own scaling for text labels
+	WritePointer(Memory::GetAddress(0x2305AC) + 4, &g_ui_text_label_scaling);
+	WritePointer(Memory::GetAddress(0x23066A) + 4, &g_ui_text_label_scaling);
+
+	PatchCall(Memory::GetAddress(0x22CFFD), ui_get_text_bounds_and_position_hook);
+	PatchCall(Memory::GetAddress(0x22FCDC), user_interface_get_key_character);
+	return;
 }
 
-const real_rgb_color* c_user_interface_text::get_color(void) const
+c_user_interface_text::c_user_interface_text(
+	void)
 {
-	return &this->m_text_color;
+	m_custom_font_type = 0;
+	m_text_is_pulsating = 0;
+	field_16 = 1;
+	field_18 = NONE;
+	m_text_justification = 2;
+	field_20 = 1.f;
+	field_24 = NONE;
+	m_tab_stop_count = 0;
+	field_3C = NONE;
+	text_length = 0;
+	m_ui_start_time = 0;
+	m_text_color.blue = 1.f;
+	m_text_color.green = 1.f;
+	m_text_color.red = 1.f;
+	return;
 }
 
-int32 c_user_interface_text::get_font(void) const
+const real_rgb_color* c_user_interface_text::get_color(
+	void) const
 {
-	return this->m_custom_font_type;
+	return &m_text_color;
 }
 
-void c_user_interface_text::set_font(int32 font_type)
+int32 c_user_interface_text::get_font(
+	void) const
 {
-	this->m_custom_font_type = font_type;
+	return m_custom_font_type;
 }
 
-void c_user_interface_text::set_pulsating(bool pulsating)
+void c_user_interface_text::set_font(
+	int32 font_type)
 {
-	this->m_text_is_pulsating = pulsating;
+	m_custom_font_type = font_type;
+	return;
 }
 
-void c_user_interface_text::set_color(real_rgb_color* color)
+void c_user_interface_text::set_pulsating(
+	bool pulsating)
 {
-	this->m_text_color = *color;
+	m_text_is_pulsating = pulsating;
+	return;
 }
 
-void c_user_interface_text::set_color(const real_rgb_color* color)
+void c_user_interface_text::set_color(
+	real_rgb_color* color)
 {
-	this->m_text_color = *color;
+	m_text_color = *color;
+	return;
 }
 
-bool c_user_interface_text::is_private_use_character(wchar_t character)
+void c_user_interface_text::set_color(
+	const real_rgb_color* color)
+{
+	m_text_color = *color;
+	return;
+}
+
+void c_user_interface_text::set_tab_stop_count(
+	const int16* tab_stops,
+	int32 tab_stop_count)
+{
+	ASSERT(tab_stop_count <= k_ui_text_max_tab_stops);
+	csmemcpy(m_tab_stops, tab_stops, sizeof(*m_tab_stops)*tab_stop_count);
+	m_tab_stop_count = tab_stop_count;
+	return;
+}
+
+bool c_user_interface_text::is_private_use_character(
+	wchar_t character)
 {
 	return IN_RANGE(character, k_first_unicode_private_use_character, k_last_unicode_private_use_character);
 }
 
-// Seperated scale for the text labels (carto addition)
-float ui_text_label_scaling = 0.0f;
-
-float get_ui_text_label_scale()
+real32 get_ui_text_label_scale(
+	void)
 {
-	return ui_text_label_scaling;
+	return g_ui_text_label_scaling;
 }
 
-void set_ui_text_label_scale(float scale)
+void set_ui_text_label_scale(
+	real32 scale)
 {
-	ui_text_label_scaling = scale;
+	g_ui_text_label_scaling = scale;
+	return;
 }
 
-bool __cdecl user_interface_parse_string(wchar_t* string, size_t max_length, char a3)
+bool __cdecl user_interface_parse_string(
+	wchar_t* string, 
+	size_t max_length,
+	char a3)
 {
 	return INVOKE(0x22F712, 0x0, user_interface_parse_string, string, max_length, a3);
 }
 
-void user_interface_get_key_character(e_input_key_code key_code, c_static_wchar_string<512>* string)
+void user_interface_get_key_character(
+	e_input_key_code key_code, 
+	c_maximum_interface_text *string)
 {
 	c_maximum_interface_text src;
 
@@ -196,20 +246,13 @@ void user_interface_get_key_character(e_input_key_code key_code, c_static_wchar_
 }
 
 // this seems to compute the required space to display the text?
-void __cdecl ui_get_text_bounds_and_position_hook(int a1, wchar_t* string, int a3, int a4, float scale)
+static void __cdecl ui_get_text_bounds_and_position_hook(
+	int32 a1,
+	wchar_t* string,
+	int32 a3,
+	int32 a4,
+	real32 scale)
 {
-	typedef void(__cdecl* ui_get_text_size_t)(int, wchar_t*, int, int, float);
-	auto p_ui_get_text_size = Memory::GetAddress<ui_get_text_size_t>(0x99D97);
-
-	p_ui_get_text_size(a1, string, a3, a4, *get_secondary_hud_scale());
-}
-
-void user_interface_text_apply_hooks()
-{
-	// Replace the ui_scale_factor with our own scaling for text labels
-	WritePointer(Memory::GetAddress(0x2305AC) + 4, &ui_text_label_scaling);
-	WritePointer(Memory::GetAddress(0x23066A) + 4, &ui_text_label_scaling);
-
-	PatchCall(Memory::GetAddress(0x22CFFD), ui_get_text_bounds_and_position_hook);
-	PatchCall(Memory::GetAddress(0x22FCDC), user_interface_get_key_character);
+	INVOKE(0x99D97, 0x0, ui_get_text_bounds_and_position_hook, a1, string, a3, a4, *get_secondary_hud_scale());
+	return;
 }

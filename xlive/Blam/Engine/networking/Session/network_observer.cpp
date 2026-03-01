@@ -166,9 +166,15 @@ bool c_network_observer::initialize_observer(c_network_link* link, c_network_mes
 	return INVOKE_TYPE(0x1BEC80, 0x1B8B5A, bool(__thiscall*)(c_network_observer*, c_network_link*, c_network_message_type_collection*, c_network_message_gateway*, s_network_observer_configuration*), this, link, message_types, message_gateway, configuration);
 }
 
-void c_network_observer::send_message(int32 session_index, int32 observer_index, bool send_out_of_band, int32 type, int32 size, void* data)
+void c_network_observer::send_message(
+	e_network_observer_owner session_index,
+	int32 observer_index,
+	bool send_out_of_band,
+	int32 type,
+	int32 size,
+	const void* data)
 {
-	typedef void(__thiscall* observer_channel_send_message_t)(c_network_observer*, int32, int32, bool, int32, int32, void*);
+	typedef void(__thiscall* observer_channel_send_message_t)(c_network_observer*, int32, int32, bool, int32, int32, const void*);
 	INVOKE_TYPE(0x1BED40, 0x1B8C1A, observer_channel_send_message_t, this, session_index, observer_index, send_out_of_band, type, size, data);
 }
 

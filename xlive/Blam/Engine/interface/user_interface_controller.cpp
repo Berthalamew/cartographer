@@ -432,16 +432,12 @@ static void __cdecl user_interface_controller_process_events(uint32 elapsed_time
 static bool user_inteface_controller_has_removed_screen_active(void)
 {
 	//h2v only checked for _ui_error_controller_removed
-	if (user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller_removed)
-		|| user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller1_removed)
-		|| user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller2_removed)
-		|| user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller3_removed)
-		|| user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller4_removed))
-	{
-
-		return true;
-	}
-	return false;
+	return 
+		user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller_removed) ||
+		user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller1_removed) ||
+		user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller2_removed) ||
+		user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller3_removed) ||
+		user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller4_removed);
 }
 
 static void user_interface_controller_update_disconnect(void)
@@ -549,7 +545,7 @@ static void user_interface_controller_removed_handler(void)
 		if (scnr && scnr->type == _scenario_type_solo && !game_time_get_paused())
 		{
 			game_time_set_paused(true);
-			sound_pause(false);
+			sound_pause(_sound_pause_state_pausing);
 		}
 	}
 	return;

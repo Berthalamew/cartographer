@@ -7,6 +7,8 @@
 #include "user_interface_widget_text.h"
 #include "user_interface_widget_window.h"
 
+/* public code */
+
 c_user_interface_widget::c_user_interface_widget(e_user_interface_widget_type widget_type, uint16 user_flags)
 {
 	//INVOKE_TYPE(0x211D81, 0x0, void(__thiscall*)(c_user_interface_widget*, e_user_interface_widget_type, __int16), this, widget_type, user_flags);
@@ -39,7 +41,7 @@ c_user_interface_widget::c_user_interface_widget(e_user_interface_widget_type wi
 	csmemset(&animation, 0, sizeof(animation));
 	animation.field_0 = NONE;
 	animation.direction = 1;
-	animation.looping_stlye = 0;
+	animation.looping_style = 0;
 	this->initialize_animation(&animation);
 }
 
@@ -49,19 +51,30 @@ void c_user_interface_widget::initialize_animation(s_animation_transform* animat
 	INVOKE_TYPE(0x2115FE, 0x0, void(__thiscall*)(c_user_interface_widget*, s_animation_transform*), this, animation);
 }
 
-
-/* public methods */
-
-e_controller_index c_user_interface_widget::get_any_responding_controller() const
+e_controller_index c_user_interface_widget::get_any_responding_controller(
+	void) const
 {
+	e_controller_index result;
 	if (TEST_FLAG(m_controllers_mask, _controller_index_0))
-		return _controller_index_0;
-	if (TEST_FLAG(m_controllers_mask, _controller_index_1))
-		return _controller_index_1;
-	if (TEST_FLAG(m_controllers_mask, _controller_index_2))
-		return _controller_index_2;
-	if (TEST_FLAG(m_controllers_mask, _controller_index_3))
-		return _controller_index_3;
+	{
+		result = _controller_index_0;
+	}
+	else if (TEST_FLAG(m_controllers_mask, _controller_index_1))
+	{
+		result = _controller_index_1;
+	}
+	else if (TEST_FLAG(m_controllers_mask, _controller_index_2))
+	{
+		result = _controller_index_2;
+	}
+	else if (TEST_FLAG(m_controllers_mask, _controller_index_3))
+	{
+		result = _controller_index_3;
+	}
+	else
+	{
+		result = k_no_controller;
+	}
 
 	return k_no_controller;
 }
@@ -133,7 +146,8 @@ c_screen_widget* c_user_interface_widget::get_parent_screen()
 
 void c_user_interface_widget::set_visible(bool visible)
 {
-	this->m_visible = visible;
+	m_visible = visible;
+	return;
 }
 
 void c_user_interface_widget::set_child_visible(e_user_interface_widget_type type, uint32 idx, bool visible)
@@ -159,17 +173,16 @@ void c_user_interface_widget::get_bounds(rectangle2d* bounds) const
 {
 	if (bounds)
 	{
-		*bounds = this->m_bounds;
+		*bounds = m_bounds;
 	}
+	return;
 }
 
-void c_user_interface_widget::set_bounds(rectangle2d* bounds)
+void c_user_interface_widget::set_bounds(const rectangle2d* bounds)
 {
 	//return INVOKE_TYPE(0x2116D2, 0x0, void(__thiscall*)(c_user_interface_widget*, rectangle2d*), this, bounds);
-	this->m_bounds.top = bounds->top;
-	this->m_bounds.left = bounds->left;
-	this->m_bounds.bottom = bounds->bottom;
-	this->m_bounds.right = bounds->right;
+	m_bounds = *bounds;
+	return;
 }
 
 void c_user_interface_widget::set_controller_mask(uint32 user_mask)
@@ -193,9 +206,10 @@ void c_user_interface_widget::start_widget_animation(int32 type)
 	INVOKE_TYPE(0x212604, 0x0, void(__thiscall*)(c_user_interface_widget*, int32), this, type);
 }
 
-void c_user_interface_widget::set_change_color(const real_rgb_color new_color)
+void c_user_interface_widget::set_change_color(const real_rgb_color *new_color)
 {
-	m_widget_color = new_color;
+	m_widget_color = *new_color;
+	return;
 }
 
 void c_user_interface_widget::destroy_recursive()

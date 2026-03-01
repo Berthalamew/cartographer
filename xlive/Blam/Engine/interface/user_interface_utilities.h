@@ -1,9 +1,5 @@
 #pragma once
 
-/* forward declarations */
-
-enum e_user_interface_screen_id : uint32;
-
 /* prototypes */
 
 void user_interface_utilities_apply_patches(void);

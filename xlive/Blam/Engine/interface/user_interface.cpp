@@ -407,22 +407,27 @@ static void ui_test_error_code(e_ui_error_types error_id, bool use_cancel, bool 
 
 /* public code */
 
-bool __cdecl user_interface_automation_is_active(void)
+bool __cdecl user_interface_automation_is_active(
+	void)
 {
 	return false;
 }
 
-uint32 __cdecl user_interface_milliseconds(void)
+uint32 __cdecl user_interface_milliseconds(
+	void)
 {
 	return INVOKE(0x2096AE, 0x0, user_interface_milliseconds);
 }
 
-c_user_interface_channel* __fastcall user_interface_get_channel(e_user_interface_render_window window_index, e_user_interface_channel_type channel_index)
+c_user_interface_channel* __fastcall user_interface_get_channel(
+	e_user_interface_render_window window_index,
+	e_user_interface_channel_type channel_index)
 {
 	return INVOKE(0x209957, 0x0, user_interface_get_channel, window_index, channel_index);
 }
 
-bool __cdecl user_interface_error_display_allowed(void)
+bool __cdecl user_interface_error_display_allowed(
+	void)
 {
 	//return INVOKE(0x21D441, 0x0, user_interface_error_display_allowed);
 
@@ -432,78 +437,117 @@ bool __cdecl user_interface_error_display_allowed(void)
 	return result;
 }
 
-bool __cdecl user_interface_has_responding_controller(int32 user_index)
+bool __cdecl user_interface_has_responding_controller(
+	int32 user_index)
 {
 	return INVOKE(0x20A20C, 0x0, user_interface_has_responding_controller, user_index);
 }
 
-bool __cdecl user_interface_channel_is_busy(e_user_interface_channel_type channel_type)
+bool __cdecl user_interface_channel_is_busy(
+	e_user_interface_channel_type channel_type)
 {
 	return INVOKE(0x20A540, 0x0, user_interface_channel_is_busy, channel_type);
 }
 
-bool __cdecl user_interface_in_screen(e_user_interface_channel_type channel_type, e_user_interface_render_window window_index, e_user_interface_screen_id screen_id)
+bool __cdecl user_interface_in_screen(
+	e_user_interface_channel_type channel_type,
+	e_user_interface_render_window window_index,
+	e_user_interface_screen_id screen_id)
 {
 	return INVOKE(0x20BAAA, 0x0, user_interface_in_screen, channel_type, window_index, screen_id);
 }
 
-bool __cdecl user_interface_error_screen_is_active(e_user_interface_channel_type channel_index, e_user_interface_render_window window_index, e_ui_error_types error_code)
+bool __cdecl user_interface_error_screen_is_active(
+	e_user_interface_channel_type channel_index,
+	e_user_interface_render_window window_index,
+	e_ui_error_types error_code)
 {
 	return INVOKE(0x20A77D, 0x0, user_interface_error_screen_is_active, channel_index, window_index, error_code);
 }
 
-void __cdecl screen_error_ok_dialog_show(e_user_interface_channel_type channel_type, e_ui_error_types ui_error_index, e_user_interface_render_window window_index, int16 user_flags, void* ok_callback, void* fallback)
+void __cdecl screen_error_ok_dialog_show(
+	e_user_interface_channel_type channel_type,
+	e_ui_error_types ui_error_index,
+	e_user_interface_render_window window_index,
+	int16 user_flags,
+	void* ok_callback,
+	void* fallback)
 {
 	INVOKE(0x20E1D8, 0x0, screen_error_ok_dialog_show, channel_type, ui_error_index, window_index, user_flags, ok_callback, fallback);
 	return;
 }
 
-void __cdecl screen_error_ok_dialog_with_custom_text(e_user_interface_channel_type channel_type, e_ui_error_types ui_error_index, e_user_interface_render_window window_index, int16 user_flags, void* ok_callback, void* fallback, const wchar_t* custom_title, const wchar_t* custom_body)
+void __cdecl screen_error_ok_dialog_with_custom_text(
+	e_user_interface_channel_type channel_type,
+	e_ui_error_types ui_error_index,
+	e_user_interface_render_window window_index,
+	int16 user_flags,
+	void* ok_callback,
+	void* fallback,
+	const wchar_t* custom_title,
+	const wchar_t* custom_body)
 {
 	return INVOKE(0x20E1DA, 0x0, screen_error_ok_dialog_with_custom_text, channel_type, ui_error_index, window_index, user_flags, ok_callback, fallback, custom_title, custom_body);
 }
 
-void __cdecl user_interface_error_ok_cancel_dialog_show_confirmation(e_user_interface_channel_type channel_type, e_user_interface_render_window window_index, int16 user_flags, void* ok_callback_handle, e_ui_error_types error_type)
+void __cdecl user_interface_error_ok_cancel_dialog_show_confirmation(
+	e_user_interface_channel_type channel_type,
+	e_user_interface_render_window window_index,
+	int16 user_flags,
+	void* ok_callback_handle,
+	e_ui_error_types error_type)
 {
 	INVOKE(0x20E3BB, 0x0, user_interface_error_ok_cancel_dialog_show_confirmation, channel_type, window_index, user_flags, ok_callback_handle, error_type);
 	return;
 }
 
-void __cdecl user_interface_back_out_from_channel(e_user_interface_channel_type channel_type, e_user_interface_render_window window_index)
+void __cdecl user_interface_back_out_from_channel(
+	e_user_interface_channel_type channel_type,
+	e_user_interface_render_window window_index)
 {
 	INVOKE(0x2096DA, 0x0, user_interface_back_out_from_channel, channel_type, window_index);
 	return;
 }
 
-bool __cdecl user_interface_back_out_from_channel_by_id(e_user_interface_channel_type channel_type, e_user_interface_render_window window_index, e_user_interface_screen_id id)
+bool __cdecl user_interface_back_out_from_channel_by_id(
+	e_user_interface_channel_type channel_type,
+	e_user_interface_render_window window_index,
+	e_user_interface_screen_id id)
 {
 	return INVOKE(0x209850, 0x0, user_interface_back_out_from_channel_by_id, channel_type, window_index, id);
 }
 
-int32 __cdecl user_interface_get_screen_tag_index_by_id(e_user_interface_screen_id id)
+int32 __cdecl user_interface_get_screen_tag_index_by_id(
+	e_user_interface_screen_id id)
 {
 	return INVOKE(0x20C701, 0x0, user_interface_get_screen_tag_index_by_id, id);
 }
 
-void __cdecl user_interface_enter_game_shell(int32 context)
+void __cdecl user_interface_enter_game_shell(
+	int32 context)
 {
 	INVOKE(0x20CE70, 0x0, user_interface_enter_game_shell, context);
 	return;
 }
 
-void __cdecl render_menu_user_interface(int32 controller_index, e_user_interface_render_window render_window, rectangle2d* out_rect2d)
+void __cdecl render_menu_user_interface(
+	int32 controller_index,
+	e_user_interface_render_window render_window,
+	rectangle2d* out_rect2d)
 {
 	INVOKE(0x20B697, 0x0, render_menu_user_interface, controller_index, render_window, out_rect2d);
 	return;
 }
 
-void __cdecl user_interface_return_to_mainmenu(bool a1)
+void __cdecl user_interface_return_to_mainmenu(
+	bool a1)
 {
 	INVOKE(0x20A87E, 0x0, user_interface_return_to_mainmenu, a1);
 	return;
 }
 
-void __cdecl user_interface_update(real32 dt)
+void __cdecl user_interface_update(
+	real32 dt)
 {
 	static real32 user_interface_precise_accumulator_msec = 0.f;
 	user_interface_precise_accumulator_msec += (dt * 1000.f) - floor(dt * 1000.f);
@@ -520,43 +564,50 @@ void __cdecl user_interface_update(real32 dt)
 	return;
 }
 
-uint32 user_interface_set_context_presence(uint32 game_mode)
+uint32 user_interface_set_context_presence(
+	uint32 game_mode)
 {
 	return XUserSetContext(0, X_CONTEXT_PRESENCE, game_mode);
 }
 
 #ifdef UI_DEBUG
-void user_interface_debug_load_main_menu(void)
+void user_interface_debug_load_main_menu(
+	void)
 {
 	user_interface_enter_game_shell(0);
 	return;
 }
 
-void user_interface_debug_text_bounds(bool value)
+void user_interface_debug_text_bounds(
+	bool value)
 {
 	*Memory::GetAddress<bool*>(0x977370) = value;
 	return;
 }
 
-void debug_render_title_safe_bounds(bool value)
+void debug_render_title_safe_bounds(
+	bool value)
 {
 	user_interface_globals_get()->render_title_safe_bounds = value;
 	return;
 }
 
-void set_debug_frame_element_bounds(bool value)
+void set_debug_frame_element_bounds(
+	bool value)
 {
 	user_interface_globals_get()->render_element_bounds = value;
 	return;
 }
 
-void user_interface_test_screen(const char* screen)
+void user_interface_test_screen(
+	const char* screen)
 {
 	// TODO: implement
 	return;
 }
 
-void user_interface_test_transition_out_console_screen(void)
+void user_interface_test_transition_out_console_screen(
+	void)
 {
 	if (user_interface_globals_get()->gameshell_channel[_window_4].active_or_incoming_screen_exists())
 		user_interface_globals_get()->gameshell_channel[_window_4].transition_out();
@@ -566,13 +617,15 @@ void user_interface_test_transition_out_console_screen(void)
 	return;
 }
 
-void set_debug_show_screen_tag_path(bool value)
+void set_debug_show_screen_tag_path(
+	bool value)
 {
 	user_interface_globals_get()->render_screen_tag_path = value;
 	return;
 }
 
-void user_interface_show_current_screen_tag(const char* path)
+void user_interface_show_current_screen_tag(
+	const char* path)
 {
 	char destination[128];
 	csstrncpy(destination, path, NUMBEROF(destination));
@@ -642,98 +695,122 @@ void user_interface_show_current_screen_tag(const char* path)
 	return;
 }
 
-void debug_set_ui_beta(bool value)
+void debug_set_ui_beta(
+	bool value)
 {
 	user_interface_globals_get()->build_is_beta = value;
 	return;
 }
 
-void user_interface_test_error_ok(int16 id)
+void user_interface_test_error_ok(
+	int16 id)
 {
 	ui_test_error_code((e_ui_error_types)id, false, false);
+	return;
 }
 
-void user_interface_test_error_ok_cancel(int16 id)
+void user_interface_test_error_ok_cancel(
+	int16 id)
 {
 	ui_test_error_code((e_ui_error_types)id, true, false);
+	return;
 }
-void user_interface_test_confirmation(int16 id)
+void user_interface_test_confirmation(
+	int16 id)
 {
 	ui_test_error_code((e_ui_error_types)id, false, true);
+	return;
 }
 #endif
 
-
-bool __cdecl user_interface_globals_is_beta_build()
+bool __cdecl user_interface_globals_is_beta_build(
+	void)
 {
 	return INVOKE(0x209ED8, 0x0, user_interface_globals_is_beta_build);
 }
 
-int32 __cdecl user_interface_globals_get_game_difficulty()
+int32 __cdecl user_interface_globals_get_game_difficulty(
+	void)
 {
 	return INVOKE(0x209E98, 0x0, user_interface_globals_get_game_difficulty);
 }
 
-int32 __cdecl user_interface_globals_get_edit_player_profile_index()
+int32 __cdecl user_interface_globals_get_edit_player_profile_index(
+	void)
 {
 	return INVOKE(0x209BA3, 0, user_interface_globals_get_edit_player_profile_index);
 }
 
-s_saved_game_player_profile* __cdecl user_interface_globals_get_edit_player_profile()
+s_saved_game_player_profile* __cdecl user_interface_globals_get_edit_player_profile(
+	void)
 {
 	return INVOKE(0x209B9D, 0, user_interface_globals_get_edit_player_profile);
 }
 
-e_scenario_type __cdecl user_interface_globals_get_map_type()
+e_scenario_type __cdecl user_interface_globals_get_map_type(
+	void)
 {
 	return INVOKE(0x20B8BB, 0x0, user_interface_globals_get_map_type);
 }
 
-void __cdecl user_interface_globals_set_game_difficulty_real(int32 difficulty)
+void __cdecl user_interface_globals_set_game_difficulty_real(
+	int32 difficulty)
 {
 	INVOKE(0x209E44, 0x0, user_interface_globals_set_game_difficulty_real, difficulty);
 }
 
-void __cdecl user_interface_globals_set_loading_from_persistent_storage(bool a1)
+void __cdecl user_interface_globals_set_loading_from_persistent_storage(
+	bool a1)
 {
 	INVOKE(0x209E6C, 0x0, user_interface_globals_set_loading_from_persistent_storage, a1);
 }
 
-void __cdecl user_interface_globals_commit_edit_profile_changes()
+void __cdecl user_interface_globals_commit_edit_profile_changes(
+	void)
 {
 	INVOKE(0x209A98, 0x0, user_interface_globals_commit_edit_profile_changes);
 }
 
-void __cdecl user_interface_globals_save_profile_changes_to_disk()
+void __cdecl user_interface_globals_save_profile_changes_to_disk(
+	void)
 {
 	INVOKE(0x209C3E, 0x0, user_interface_globals_save_profile_changes_to_disk);
 }
 
-void __cdecl user_interface_globals_finish_saving_profile_changes()
+void __cdecl user_interface_globals_finish_saving_profile_changes(
+	void)
 {
 	INVOKE(0x209D08, 0x0, user_interface_globals_finish_saving_profile_changes);
 }
 
-void __cdecl user_interface_globals_set_edit_player_profile(e_controller_index controller_index, uint32 profile_index, s_saved_game_player_profile* profile)
+void __cdecl user_interface_globals_set_edit_player_profile(
+	e_controller_index controller_index,
+	uint32 profile_index,
+	s_saved_game_player_profile* profile)
 {
 	INVOKE(0x209B72, 0x0, user_interface_globals_set_edit_player_profile, controller_index, profile_index, profile);
 }
 
 /* private code */
 
-static s_user_interface_globals* user_interface_globals_get(void)
+static s_user_interface_globals* user_interface_globals_get(
+	void)
 {
 	return Memory::GetAddress<s_user_interface_globals*>(0x9718E0);
 }
 
-static const char* user_interface_error_codes_get_name(e_ui_error_types error_code)
+static const char* user_interface_error_codes_get_name(
+	e_ui_error_types error_code)
 {
 	ASSERT(VALID_INDEX(error_code, k_last_ui_error_code));
 	ASSERT(table[error_code].error_code == error_code);
 	return table[error_code].string;
 }
 
-static void ui_test_error_code(e_ui_error_types error_id, bool use_cancel, bool confirmation)
+static void ui_test_error_code(
+	e_ui_error_types error_id,
+	bool use_cancel,
+	bool confirmation)
 {
 	if (error_id > k_last_ui_error_code)
 	{
@@ -771,4 +848,6 @@ static void ui_test_error_code(e_ui_error_types error_id, bool use_cancel, bool 
 			screen_error_ok_dialog_show(_user_interface_channel_type_game_error, error_id, _window_4, NONE, nullptr, nullptr);
 		}
 	}
+
+	return;
 }

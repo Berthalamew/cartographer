@@ -1,4 +1,5 @@
 #pragma once
+#include "network_observer.h"
 #include "game/game_allegiance.h"
 #include "game/player_constants.h"
 #include "input/controllers.h"
@@ -334,7 +335,7 @@ public:
 	class c_network_observer* m_network_observer;
 	void* m_session_manager;
 	uint32 field_10;
-	int32 m_session_index;
+	e_network_observer_owner m_session_index;
 	int32 m_session_type;
 	e_network_session_class m_session_class;
 	s_transport_secure_identifier m_session_id;

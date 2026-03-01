@@ -1,5 +1,6 @@
 #pragma once
-#include "real_math.h"
+
+/* structures */
 
 struct s_random_math
 {
@@ -7,9 +8,11 @@ struct s_random_math
 	uint32 random_number;
 };
 
+/* prototypes */
+
 s_random_math* random_math_get_globals();
 
-uint32 random_math_get_seed();
+uint32 get_random_seed(void);
 
 uint32 random_math_get_random_number();
 

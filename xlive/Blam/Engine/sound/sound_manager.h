@@ -1,11 +1,24 @@
 #pragma once
 #include "game/player_constants.h"
 
+/* constants */
+
 enum
 {
 	MAXIMUM_SOUND_INSTANCES_PER_DEFINITION = 16,
 	MAXIMUM_SOUND_INSTANCES_PER_OBJECT_PER_DEFINITION = MAXIMUM_SOUND_INSTANCES_PER_DEFINITION,
 };
+
+/* enums */
+
+enum e_sound_pause_state
+{
+	_sound_pause_state_pausing = 0,
+	_sound_pause_state_resuming,
+	_sound_pause_state_stopping,
+};
+
+/* structures */
 
 struct s_sound_global_mix_configuration
 {
@@ -108,4 +121,4 @@ void __cdecl sound_render(void);
 
 void __cdecl sound_idle(void);
 
-void __cdecl sound_pause(bool a1);
+void __cdecl sound_pause(e_sound_pause_state new_state);

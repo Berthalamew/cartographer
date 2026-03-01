@@ -55,6 +55,16 @@ enum e_observer_channel_state : int32
 	_observer_channel_state_connected = 7
 };
 
+enum e_network_observer_owner
+{
+	_network_observer_owner_squad_one = 0,
+	_network_observer_owner_squad_two,
+	_network_observer_owner_simulation,
+	k_network_observer_owner_count,
+	_network_observer_owner_none = NONE,
+};
+
+
 /* structures */
 
 struct s_observer_channel
@@ -229,7 +239,7 @@ public:
 
 	bool __thiscall get_bandwidth_results(int32 *out_throughput, real32 *out_satiation, int32 *a4);
 	int32 get_observer_channel_state(int32 observer_index) { return m_observer_channels[observer_index].state; };
-	void send_message(int32 session_index, int32 observer_index, bool send_out_of_band, int32 type, int32 size, void* data);
+	void send_message(e_network_observer_owner session_index, int32 observer_index, bool send_out_of_band, int32 type, int32 size, const void* data);
 
 	int32 observer_channel_find_by_network_channel(
 		int32 session_index,
