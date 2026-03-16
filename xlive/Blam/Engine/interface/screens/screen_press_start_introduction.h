@@ -18,7 +18,7 @@ protected:
 	void handle_item_pressed_event(s_event_record* const& event, datum* pitem_index);
 
 public:
-	static void* load(s_screen_parameters* parameters);
+	static void* load(c_screen_parameters* parameters);
 	static void apply_instance_patches();
 	c_screen_press_start_introduction(e_user_interface_channel_type channel_type, e_user_interface_render_window window_index, int16 user_flags);
 
@@ -27,7 +27,7 @@ public:
 	virtual ~c_screen_press_start_introduction() = default;
 	virtual void update() override;
 	bool handle_event(s_event_record* event) override;
-	virtual void initialize(s_screen_parameters* parameters) override;
+	virtual void initialize(c_screen_parameters* parameters) override;
 	virtual void sub_60EBC2(int32 a1) override;
 	virtual const void* load_proc(void) const override;
 };

@@ -211,112 +211,76 @@ void c_settings_list::handle_item_pressed_event(s_event_record* const& event, da
 
 void c_settings_list::handle_item_player_profile(s_event_record* const& event)
 {
-	s_screen_parameters params;
-	params.m_flags = 0;
-	params.m_window_index = _window_4;
-	params.m_context = NULL;
-	params.m_user_flags = FLAG(event->controller);
-	params.m_channel_type = _user_interface_channel_type_gameshell_screen;
-	params.m_screen_state.field_0 = 0xFFFFFFFF;
-	params.m_screen_state.m_last_focused_item_order = 0xFFFFFFFF;
-	params.m_screen_state.m_last_focused_item_index = 0xFFFFFFFF;
-	params.m_load_function = c_screen_single_player_profile_select_fancy::load;
-
-	params.m_load_function(&params);
+	c_screen_parameters params;
+	params.initialize_default_user(FLAG(event->controller), _user_interface_channel_type_gameshell_screen, _window_4, c_screen_single_player_profile_select_fancy::load);
+	params.execute_load_function();
+	return;
 }
+
 void c_settings_list::handle_item_variant(s_event_record* const& event)
 {
-	s_screen_parameters params;
-	params.m_flags = 0;
-	params.m_window_index = _window_4;
-	params.m_context = NULL;
-	params.m_user_flags = FLAG(event->controller);
-	params.m_channel_type = _user_interface_channel_type_gameshell_screen;
-	params.m_screen_state.field_0 = 0xFFFFFFFF;
-	params.m_screen_state.m_last_focused_item_order = 0xFFFFFFFF;
-	params.m_screen_state.m_last_focused_item_index = 0xFFFFFFFF;
-	params.m_load_function = c_screen_game_engine_category::load_for_settings;
-
-	params.m_load_function(&params);
+	c_screen_parameters params;
+	params.initialize_default_user(FLAG(event->controller), _user_interface_channel_type_gameshell_screen, _window_4, c_screen_game_engine_category::load_for_settings);
+	params.execute_load_function();
+	return;
 }
 void c_settings_list::handle_item_video(s_event_record* const& event)
 {
-	s_screen_parameters params;
-	params.m_flags = 0;
-	params.m_window_index = _window_4;
-	params.m_context = NULL;
-	params.m_user_flags = FLAG(event->controller);
-	params.m_channel_type = _user_interface_channel_type_gameshell_screen;
-	params.m_screen_state.field_0 = 0xFFFFFFFF;
-	params.m_screen_state.m_last_focused_item_order = 0xFFFFFFFF;
-	params.m_screen_state.m_last_focused_item_index = 0xFFFFFFFF;
-	params.m_load_function = c_screen_video_settings::load;
-
-	params.m_load_function(&params);
+	c_screen_parameters params;
+	params.initialize_default_user(FLAG(event->controller), _user_interface_channel_type_gameshell_screen, _window_4, c_screen_video_settings::load);
+	params.execute_load_function();
+	return;
 }
-void c_settings_list::handle_item_audio(s_event_record* const& event)
+
+void c_settings_list::handle_item_audio(s_event_record* const &event)
 {
-	s_screen_parameters params;
-	params.m_flags = 0;
-	params.m_window_index = _window_4;
-	params.m_context = NULL;
-	params.m_user_flags = FLAG(event->controller);
-	params.m_channel_type = _user_interface_channel_type_gameshell_screen;
-	params.m_screen_state.field_0 = 0xFFFFFFFF;
-	params.m_screen_state.m_last_focused_item_order = 0xFFFFFFFF;
-	params.m_screen_state.m_last_focused_item_index = 0xFFFFFFFF;
-	params.m_load_function = c_screen_audio_settings::load;
-
-	params.m_load_function(&params);
+	c_screen_parameters params;
+	params.initialize_default_user(FLAG(event->controller), _user_interface_channel_type_gameshell_screen, _window_4, c_screen_audio_settings::load);
+	params.execute_load_function();
+	return;
 }
-void c_settings_list::handle_item_network(s_event_record* const& event)
+void c_settings_list::handle_item_network(s_event_record* const &event)
 {
-	s_screen_parameters params;
-	params.m_flags = 0;
-	params.m_window_index = _window_4;
-	params.m_context = NULL;
-	params.m_user_flags = FLAG(event->controller);
-	params.m_channel_type = _user_interface_channel_type_gameshell_dialog;
-	params.m_screen_state.field_0 = 0xFFFFFFFF;
-	params.m_screen_state.m_last_focused_item_order = 0xFFFFFFFF;
-	params.m_screen_state.m_last_focused_item_index = 0xFFFFFFFF;
-	params.m_load_function = c_screen_network_adapter_menu::load;
-
-	params.m_load_function(&params);
+	c_screen_parameters params;
+	params.initialize_default_user(FLAG(event->controller), _user_interface_channel_type_gameshell_dialog, _window_4, c_screen_network_adapter_menu::load);
+	params.execute_load_function();
+	return;
 }
-void c_settings_list::handle_item_about(s_event_record* const& event)
+void c_settings_list::handle_item_about(s_event_record* const &event)
 {
-	s_screen_parameters params;
-	params.m_flags = 0;
-	params.m_window_index = _window_4;
-	params.m_context = NULL;
-	params.m_user_flags = FLAG(event->controller);
-	params.m_channel_type = _user_interface_channel_type_gameshell_dialog;
-	params.m_screen_state.field_0 = 0xFFFFFFFF;
-	params.m_screen_state.m_last_focused_item_order = 0xFFFFFFFF;
-	params.m_screen_state.m_last_focused_item_index = 0xFFFFFFFF;
-	params.m_load_function = c_screen_about_dialog_menu::load;
-
-	params.m_load_function(&params);
+	c_screen_parameters params;
+	params.initialize_default_user(FLAG(event->controller), _user_interface_channel_type_gameshell_dialog, _window_4, c_screen_about_dialog_menu::load);
+	params.execute_load_function();
+	return;
 }
-void c_settings_list::handle_item_guide(s_event_record* const& event)
+
+void c_settings_list::handle_item_guide(s_event_record* const &event)
 {
 	ui_load_cartographer_guide_menu();
+	return;
 }
-
-
 
 //
 // c_screen_settings class starts here
 // 
 
+c_screen_settings::c_screen_settings(
+	const c_screen_parameters* parameters) :
+	c_screen_settings(parameters->get_channel_type(), parameters->get_window_index(), parameters->get_user_flags())
+{
+	return;
+}
 
-c_screen_settings::c_screen_settings(e_user_interface_channel_type channel_type, e_user_interface_render_window window_index, int16 user_flags) :
+c_screen_settings::c_screen_settings(
+	e_user_interface_channel_type channel_type,
+	e_user_interface_render_window window_index,
+	int16 user_flags) :
 	c_screen_with_menu(_screen_settings, channel_type, window_index, user_flags, &m_settings_list),
 	m_settings_list(user_flags)
 {
 	user_interface_globals_commit_edit_profile_changes();
 	user_interface_squad_clear_match_playlist();
+	return;
 }
 
 
@@ -365,30 +329,17 @@ const void* c_screen_settings::load_proc(void) const
 	return &c_screen_settings::load;
 }
 
-void* c_screen_settings::load(s_screen_parameters* parameters)
+void* c_screen_settings::load(c_screen_parameters* parameters)
 {
 	//return INVOKE(0xB071, 0x0, c_screen_settings::load, parameters);
 
-	c_screen_settings* screen;
+	void* pool;
+	c_screen_settings* screen = (pool = ui_pool_allocate_space(sizeof(c_screen_settings), 0)) ? new (pool) c_screen_settings(parameters) : NULL;
+	ASSERT(screen != NULL);
 
-	void* pool = ui_pool_allocate_space(sizeof(c_screen_settings), 0);
-	if (pool)
-	{
-		screen = new (pool) c_screen_settings(
-			parameters->m_channel_type,
-			parameters->m_window_index,
-			parameters->m_user_flags);
-
-		screen->m_allocated = true;
-
-		networking_panorama_presence_set_presence(_context_presence_settings);
-		user_interface_register_screen_to_channel(screen, parameters);
-	}
-	else
-	{
-		screen = 0;
-	}
-
+	screen->m_allocated = true;
+	networking_panorama_presence_set_presence(_context_presence_settings);
+	user_interface_register_screen_to_channel(screen, parameters);
 	return screen;
 }
 

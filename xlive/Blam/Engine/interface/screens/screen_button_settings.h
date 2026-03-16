@@ -4,9 +4,12 @@
 #include "interface/user_interface_widget_window.h"
 
 
-/* macro defines */
+/* constants */
 
-#define k_no_of_visible_items_for_button_settings 4+1
+enum
+{
+	k_no_of_visible_items_for_button_settings = 4+1,
+};
 
 /* classes */
 
@@ -17,7 +20,7 @@ protected:
 	bool m_qtr_screen;
 	c_slot2<c_button_settings_edit_list, s_event_record*, datum> m_slot;
 
-	void handle_item_pressed_event(s_event_record* const& event, datum* pitem_index);
+	void handle_item_pressed_event(s_event_record* const &event, datum* pitem_index);
 
 public:
 	c_button_settings_edit_list(int16 user_flags);
@@ -35,14 +38,9 @@ public:
 
 class c_screen_button_settings_menu : public c_screen_with_menu
 {
-protected:
-	c_button_settings_edit_list m_button_settings_list;
-	int32 field_D3C; 	// non functional unfinished setting
-	bool m_using_qtr_arrows;
-
 public:
-	static void* load(s_screen_parameters* parameters);
-	static void* load_qtr(s_screen_parameters* parameters);
+	static void* load(c_screen_parameters* parameters);
+	static void* load_qtr(c_screen_parameters* parameters);
 	static void apply_patches_on_ui_map_load();
 	static void apply_patches_on_mp_map_load();
 	static void apply_instance_patches();
@@ -57,5 +55,9 @@ public:
 	virtual void post_initialize_button_keys() override;
 	virtual const void* load_proc() const override;
 
+protected:
+	c_button_settings_edit_list m_button_settings_list;
+	int32 field_D3C; 	// non functional unfinished setting
+	bool m_using_qtr_arrows;
 };
 //ASSERT_STRUCT_SIZE(c_screen_button_settings_menu, 0xD44);

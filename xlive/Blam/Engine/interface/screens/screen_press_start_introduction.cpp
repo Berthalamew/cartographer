@@ -5,7 +5,7 @@
 
 // typedef
 
-typedef void(__cdecl* t_screen_press_start_introduction_open)(s_screen_parameters* parameters);
+typedef void(__cdecl* t_screen_press_start_introduction_open)(c_screen_parameters* parameters);
 t_screen_press_start_introduction_open p_screen_press_start_introduction_open;
 
 c_screen_press_start_introduction::c_screen_press_start_introduction(e_user_interface_channel_type channel_type, e_user_interface_render_window window_index, int16 user_flags) :
@@ -13,7 +13,7 @@ c_screen_press_start_introduction::c_screen_press_start_introduction(e_user_inte
 	m_start_button(0, user_flags),
 	m_slot(this, &c_screen_press_start_introduction::handle_item_pressed_event)
 {
-	this->m_has_input_saved = false;
+	m_has_input_saved = false;
 }
 
 void c_screen_press_start_introduction::update()
@@ -27,7 +27,7 @@ bool c_screen_press_start_introduction::handle_event(s_event_record* event)
 }
 
 CLASS_HOOK_DECLARE_LABEL(c_screen_press_start_introduction__initialize, c_screen_press_start_introduction::initialize);
-void c_screen_press_start_introduction::initialize(s_screen_parameters* parameters)
+void c_screen_press_start_introduction::initialize(c_screen_parameters* parameters)
 {
 	if (XUserSignedIn(0)) {
 		XUserSignOut(0);
@@ -35,7 +35,7 @@ void c_screen_press_start_introduction::initialize(s_screen_parameters* paramete
 	}
 	
 	//orignal c_screen_press_start_introduction::initialize
-	INVOKE_TYPE(0x23F180, 0x0, void(__thiscall*)(c_screen_press_start_introduction*, s_screen_parameters*), this, parameters);
+	INVOKE_TYPE(0x23F180, 0x0, void(__thiscall*)(c_screen_press_start_introduction*, c_screen_parameters*), this, parameters);
 }
 
 void c_screen_press_start_introduction::sub_60EBC2(int32 a1)
@@ -52,16 +52,16 @@ void c_screen_press_start_introduction::handle_item_pressed_event(s_event_record
 {
 	s_event_record* arg = event;
 
-	this->m_saved_input.type = arg->type;
-	this->m_saved_input.controller = arg->controller;
-	this->m_saved_input.component = arg->component;
-	this->m_saved_input.value = arg->value;
+	m_saved_input.type = arg->type;
+	m_saved_input.controller = arg->controller;
+	m_saved_input.component = arg->component;
+	m_saved_input.value = arg->value;
 
-	this->m_has_input_saved = true;
+	m_has_input_saved = true;
 
 }
 
-void* c_screen_press_start_introduction::load(s_screen_parameters* parameters)
+void* c_screen_press_start_introduction::load(c_screen_parameters* parameters)
 {
 	//return p_screen_press_start_introduction_open(parameters);
 

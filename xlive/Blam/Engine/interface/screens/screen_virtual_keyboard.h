@@ -138,6 +138,7 @@ protected:
 	void update_custom_labels(e_vkbd_context_type context);
 
 public:
+	c_screen_virtual_keyboard(const c_screen_parameters* parameters);
 	c_screen_virtual_keyboard(e_user_interface_channel_type _channel_type, e_user_interface_render_window _window_index, uint16 _user_flags);
 
 	void set_input_string_buffer(wchar_t* buffer, uint32 buffer_size);
@@ -146,7 +147,7 @@ public:
 	static void apply_patches();
 	bool __thiscall load_player_profile_edit();
 
-	static void* load(s_screen_parameters* parameters);
+	static void* load(c_screen_parameters* parameters);
 
 	// c_screen_virtual_keyboard virtual functions
 
@@ -154,7 +155,7 @@ public:
 	virtual void update() override;
 	virtual void render_widget(rectangle2d* viewport_bounds) override;
 	virtual bool handle_event(s_event_record* event) override;
-	virtual void initialize(s_screen_parameters* parameters) override;
+	virtual void initialize(c_screen_parameters* parameters) override;
 	virtual const void* load_proc(void) const override;
 };
 ASSERT_STRUCT_SIZE(c_screen_virtual_keyboard, 0x3B80);

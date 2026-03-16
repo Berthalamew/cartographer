@@ -3,10 +3,12 @@
 
 #include "memory/rockall_heap_manager.h"
 
+#include "networking/delivery/network_channel.h"
 #include "networking/delivery/network_link.h"
 #include "networking/messages/network_message_gateway.h"
 #include "networking/messages/network_message_handler.h"
 #include "networking/messages/network_message_type_collection.h"
+#include "networking/session/network_observer.h"
 #include "networking/session/network_session_manager.h"
 #include "networking/session/network_text_chat_manager.h"
 
@@ -38,6 +40,9 @@ void network_memory_apply_patches(void)
 	DETOUR_ATTACH(p_network_heap_allocate_block, Memory::GetAddress<t_network_heap_allocate_block>(0x1AC939, 0x1ACB07), network_heap_allocate_block);
 	DETOUR_ATTACH(p_network_heap_free_block, Memory::GetAddress<t_network_heap_free_block>(0x1AC94A, 0x1ACB18), network_heap_free_block);
 	PatchCall(Memory::GetAddress(0x1AD292, 0x1AD460), jmp_c_network_heap__discard);
+
+	// increase network_shared_memory_globals.maximum_channel_count for campaign
+	WriteValue<uint32>(Memory::GetAddress(0x1ACCDB + 1), k_network_channel_count_for_campaign);	
 	return;
 }
 
@@ -67,6 +72,13 @@ void c_network_heap::dispose(void)
 s_network_heap_stats* network_heap_get_description(void)
 {
 	return &g_network_heap_allocations;
+}
+
+c_network_channel* network_memory_get_channel(
+	int32 channel_index)
+{
+	c_network_channel* network_channels = *Memory::GetAddress<c_network_channel**>(0x4FADBC, 0x525274);
+	return &network_channels[channel_index];
 }
 
 bool __cdecl network_memory_base_initialize(

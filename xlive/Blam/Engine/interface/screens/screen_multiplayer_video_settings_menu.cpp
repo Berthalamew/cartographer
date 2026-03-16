@@ -118,81 +118,85 @@ void c_multiplayer_video_settings_list::handle_item_pressed_event(s_event_record
 {
 	//INVOKE_TYPE(0x258F3E, 0x0, void(__thiscall*)(c_multiplayer_video_settings_list*, s_event_record**, datum*), this, pevent, pitem_index);
 
-	s_screen_parameters params;
-	params.m_flags = 0;
-	params.m_window_index = this->get_parent_render_window();
-	params.m_context = 0;
-	params.m_user_flags = FLAG(event->controller);
-	params.m_channel_type = this->get_parent_channel();
-	params.m_screen_state.field_0 = NONE;
-	params.m_screen_state.m_last_focused_item_order = NONE;
-	params.m_screen_state.m_last_focused_item_index = NONE;
-	params.m_load_function = nullptr; // stop warning of using uinitialized var
-
 	if (*pitem_index != NONE)
 	{
+		c_screen_parameters params;
 		s_list_item_datum* item = (s_list_item_datum*)datum_try_and_get(m_list_data, *pitem_index);
 		e_mp_video_settings_list_items item_type = (e_mp_video_settings_list_items)item->item_id;
 
 		switch (item_type)
 		{
 		case _item_display_mode:
-			params.m_load_function = &c_screen_display_mode_menu::load_mp;
+			params.initialize_default_user(FLAG(event->controller), get_parent_channel(), get_parent_render_window(), c_screen_display_mode_menu::load_mp);
 			break;
 		case _item_resolution:
-			params.m_load_function = &c_screen_resolution_menu::load_mp;
+			params.initialize_default_user(FLAG(event->controller), get_parent_channel(), get_parent_render_window(), c_screen_resolution_menu::load_mp);
 			break;
 		case _item_vsync:
-			params.m_load_function = &c_screen_vsync_menu::load;
+			params.initialize_default_user(FLAG(event->controller), get_parent_channel(), get_parent_render_window(), c_screen_vsync_menu::load);
 			break;
 		case _item_brightness_level:
-			params.m_load_function = &c_screen_brightness_level_menu::load_mp;
+			params.initialize_default_user(FLAG(event->controller), get_parent_channel(), get_parent_render_window(), c_screen_brightness_level_menu::load_mp);
 			break;
 		case _item_gamma_setting:
-			params.m_load_function = &c_screen_gamma_menu::load_mp;
+			params.initialize_default_user(FLAG(event->controller), get_parent_channel(), get_parent_render_window(), c_screen_gamma_menu::load_mp);
 			break;
 		case _item_anti_aliasing:
-			params.m_load_function = &c_screen_anti_aliasing_menu::load_mp;
+			params.initialize_default_user(FLAG(event->controller), get_parent_channel(), get_parent_render_window(), c_screen_anti_aliasing_menu::load_mp);
 			break;
 		case _item_safe_area:
-			params.m_load_function = &c_screen_safe_area_menu::load_mp;
+			params.initialize_default_user(FLAG(event->controller), get_parent_channel(), get_parent_render_window(), c_screen_safe_area_menu::load_mp);
 			break;
 		case _item_splitscreen:
-			params.m_load_function = &c_screen_splitscreen_menu::load;
+			params.initialize_default_user(FLAG(event->controller), get_parent_channel(), get_parent_render_window(), c_screen_splitscreen_menu::load);
 			break;
 		case _item_restore_defaults:
-			params.m_load_function = &c_screen_restore_video_defaults_setting_menu::load_mp;
+			params.initialize_default_user(FLAG(event->controller), get_parent_channel(), get_parent_render_window(), c_screen_restore_video_defaults_setting_menu::load_mp);
 			break;
 		default:
 			unreachable();
 		}
+
+		if (VALID_INDEX(item_type, k_total_no_of_mp_video_settings_list_items))
+		{
+			if (user_interface_globals_get_edit_player_profile_index() != NONE)
+			{
+				user_interface_globals_finish_saving_profile_changes();
+			}
+
+			s_saved_game_player_profile profile;
+			uint32 profile_index;
+
+			user_interface_controller_get_profile_data(this->get_any_responding_controller(), &profile, &profile_index);
+			user_interface_globals_set_edit_player_profile(this->get_any_responding_controller(), profile_index, &profile);
+
+			params.execute_load_function();
+		}
 	}
-
-	if (params.m_load_function != nullptr)
-	{
-		if (user_interface_globals_get_edit_player_profile_index() != NONE)
-			user_interface_globals_finish_saving_profile_changes();
-
-		s_saved_game_player_profile profile;
-		uint32 profile_index;
-
-		user_interface_controller_get_profile_data(this->get_any_responding_controller(), &profile, &profile_index);
-		user_interface_globals_set_edit_player_profile(this->get_any_responding_controller(), profile_index, &profile);
-
-		params.m_load_function(&params);
-	}
-};
+	
+	return;
+}
 
 
 //
 // c_screen_multiplayer_video_settings class starts here
 // 
 
+c_screen_multiplayer_video_settings::c_screen_multiplayer_video_settings(
+	const c_screen_parameters* parameters) :
+	c_screen_multiplayer_video_settings(parameters->get_channel_type(), parameters->get_window_index(), parameters->get_user_flags())
+{
+	return;
+}
 
-c_screen_multiplayer_video_settings::c_screen_multiplayer_video_settings(e_user_interface_channel_type channel_type, e_user_interface_render_window window_index, uint16 user_flags) :
+c_screen_multiplayer_video_settings::c_screen_multiplayer_video_settings(
+	e_user_interface_channel_type channel_type,
+	e_user_interface_render_window window_index,
+	uint16 user_flags) :
 	c_screen_with_menu(_screen_video_settings_mp, channel_type, window_index, user_flags, &m_mp_video_settings_list),
 	m_mp_video_settings_list(user_flags)
 {
+	return;
 }
 
 const void* c_screen_multiplayer_video_settings::load_proc() const
@@ -200,28 +204,16 @@ const void* c_screen_multiplayer_video_settings::load_proc() const
 	return &c_screen_multiplayer_video_settings::load;
 }
 
-void* c_screen_multiplayer_video_settings::load(s_screen_parameters* parameters)
+void* c_screen_multiplayer_video_settings::load(c_screen_parameters* parameters)
 {
 	//return INVOKE(0x24DCD9, 0x0, c_screen_multiplayer_video_settings::load, parameters);
 
-	c_screen_multiplayer_video_settings* screen;
-
-	void* pool = ui_pool_allocate_space(sizeof(c_screen_multiplayer_video_settings), 0);
-	if (pool)
-	{
-		screen = new (pool) c_screen_multiplayer_video_settings(
-			parameters->m_channel_type,
-			parameters->m_window_index,
-			parameters->m_user_flags);
-
-		screen->m_allocated = true;
-		user_interface_register_screen_to_channel(screen, parameters);
-	}
-	else
-	{
-		screen = nullptr;
-	}
-
+	void* pool;
+	c_screen_multiplayer_video_settings* screen = (pool = ui_pool_allocate_space(sizeof(c_screen_multiplayer_video_settings), 0)) ? new (pool) c_screen_multiplayer_video_settings(parameters) : NULL;
+	ASSERT(screen != NULL);
+	
+	screen->m_allocated = true;
+	user_interface_register_screen_to_channel(screen, parameters);
 	return screen;
 }
 

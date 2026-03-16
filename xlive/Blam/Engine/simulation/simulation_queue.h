@@ -214,5 +214,5 @@ public:
 	void dispose();
 
 	bool decode(class c_bitstream* bitstream);
-	void encode(class c_bitstream* bitstream);
+	void encode(class c_bitstream* bitstream) const;
 };

@@ -3,6 +3,7 @@
 // Network Observer
 //	- manages network bandwidth based on network conditions
 
+#include "networking/messages/network_message_type_collection.h"
 #include "networking/transport/transport_address.h"
 #include "networking/transport/transport_qos.h"
 #include "networking/network_statistics.h"
@@ -240,6 +241,8 @@ public:
 	bool __thiscall get_bandwidth_results(int32 *out_throughput, real32 *out_satiation, int32 *a4);
 	int32 get_observer_channel_state(int32 observer_index) { return m_observer_channels[observer_index].state; };
 	void send_message(e_network_observer_owner session_index, int32 observer_index, bool send_out_of_band, int32 type, int32 size, const void* data);
+	void observer_channel_set_waiting_on_backlog(e_network_observer_owner owner_type, int32 observer_index, e_network_message_type message_type);
+	bool observer_channel_backlogged(e_network_observer_owner owner_type, int32 observer_index, e_network_message_type message_type) const;
 
 	int32 observer_channel_find_by_network_channel(
 		int32 session_index,
@@ -261,6 +264,7 @@ public:
 
 		return observer_index;
 	}
+
 
 private:
 };

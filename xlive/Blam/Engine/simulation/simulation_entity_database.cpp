@@ -3,6 +3,7 @@
 
 #include "simulation.h"
 #include "simulation_queue_entities.h"
+#include "simulation_world.h"
 
 #include "memory/bitstream.h"
 #include "networking/network_event.h"
@@ -75,6 +76,44 @@ void simulation_entity_database_apply_patches(void)
 c_simulation_entity_database* simulation_get_entity_database(void)
 {
 	return &simulation_get_world()->get_distributed_world()->m_entity_database;
+}
+
+void c_simulation_entity_database::initialize(
+	c_simulation_world* world,
+	c_replication_entity_manager* entity_manager, 
+	c_simulation_type_collection* type_collection)
+{
+	ASSERT(!m_initialized);
+	ASSERT(world);
+	ASSERT(world->exists());
+	ASSERT(entity_manager);
+	ASSERT(type_collection);
+
+	m_resetting = false;
+	m_world = world;
+	m_entity_manager = entity_manager;
+	m_type_collection = type_collection;
+	m_entity_manager->attach_client(this);
+	reset();
+	m_initialized = true;
+
+	return;
+}
+
+void c_simulation_entity_database::destroy(
+	void)
+{
+	ASSERT(m_initialized);
+	ASSERT(m_entity_manager);
+
+	reset();
+	m_entity_manager->detach_client(this);
+	m_initialized = false;
+	m_world = NULL;
+	m_entity_manager = NULL;
+	m_type_collection = NULL;
+
+	return;
 }
 
 bool c_simulation_entity_database::process_creation(int32 entity_index, e_simulation_entity_type entity_type, uint32 update_mask, int32 block_count, s_replication_allocation_block* blocks)
@@ -156,7 +195,7 @@ bool c_simulation_entity_database::process_creation(int32 entity_index, e_simula
 	return result;
 }
 
-uint32 c_simulation_entity_database::read_creation_from_packet(int32 entity_index, 
+e_network_read_result c_simulation_entity_database::read_creation_from_packet(int32 entity_index,
 	e_simulation_entity_type* out_entity_type, 
 	uint32* out_entity_initial_update_mask, 
 	int32 maximum_block_count,
@@ -169,7 +208,7 @@ uint32 c_simulation_entity_database::read_creation_from_packet(int32 entity_inde
 	ASSERT(VALID_INDEX(absolute_index, k_simulation_entity_database_maximum_entities));
 	ASSERT(packet);
 
-	uint32 result = 3;
+	e_network_read_result result = _network_read_result_corrupt;
 	e_simulation_entity_type entity_type = (e_simulation_entity_type)packet->read_integer("entity-type", 5);
 	c_simulation_entity_definition* entity_definition = m_type_collection->get_entity_definition(entity_type);
 	
@@ -194,7 +233,7 @@ uint32 c_simulation_entity_database::read_creation_from_packet(int32 entity_inde
 					network_heap_describe(description, sizeof(description))
 				);
 #endif
-				result = 2;
+				result = _network_read_result_discard;
 			}
 		}
 
@@ -211,7 +250,7 @@ uint32 c_simulation_entity_database::read_creation_from_packet(int32 entity_inde
 				network_heap_describe(description, sizeof(description))
 			);
 #endif
-			result = 2;
+			result = _network_read_result_discard;
 		}
 
 		// Allocate gamestate data
@@ -221,9 +260,14 @@ uint32 c_simulation_entity_database::read_creation_from_packet(int32 entity_inde
 		{
 #ifdef EVENTS_ENABLED
 			char description[1024];
-			event(_event_error, "networking:simulation:entity: OUT OF MEMORY allocating %s gamestate data [%d] bytes [%s]", sizeof(int32), network_heap_describe(description, sizeof(description)));
+			event(
+				_event_error,
+				"networking:simulation:entity: OUT OF MEMORY allocating %s gamestate data [%d] bytes [%s]",
+				sizeof(int32),
+				network_heap_describe(description, sizeof(description))
+			);
 #endif
-			result = 2;
+			result = _network_read_result_discard;
 		}
 		*/
 
@@ -240,7 +284,7 @@ uint32 c_simulation_entity_database::read_creation_from_packet(int32 entity_inde
 				network_heap_describe(description, sizeof(description))
 			);
 #endif
-			result = 2;
+			result = _network_read_result_discard;
 		}
 
 		// check if creation size is > 0 and if network heap block have been successfully allocated
@@ -354,7 +398,7 @@ uint32 c_simulation_entity_database::read_creation_from_packet(int32 entity_inde
 
 						*block_count += k_entity_creation_block_order_count;
 
-						result = 0;
+						result = _network_read_result_ok;
 					}
 					else
 					{
@@ -364,13 +408,13 @@ uint32 c_simulation_entity_database::read_creation_from_packet(int32 entity_inde
 							entity_type,
 							entity_definition->entity_type_name(),
 							entity_index);
-						result = 3;
-					}
+						
+						result = _network_read_result_corrupt;
 
-					if (!packet->read_only_for_consistency())
-					{
-						// FIXME: figure out why this breaks...
-						//DISPLAY_ASSERT("entity initial update decode failed consistency checking a packet");
+						if (!packet->read_only_for_consistency())
+						{
+							DISPLAY_ASSERT("entity initial update decode failed consistency checking a packet");
+						}
 					}
 				}
 			}
@@ -381,17 +425,19 @@ uint32 c_simulation_entity_database::read_creation_from_packet(int32 entity_inde
 					"networking:simulation:entity:read_creation_from_packet: corrupt creation data reading entity %d/%s/[0x%08X]",
 					entity_type,
 					entity_definition->entity_type_name(),
-					entity_index);
-				result = 3;
+					entity_index
+				);
+
+				result = _network_read_result_corrupt;
 
 				if (!packet->read_only_for_consistency())
 				{
-					DISPLAY_ASSERT("entity initial update decode failed consistency checking a packet");
+					DISPLAY_ASSERT("entity creation data decode failed consistency checking a packet");
 				}
 			}
 		}
 
-		if (result == 3 || result == 2)
+		if (result == _network_read_result_corrupt || result == _network_read_result_discard)
 		{
 			if (creation_data != NULL)
 			{
@@ -643,14 +689,23 @@ void c_simulation_entity_database::reset(void)
 		{
 			if (entity->entity_index != NONE)
 			{
-				this->entity_delete_internal(entity->entity_index);
+				entity_delete_internal(entity->entity_index);
+				ASSERT(entity->entity_index==NONE);
 			}
+
+			ASSERT(entity->entity_type==NONE);
 		}
 		else
 		{
 			entity->entity_index = NONE;
 			entity->entity_type = _simulation_entity_type_none;
 		}
+
+		ASSERT(entity->creation_data_size==0);
+		ASSERT(entity->creation_data==NULL);
+		ASSERT(entity->state_data_size==0);
+		ASSERT(entity->state_data==NULL);
+
 	}
 	m_resetting = false;
 	return;

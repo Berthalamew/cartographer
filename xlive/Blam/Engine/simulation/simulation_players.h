@@ -7,15 +7,15 @@
 
 /* enums */
 
-enum e_simulation_player_type   //TODO: determine actual names for this enum field
+enum e_simulation_player_type
 {
-	simulation_player_type_local_authority = 0x0,
-	simulation_player_type_local_no_authority = 0x1,
-	simulation_player_type_local_unk = 0x2,
-	simulation_player_type_foreign_synchronous = 0x3,
-	simulation_player_type_foreign_no_authority = 0x4,
-	simulation_player_type_foreign_distributed = 0x5,
-	k_simulation_player_type_count = 0x6,
+	_simulation_player_type_local_authoritative = 0,
+	_simulation_player_type_local_predicted,
+	_simulation_player_type_local_zombie,
+	_simulation_player_type_remote_synchronous,
+	_simulation_player_type_remote_predicted,
+	_simulation_player_type_remote_replicated,
+	k_simulation_player_type_count,
 };
 
 enum e_simulation_player_update_type
@@ -68,20 +68,74 @@ ASSERT_STRUCT_SIZE(s_player_collection, 0xA44);
 /* classes */
 
 #pragma pack(push, 1)
-struct c_simulation_player
+class c_simulation_player
 {
+public:
+	void set_active(bool active);
+
+	void destroy(void);
+	void handle_local_input(struct player_action const* action);
+
+	bool exists(
+		void) const
+	{
+		return m_player_index != NONE;
+	}
+
+	bool is_local(
+		void) const
+	{
+		ASSERT(exists());
+		ASSERT(m_player_type>=0 && m_player_type<k_simulation_player_type_count);
+
+		return
+			m_player_type== _simulation_player_type_local_authoritative ||
+			m_player_type== _simulation_player_type_local_predicted;
+	}
+
+	bool active(
+		void) const
+	{
+		return m_active;
+	}
+
+	bool pending_deletion(
+		void) const
+	{
+		ASSERT(exists());
+
+		return m_pending_deletion;
+	}
+
+	int32 get_player_index(
+		void) const
+	{
+		return m_player_datum_index;
+	}
+
+	void get_identifier(
+		struct s_player_identifier* player_identifier) const
+	{
+		ASSERT(exists());
+		ASSERT(player_identifier);
+		*player_identifier = m_player_identifier;
+
+		return;
+	}
+
+private:
 	int32 m_player_index;
 	datum m_player_datum_index;
 	e_simulation_player_type m_player_type;
-	uint64 m_player_identifier;
+	s_player_identifier m_player_identifier;
 	s_machine_identifier m_player_machine_identifier;
 	int16 pad;
-	void* m_simulation_world;
-	char m_field_20;
+	class c_simulation_world* m_world;
+	bool m_pending_deletion;
 	bool m_active;
 	int16 pad_1;
-	uint32 m_start_commit_ticks;
-	player_action m_actions;
+	uint32 m_current_action_time;
+	player_action m_current_action;
 };
 #pragma pack(pop)
 ASSERT_STRUCT_SIZE(c_simulation_player, 0x88);

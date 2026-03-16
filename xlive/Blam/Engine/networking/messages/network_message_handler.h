@@ -22,6 +22,7 @@ public:
 	void register_session_manager(class c_network_session_manager* session_manager);
 	void register_observer(class c_network_observer* observer);
 	void handle_leave_session(const struct transport_address* address, const struct s_network_message_leave_session* received_data);
+	void handle_synchronous_update(int32 network_channel_index, const struct s_network_message_synchronous_update* message);
 
 	/* cartographer message handlers */
 

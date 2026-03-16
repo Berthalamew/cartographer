@@ -407,6 +407,49 @@ static void ui_test_error_code(e_ui_error_types error_id, bool use_cancel, bool 
 
 /* public code */
 
+c_screen_parameters::c_screen_parameters(void)
+{
+	m_context = NULL;
+	return;
+}
+
+void c_screen_parameters::initialize_default_user(
+	uint16 user_flags,
+	e_user_interface_channel_type channel_type,
+	e_user_interface_render_window window_index,
+	proc_ui_screen_load_cb_t load_cb)
+{
+	initialize_internal(0, user_flags, channel_type, window_index, NULL, load_cb);
+	return;
+}
+
+void c_screen_parameters::initialize_internal(
+	uint16 flags,
+	uint16 user_flags,
+	e_user_interface_channel_type channel_type,
+	e_user_interface_render_window window_index,
+	s_screen_state* screen_state,
+	proc_ui_screen_load_cb_t load_cb)
+{
+	m_flags = flags;
+	m_user_flags = user_flags;
+	m_channel_type = channel_type;
+	m_window_index = window_index;
+	
+	if (screen_state)
+	{
+		csmemcpy(&m_screen_state, screen_state, sizeof(m_screen_state));
+	}
+	else
+	{
+		csmemset(&m_screen_state, NONE, sizeof(m_screen_state));
+	}
+	
+	m_load_function = load_cb;
+
+	return;
+}
+
 bool __cdecl user_interface_automation_is_active(
 	void)
 {

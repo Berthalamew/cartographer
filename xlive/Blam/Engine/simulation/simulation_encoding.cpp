@@ -2,7 +2,10 @@
 #include "simulation_encoding.h"
 
 #include "simulation.h"
+
+#include "memory/bitstream.h"
 #include "networking/network_event.h"
+#include "structures/structure_bsp_definitions.h"
 
 #include "memory/bitstream.h"
 
@@ -19,15 +22,20 @@ enum
 
 /* prototypes */
 
-static void __cdecl player_action_encode(c_bitstream* packet, struct player_action* action);
-static bool __cdecl player_action_decode(c_bitstream* packet, struct player_action* action);
-static void __cdecl simulation_machine_update_encode(c_bitstream* packet, struct simulation_machine_update* machine_update);
-static bool __cdecl simulation_machine_update_decode(c_bitstream* packet, struct simulation_machine_update* machine_update);
-
-
-#include "simulation/simulation_players.h"
-
 /* public code */
+
+void simulation_read_quantized_position(
+	class c_bitstream* packet,
+	real_point3d* position,
+	int32 axis_encoding_bit_count)
+{
+	long_point3d point_quantization;
+
+	packet->read_point3d("point-quantization", &point_quantization, axis_encoding_bit_count);
+	dequantize_real_point3d(&point_quantization, &global_structure_bsp_get()->world_bounds, axis_encoding_bit_count, position);
+
+	return;
+}
 
 void __cdecl simulation_player_update_encode(c_bitstream* packet, const simulation_player_update* player_update)
 {
@@ -47,8 +55,93 @@ bool __cdecl simulation_player_update_decode(c_bitstream* packet, simulation_pla
 	return INVOKE(0x1E078A, 0x1C7C4A, simulation_player_update_decode, packet, player_update);
 }
 
+void __cdecl player_action_encode(c_bitstream* packet, const struct player_action* action)
+{
+	INVOKE(0x1DFE4C, 0x0, player_action_encode, packet, action);
+}
 
-void __cdecl simulation_update_encode(c_bitstream* packet, struct simulation_update* update)
+bool __cdecl player_action_decode(c_bitstream* packet, struct player_action* action)
+{
+	return INVOKE(0x1E01CB, 0x0, player_action_decode, packet, action);
+}
+
+void __cdecl simulation_machine_update_encode(c_bitstream* packet, const struct simulation_machine_update* machine_update)
+{
+	INVOKE(0x1E08E7, 0x0, simulation_machine_update_encode, packet, machine_update);
+}
+
+bool __cdecl simulation_machine_update_decode(c_bitstream* packet, struct simulation_machine_update* machine_update)
+{
+	return INVOKE(0x1E0935, 0x0, simulation_machine_update_decode, packet, machine_update);
+}
+
+bool player_action_compare(
+	struct player_action const* action1,
+	struct player_action* action2)
+{
+	bool result = false;
+
+	ASSERT(action1);
+	ASSERT(action2);
+
+	if (
+		c_bitstream::compare_quantized_reals(action1->facing.yaw, action2->facing.yaw, 0.f, (2.f* _pi), 13, false, true) &&
+		c_bitstream::compare_quantized_reals(action1->facing.pitch, action2->facing.pitch, -_pi, _pi, 12, false, false) &&
+		c_bitstream::compare_quantized_reals(action1->throttle.x, action2->throttle.x, -1.f, 1.f, 5, true, false) &&
+		c_bitstream::compare_quantized_reals(action1->throttle.y, action2->throttle.y, -1.f, 1.f, 5, true, false) &&
+		c_bitstream::compare_quantized_reals(action1->trigger, action2->trigger, 0.f, 1.f, 5, false, false) && 
+		c_bitstream::compare_quantized_reals(action1->secondary_trigger, action2->secondary_trigger, 0.f, 1.f, 5, false, false) &&
+		c_bitstream::compare_quantized_reals(action1->aim_assist_data.primary_auto_aim_level, action2->aim_assist_data.primary_auto_aim_level, 0.f, 1.f, 4, false, false) &&
+		c_bitstream::compare_quantized_reals(action1->aim_assist_data.secondary_auto_aim_level, action2->aim_assist_data.secondary_auto_aim_level, 0.f, 1.f, 4, false, false)
+	)
+	{
+		result = true;
+		
+		action2->facing = action1->facing;
+		action2->throttle = action1->throttle;
+		action2->trigger = action1->trigger;
+		action2->secondary_trigger = action1->secondary_trigger;
+		action2->aim_assist_data.primary_auto_aim_level = action1->aim_assist_data.primary_auto_aim_level;
+		action2->aim_assist_data.secondary_auto_aim_level = action1->aim_assist_data.secondary_auto_aim_level;
+	}
+	return result;
+}
+
+bool simulation_update_compare(
+	struct simulation_update const* update1,
+	struct simulation_update* update2)
+{
+	bool result = true;
+
+	if (result)
+	{
+		if (update1->player_action_mask != update2->player_action_mask)
+		{
+			result = false;
+		}
+	}
+
+	if (result)
+	{
+		for (int32 i = 0; i < NUMBEROF(update1->player_actions); ++i)
+		{
+			if (TEST_BIT(update1->player_action_mask, i))
+			{
+				result = result && player_action_compare(
+					&update1->player_actions[i], 
+					&update2->player_actions[i]
+				);
+			}
+		}
+	}
+
+	return result;
+}
+
+
+void __cdecl simulation_update_encode(
+	c_bitstream* packet,
+	const struct simulation_update* update)
 {
 	//INVOKE(0x1E0998, 0x0, synchronous_update_encode_internal, packet, update);
 
@@ -103,10 +196,8 @@ void __cdecl simulation_update_encode(c_bitstream* packet, struct simulation_upd
 			k_simulation_update_estimated_size);
 	}
 
-
-	c_simulation_world* simulation_world = simulation_get_world();
-	simulation_world->queue_get(_simulation_queue_bookkeeping)->encode(packet);
-	simulation_world->queue_get(_simulation_queue)->encode(packet);
+	update->bookkeeping_simulation_queue.encode(packet);
+	update->game_simulation_queue.encode(packet);
 
 	return;
 }
@@ -157,12 +248,10 @@ bool __cdecl simulation_update_decode(
 	update->flush_gamestate = packet->read_bool("flush-gamestate");
 	update->verify_game_time = packet->read_integer("verify-game-time", SIZEOF_BITS(update->verify_game_time));
 	update->verify_random_seed = packet->read_integer("verify-random", SIZEOF_BITS(update->verify_random_seed));
-
-	c_simulation_world* simulation_world = simulation_get_world();
 	
 	// Validation
-	result = result && simulation_world->queue_get(_simulation_queue_bookkeeping)->decode(packet);
-	result = result && simulation_world->queue_get(_simulation_queue)->decode(packet);
+	result = result && update->bookkeeping_simulation_queue.decode(packet);
+	result = result && update->game_simulation_queue.decode(packet);
 	result = result && !packet->error_occurred();
 	result = result && update->verify_game_time >= 0;
 	result = result && update->update_number >= 0;
@@ -170,33 +259,12 @@ bool __cdecl simulation_update_decode(
 	// If something went wrong dispose of the queues
 	if (!result)
 	{
-		simulation_world->queue_get(_simulation_queue_bookkeeping)->dispose();
-		simulation_world->queue_get(_simulation_queue)->dispose();
+		update->bookkeeping_simulation_queue.dispose();
+		update->game_simulation_queue.dispose();
 	}
 
 	return result;
 }
 
-
-
 /* private code */
 
-void __cdecl player_action_encode(c_bitstream* packet, struct player_action* action)
-{
-	INVOKE(0x1DFE4C, 0x0, player_action_encode, packet, action);
-}
-
-bool __cdecl player_action_decode(c_bitstream* packet, struct player_action* action)
-{
-	return INVOKE(0x1E01CB, 0x0, player_action_decode, packet, action);
-}
-
-void __cdecl simulation_machine_update_encode(c_bitstream* packet, struct simulation_machine_update* machine_update)
-{
-	INVOKE(0x1E08E7, 0x0, simulation_machine_update_encode, packet, machine_update);
-}
-
-bool __cdecl simulation_machine_update_decode(c_bitstream* packet, struct simulation_machine_update* machine_update)
-{
-	return INVOKE(0x1E0935, 0x0, simulation_machine_update_decode, packet, machine_update);
-}

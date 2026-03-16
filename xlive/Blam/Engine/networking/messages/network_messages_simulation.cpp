@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "network_messages_simulation.h"
 
+#include "network_message_type_collection.h"
+
 /* public code */
 
 void __cdecl network_message_types_register_simulation(c_network_message_type_collection* message_collection)

@@ -1,13 +1,14 @@
 #include "stdafx.h"
 #include "simulation_queue_entities.h"
 
+#include "simulation.h"
 #include "simulation_gamestate_entities.h"
+#include "simulation_entity_database.h"
+#include "simulation_world.h"
 
 #include "game/game.h"
 #include "memory/bitstream.h"
 #include "networking/network_event.h"
-#include "simulation/simulation.h"
-#include "simulation/simulation_entity_database.h"
 
 // We get the absolute entity_def index from here as well as h2 needs it in order to create the game entity_def
 bool encode_simulation_queue_creation_to_buffer(uint8* out_buffer, int32 out_buffer_size, datum gamestate_index, s_simulation_queue_entity_data* data, uint32 initial_update_mask, int32* out_written_size);
@@ -178,7 +179,11 @@ bool decode_simulation_queue_creation_from_buffer(int32 encoded_size, uint8* enc
 	return decode_success;
 }
 
-bool simulation_queue_entity_creation_allocate(s_simulation_queue_entity_data* sim_queue_entity_data, uint32 initial_update_mask, s_simulation_queue_element** element, int32* gamestate_index)
+bool simulation_queue_entity_creation_allocate(
+	s_simulation_queue_entity_data* sim_queue_entity_data,
+	uint32 initial_update_mask,
+	s_simulation_queue_element** element,
+	int32* gamestate_index)
 {
 	ASSERT(game_is_distributed());
 	ASSERT(!game_is_playback());
@@ -369,7 +374,7 @@ bool encode_simulation_queue_update_to_buffer(
 
 	simulation_queue_entity_encode_header(&stream, data->entity_type, gamestate_index);
 	simulation_entity_index_encode(&stream, data->entity_index);
-	stream.write_integer("update-mask", update_mask, 32);
+	stream.write_integer("update-mask", update_mask, SIZEOF_BITS(update_mask));
 
 	// write the actual encode_buffer
 	c_simulation_entity_definition* entity_def = simulation_queue_entities_get_definition(data->entity_type);
@@ -377,14 +382,16 @@ bool encode_simulation_queue_update_to_buffer(
 	entity_def->entity_update_encode(false, update_mask, &update_mask_written, data->state_data_size, data->state_data, NULL, &stream, 0);
 
 	bool result = !stream.error_occurred();
-	stream.finish_writing(NULL);
-
 	*out_encoded_size = stream.get_space_used_in_bytes();
+	stream.finish_writing(NULL);
 
 	return result;
 }
 
-bool decode_simulation_queue_update_from_buffer(int32 encoded_size, uint8* encoded_data, s_simulation_queue_decoded_update_data* out_decoded_data)
+bool decode_simulation_queue_update_from_buffer(
+	int32 encoded_size,
+	uint8* encoded_data,
+	s_simulation_queue_decoded_update_data* out_decoded_data)
 {
 	bool decode_success = false;
 
@@ -394,7 +401,7 @@ bool decode_simulation_queue_update_from_buffer(int32 encoded_size, uint8* encod
 	if (simulation_queue_entity_decode_header(&stream, &out_decoded_data->entity_type, &out_decoded_data->gamestate_index))
 	{
 		simulation_entity_index_decode(&stream, &out_decoded_data->entity_index);
-		out_decoded_data->update_mask = stream.read_integer("update-mask", 32);
+		out_decoded_data->update_mask = stream.read_integer("update-mask", SIZEOF_BITS(out_decoded_data->update_mask));
 
 		c_simulation_entity_database* entity_database = simulation_get_entity_database();
 		s_simulation_game_entity* entity = entity_database->entity_try_and_get(out_decoded_data->entity_index);
@@ -451,7 +458,11 @@ bool decode_simulation_queue_update_from_buffer(int32 encoded_size, uint8* encod
 	return decode_success;
 }
 
-bool simulation_queue_entity_update_allocate(s_simulation_queue_entity_data* entity_data, int32 gamestate_index, uint32 update_mask, s_simulation_queue_element** element)
+bool simulation_queue_entity_update_allocate(
+	s_simulation_queue_entity_data* entity_data,
+	int32 gamestate_index,
+	uint32 update_mask,
+	s_simulation_queue_element** element)
 {
 	ASSERT(game_is_distributed());
 	ASSERT(!game_is_playback());
@@ -459,7 +470,6 @@ bool simulation_queue_entity_update_allocate(s_simulation_queue_entity_data* ent
 	// TODO: gamestate
 	//ASSERT(gamestate_index != NONE);
 	//ASSERT(simulation_gamestate_index_valid(gamestate_index));
-
 
 	//int32 entity_index = simulation_gamestate_entity_create();
 
@@ -532,15 +542,18 @@ void simulation_queue_entity_update_apply(const s_simulation_queue_element* elem
 	ASSERT(element);
 	ASSERT(element->type == _simulation_queue_element_type_entity_update);
 
-	if (game_is_distributed() && !game_is_playback())
+	if (game_is_distributed())
 	{
 		s_simulation_queue_decoded_update_data decoded_update_data;
 		csmemset(&decoded_update_data, 0, sizeof(decoded_update_data));
 
-		if (decode_simulation_queue_update_from_buffer(element->data_size, element->data, &decoded_update_data))
+		if (decode_simulation_queue_update_from_buffer(
+			element->data_size,
+			element->data,
+			&decoded_update_data))
 		{
-			c_simulation_entity_definition* entity_def = simulation_queue_entities_get_definition(decoded_update_data.entity_type);
 			s_simulation_game_entity* game_entity = simulation_get_entity_database()->entity_try_and_get(decoded_update_data.entity_index);
+			c_simulation_entity_definition* entity_def = simulation_queue_entities_get_definition(decoded_update_data.entity_type);
 
 			if (game_entity)
 			{

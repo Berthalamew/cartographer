@@ -46,7 +46,7 @@ void __cdecl ok_cancel_dialog_show_hook(e_user_interface_channel_type channel_ty
 
 
 
-void* __cdecl c_screen_error_dialog_ok::load_for_active_users(s_screen_parameters* parameters)
+void* __cdecl c_screen_error_dialog_ok::load_for_active_users(c_screen_parameters* parameters)
 {
 	if ((parameters->m_user_flags & 0xFF) == (uint8)NONE)
 	{

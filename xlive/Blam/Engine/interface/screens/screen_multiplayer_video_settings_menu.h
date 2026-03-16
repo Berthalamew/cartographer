@@ -48,9 +48,11 @@ protected:
 	c_multiplayer_video_settings_list m_mp_video_settings_list;
 
 public:
-	static void* load(s_screen_parameters* parameters);
-	static void apply_instance_patches();
+	c_screen_multiplayer_video_settings(const c_screen_parameters* parameters);
 	c_screen_multiplayer_video_settings(e_user_interface_channel_type channel_type, e_user_interface_render_window window_index, uint16 user_flags);
+
+	static void* load(c_screen_parameters* parameters);
+	static void apply_instance_patches();
 
 	// c_screen_multiplayer_video_settings virtual functions
 

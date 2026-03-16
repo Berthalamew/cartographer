@@ -1,8 +1,9 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "screen_button_settings.h"
 
 #include "cache/cache_files.h"
 #include "input/input_abstraction.h"
+#include "interface/user_interface_bitmap_block.h"
 #include "interface/user_interface_memory.h"
 #include "interface/user_interface_screen_widget_definition.h"
 #include "saved_games/player_profile.h"
@@ -268,7 +269,7 @@ void c_button_settings_edit_list::update_list_items(c_list_item_widget* item, in
 }
 
 
-void c_button_settings_edit_list::handle_item_pressed_event(s_event_record* const& event, datum* pitem_index)
+void c_button_settings_edit_list::handle_item_pressed_event(s_event_record* const &event, datum* pitem_index)
 {
 	//INVOKE_TYPE(0x25D0AC, 0x0, void(__thiscall*)(c_button_settings_edit_list*, s_event_record**, datum*), this, pevent, pitem_index);
 
@@ -313,8 +314,17 @@ void c_button_settings_edit_list::handle_item_pressed_event(s_event_record* cons
 // 
 
 
-c_screen_button_settings_menu::c_screen_button_settings_menu(e_user_interface_channel_type channel_type, e_user_interface_render_window window_index, int16 user_flags, e_user_interface_screen_id screen_id) :
-	c_screen_with_menu(screen_id, channel_type, window_index, user_flags, &m_button_settings_list),
+c_screen_button_settings_menu::c_screen_button_settings_menu(
+	e_user_interface_channel_type channel_type,
+	e_user_interface_render_window window_index,
+	int16 user_flags,
+	e_user_interface_screen_id screen_id) :
+	c_screen_with_menu(
+		screen_id,
+		channel_type,
+		window_index,
+		user_flags,
+		&m_button_settings_list),
 	m_button_settings_list(user_flags),
 	field_D3C(NONE)
 {
@@ -423,7 +433,7 @@ const void* c_screen_button_settings_menu::load_proc() const
 }
 
 
-void* c_screen_button_settings_menu::load(s_screen_parameters* parameters)
+void* c_screen_button_settings_menu::load(c_screen_parameters* parameters)
 {
 	//return INVOKE(0x255FA4, 0x0, c_screen_button_settings_menu::load, parameters);
 	c_screen_button_settings_menu* screen;
@@ -449,7 +459,7 @@ void* c_screen_button_settings_menu::load(s_screen_parameters* parameters)
 	return screen;
 }
 
-void* c_screen_button_settings_menu::load_qtr(s_screen_parameters* parameters)
+void* c_screen_button_settings_menu::load_qtr(c_screen_parameters* parameters)
 {
 	//return INVOKE(0x259DC0, 0x0, c_screen_button_settings_menu::load_qtr, parameters);
 	c_screen_button_settings_menu* screen;

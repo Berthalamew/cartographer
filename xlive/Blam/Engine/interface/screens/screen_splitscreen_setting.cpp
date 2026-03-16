@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "screen_splitscreen_setting.h"
 
 #include "interface/user_interface_memory.h"
@@ -176,7 +176,7 @@ c_screen_splitscreen_menu::c_screen_splitscreen_menu(e_user_interface_channel_ty
 {
 }
 
-void c_screen_splitscreen_menu::initialize(s_screen_parameters* parameters)
+void c_screen_splitscreen_menu::initialize(c_screen_parameters* parameters)
 {
 	c_screen_with_menu::initialize(parameters);
 
@@ -214,7 +214,7 @@ const void* c_screen_splitscreen_menu::load_proc() const
 	return &c_screen_splitscreen_menu::load;
 }
 
-void* c_screen_splitscreen_menu::load(s_screen_parameters* parameters)
+void* c_screen_splitscreen_menu::load(c_screen_parameters* parameters)
 {
 	c_screen_splitscreen_menu* screen;
 

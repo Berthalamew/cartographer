@@ -181,6 +181,12 @@ void main_game_load_post_game_launch()
 	}
 }
 
+bool main_game_reset_in_progress(
+	void)
+{
+	return main_game_globals_get()->map_reset_in_progress;
+}
+
 // TODO rewrite the obfuscated function
 bool __cdecl main_game_change(const s_game_options* options)
 {

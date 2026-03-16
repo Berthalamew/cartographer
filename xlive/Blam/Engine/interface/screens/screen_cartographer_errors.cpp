@@ -133,7 +133,7 @@ void c_cartographer_error_menu::get_error_label(e_cartographer_error_id error_id
 
 void* c_cartographer_error_menu::load_by_error_id(e_cartographer_error_id error_id) {
 
-	s_screen_parameters params;
+	c_screen_parameters params;
 	c_cartographer_error_menu* error_menu = NULL;
 
 	params.m_flags = 0;
@@ -151,7 +151,7 @@ void* c_cartographer_error_menu::load_by_error_id(e_cartographer_error_id error_
 	return error_menu;
 }
 
-void* c_cartographer_error_menu::load(s_screen_parameters* parameters)
+void* c_cartographer_error_menu::load(c_screen_parameters* parameters)
 {
 	c_cartographer_error_menu* error_menu = nullptr;
 	BYTE* ui_buffer = ui_pool_allocate_space(sizeof(c_cartographer_error_menu), 0);
@@ -210,18 +210,18 @@ bool c_cartographer_error_menu::handle_event(s_event_record* event)
 	return result;
 }
 
-void c_cartographer_error_menu::initialize(s_screen_parameters* screen_parameters)
+void c_cartographer_error_menu::initialize(c_screen_parameters* screen_parameters)
 {
 	s_interface_expected_screen_layout layout;
 	csmemset(&layout, 0, sizeof(layout));
 	layout.panes_count = 1;
 
-	datum widget_tag_datum = user_interface_get_screen_tag_index_by_id(this->m_screen_id);
+	datum widget_tag_datum = user_interface_get_screen_tag_index_by_id(m_screen_id);
 	if (widget_tag_datum != NONE)
 	{
-		this->verify_and_load_from_layout(widget_tag_datum, &layout);
+		verify_and_load_from_layout(widget_tag_datum, &layout);
 	}
-	this->setup_children();
+	setup_children();
 
 	//update header and subheader labels
 

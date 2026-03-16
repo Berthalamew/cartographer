@@ -3,6 +3,8 @@
 
 #include "random_direction_table.h"
 
+#include "game/game.h"
+
 // More info:
 // https://en.wikipedia.org/wiki/Linear_congruential_generator
 // https://www.cec.uchile.cl/cinetica/pcordero/MC_libros/NumericalRecipesinC.pdf
@@ -41,7 +43,7 @@ enum
 
 /* globals */
 
-int32 g_random_seed_allow = 0;
+static int32 random_seed_allow_use_count = 0;
 
 /* public code */
 
@@ -53,6 +55,12 @@ s_random_math* random_math_get_globals()
 uint32 get_random_seed(
 	void)
 {
+	// Added assert for allow use count (added in h3)
+	if (!game_in_editor())
+	{
+		ASSERT(random_seed_allow_use_count>0);
+	}
+
 	return random_math_get_globals()->seed;
 }
 
@@ -106,16 +114,16 @@ real_vector3d* _random_direction3d(uint32* seed, const char* type, char* file, i
 
 void random_seed_allow_use(void)
 {
-	++g_random_seed_allow;
+	++random_seed_allow_use_count;
 	return;
 }
 
 void random_seed_disallow_use(void)
 {
-	if (g_random_seed_allow <= 0)
+	if (random_seed_allow_use_count <= 0)
 	{
 		DISPLAY_ASSERT("unmatched call to random_seed_disallow() somewhere");
 	}
-	--g_random_seed_allow;
+	--random_seed_allow_use_count;
 	return;
 }

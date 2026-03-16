@@ -244,7 +244,7 @@ void c_main_menu_list::handle_item_campaign(s_event_record* const& event)
 	}
 	else if (online_connected_to_xbox_live())
 	{
-		s_screen_parameters params;
+		c_screen_parameters params;
 		params.m_flags = 0;
 		params.m_window_index = _window_4;
 		params.m_context = 0;
@@ -288,7 +288,7 @@ void c_main_menu_list::handle_item_xbox_live(s_event_record* const& event)
 	//h2v on the other hand checks for live-connection-status and the flag
 	if (online_connected_to_xbox_live() || shell_command_line_flag_is_set(_shell_command_line_flag_unlock_xbox_live_menus))
 	{
-		s_screen_parameters params;
+		c_screen_parameters params;
 		params.m_flags = 0;
 		params.m_window_index = _window_4;
 		params.m_context = 0;
@@ -381,7 +381,7 @@ void c_main_menu_list::handle_item_settings(s_event_record* const& event)
 {
 	//return INVOKE_TYPE(0xB32B, 0x0, bool(__thiscall*)(c_main_menu_list*, s_event_record**), this, pevent);
 
-	s_screen_parameters params;
+	c_screen_parameters params;
 	params.m_flags = 0;
 	params.m_window_index = _window_4;
 	params.m_context = NULL;
@@ -411,7 +411,7 @@ static bool __cdecl screen_show_campaign_options_without_achievement(e_controlle
 {
 	//return INVOKE(0x213673, 0x0, screen_show_campaign_options_without_achievement, controller_index);
 
-	s_screen_parameters params;
+	c_screen_parameters params;
 	params.m_flags = 0;
 	params.m_window_index = _window_4;
 	params.m_context = 0;
@@ -438,7 +438,7 @@ static bool __cdecl screen_show_screen_4way_signin_splitscreen_offline(e_control
 	}
 	else
 	{
-		s_screen_parameters params;
+		c_screen_parameters params;
 		params.m_flags = 0;
 		params.m_window_index = _window_4;
 		params.m_context = 0;
@@ -468,7 +468,7 @@ static bool __cdecl screen_show_screen_4way_signin_system_link_offline(e_control
 	{
 		if (transport_available())
 		{
-			s_screen_parameters params;
+			c_screen_parameters params;
 			params.m_flags = 0;
 			params.m_window_index = _window_4;
 			params.m_context = 0;
@@ -513,7 +513,7 @@ static bool __cdecl screen_show_screen_4way_signin_xbox_live_callback(void)
 			nullptr);
 	}
 
-	s_screen_parameters params;
+	c_screen_parameters params;
 	params.m_flags = 0;
 	params.m_window_index = _window_4;
 	params.m_context = 0;

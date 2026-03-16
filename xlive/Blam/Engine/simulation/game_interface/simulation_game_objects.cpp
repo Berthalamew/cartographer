@@ -2,22 +2,214 @@
 #include "simulation_game_objects.h"
 
 #include "simulation_game_interface.h"
+#include "simulation_game_object_constants.h"
 
 #include "cache/cache_files.h"
 #include "memory/bitstream.h"
 #include "models/models.h"
+#include "networking/network_event.h"
 #include "objects/objects.h"
 #include "objects/object_definition.h"
+#include "simulation/simulation_encoding.h"
 
+/* constants */
 
+static real32 const k_object_shield_vitality_maximum = 3.f;
+static real32 const k_object_shield_vitality_minimum = 0.f;
+static real32 const k_object_translational_velocity_magnitude_maximum = 350.f;
+static real32 const k_object_translational_velocity_magnitude_minimum = 0.03f;
+static real32 const k_object_angular_velocity_magnitude_maximum = 30.f;
+static real32 const k_object_angular_velocity_magnitude_minimum = 0.03f;
+static real32 const k_object_body_vitality_maximum = 1.f;
+static real32 const k_object_body_vitality_minimum = -1.f;
+static real32 const k_object_scale_maximum = 10.f;
+
+/* typedefs */
+
+typedef void(__stdcall* c_simulation_unit_entity_definition_creation_encode_t)(void*, s_simulation_object_creation_data*, c_bitstream*);
+typedef bool(__stdcall* c_simulation_unit_entity_definition_creation_decode_t)(void* thisptr, void* creation_data, c_bitstream* stream);
+
+/* prototypes */
 
 // Ensure we aren't sending a variant index that's the same as the default variant
 // Inefficient since the variant will be set to it regardless
 // If we sync the variant index of the "default" variant this can also cause an issue where the default dialouge isn't selected but that variants specific dialouge
-bool simulation_object_variant_should_sync(s_simulation_object_creation_data* creation_data);
+static bool simulation_object_variant_should_sync(s_simulation_object_creation_data* creation_data);
+
+/* globals */
+
+static c_simulation_unit_entity_definition_creation_encode_t p_c_simulation_unit_entity_definition_encode;
+static c_simulation_unit_entity_definition_creation_decode_t p_c_simulation_unit_entity_definition_decode;
+
+/* public code */
+
+bool c_simulation_object_entity_definition::object_update_decode(
+	bool initial_update,
+	uint32* update_mask,
+	s_simulation_object_state_data* object_state_data,
+	class c_bitstream* packet)
+{
+	bool decode_success = true;
+
+	ASSERT(update_mask);
+	ASSERT(object_state_data);
+	ASSERT(packet);
+	ASSERT((*update_mask & MASK(k_simulation_object_update_flag_count))==0);
+
+	if (packet->read_bool("dead-exists"))
+	{
+		object_state_data->dead = packet->read_bool("dead");
+		SET_BIT(*update_mask, _simulation_object_update_dead_bit, true);
+	}
+
+	if (packet->read_bool("position-exists"))
+	{
+		simulation_read_quantized_position(packet, &object_state_data->relative_position, 16);
+		SET_BIT(*update_mask, _simulation_object_update_position_bit, true);
+		decode_success = decode_success && valid_real_point3d(&object_state_data->relative_position);
+		
+		if (!decode_success)
+		{
+			event(_event_warning, "simulation:objects: failed to decode object position");
+		}
+	}
+
+	if (packet->read_bool("forward-and-up-exists"))
+	{
+		packet->read_axes("forward-and-up", &object_state_data->forward, &object_state_data->up);
+		SET_BIT(*update_mask, _simulation_object_update_forward_and_up_bit, true);
+		decode_success = decode_success && valid_real_vector3d_axes2(&object_state_data->forward, &object_state_data->up);
+
+		if (!decode_success)
+		{
+			event(_event_warning, "simulation:objects: failed to decode object forward/up");
+		}
+	}
+
+	if (packet->read_bool("scale-exists"))
+	{
+		object_state_data->scale = packet->read_quantized_real("scale", 0.f, k_object_scale_maximum, 7, false);
+		SET_BIT(*update_mask, _simulation_object_update_scale_bit, true);
+		decode_success = decode_success && valid_real(object_state_data->scale);
+
+		if (!decode_success)
+		{
+			event(_event_warning, "simulation:objects: failed to decode object scale");
+		}
+	}
+
+	if (packet->read_bool("translational-velocity-exists"))
+	{
+		packet->read_vector(
+			"translational-velocity",
+			&object_state_data->translational_velocity,
+			k_object_translational_velocity_magnitude_minimum,
+			k_object_translational_velocity_magnitude_maximum,
+			10);
+		SET_BIT(*update_mask, _simulation_object_update_translational_velocity_bit, true);
+		decode_success = decode_success && valid_real_vector3d(&object_state_data->translational_velocity);
+
+		if (!decode_success)
+		{
+			event(_event_warning, "simulation:objects: failed to decode translational velocity");
+		}
+	}
+
+	if (packet->read_bool("angular-velocity-exists"))
+	{
+		packet->read_vector(
+			"angular-velocity",
+			&object_state_data->angular_velocity,
+			k_object_angular_velocity_magnitude_minimum,
+			k_object_angular_velocity_magnitude_maximum,
+			8);
+		SET_BIT(*update_mask, _simulation_object_update_angular_velocity_bit, true);
+		decode_success = decode_success && valid_real_vector3d(&object_state_data->angular_velocity);
+
+		if (!decode_success)
+		{
+			event(_event_warning, "simulation:objects: failed to decode angular velocity");
+		}
+	}
+
+	if (packet->read_bool("body-vitality-exists"))
+	{
+		object_state_data->body_vitality = packet->read_quantized_real("body-vitality", k_object_body_vitality_minimum, k_object_body_vitality_maximum, 8, true);
+		object_state_data->body_stun_ticks_is_zero = packet->read_bool("body-stun-ticks-is-zero");
+		SET_BIT(*update_mask, _simulation_object_update_body_vitality_bit, true);
+		decode_success = decode_success && valid_real(object_state_data->body_vitality);
+
+		if (!decode_success)
+		{
+			event(_event_warning, "simulation:objects: failed to decode body vitality");
+		}
+	}
+
+	if (packet->read_bool("shield-vitality-exists"))
+	{
+		object_state_data->shield_vitality = packet->read_quantized_real("shield-vitality", k_object_shield_vitality_minimum, k_object_shield_vitality_maximum, 8, true);
+		object_state_data->shield_stun_ticks_is_zero = packet->read_bool("shield-stun-ticks-is-zero");
+		SET_BIT(*update_mask, _simulation_object_update_shield_vitality_bit, true);
+		decode_success = decode_success && valid_real(object_state_data->shield_vitality);
+
+		if (!decode_success)
+		{
+			event(_event_warning, "simulation:objects: failed to decode shield vitality");
+		}
+	}
+
+	if (packet->read_bool("region-state-exists"))
+	{
+		object_state_data->region_count = (uint8)packet->read_integer("region-count", 4);
+		decode_success = decode_success && VALID_INDEX(object_state_data->region_count, NUMBEROF(object_state_data->region_states));
+
+		for (int32 i = 0; i<NUMBEROF(object_state_data->region_states); ++i)
+		{
+			object_state_data->region_states[i] = (uint8)packet->read_integer("region-state", 3);
+			decode_success = decode_success && VALID_INDEX(object_state_data->region_states[i], k_maximum_number_of_model_states);
+
+			if (!decode_success)
+			{
+				event(_event_warning, "simulation:objects: failed to decode region state");
+			}
+		}
+
+		SET_BIT(*update_mask, _simulation_object_update_region_state_bit, true);
+	}
+
+	if (packet->read_bool("constraint-state-exists"))
+	{
+		object_state_data->constraint_count = (uint8)packet->read_integer("constraint-count", 5);
+		decode_success = decode_success && VALID_INDEX(object_state_data->constraint_count, MAXIMUM_DAMAGE_CONSTRAINT_INFOS_PER_MODEL);
+
+		if (!decode_success)
+		{
+			event(_event_warning, "simulation:objects: failed to constraint cound");
+		}
+
+		if (object_state_data->constraint_count)
+		{
+			object_state_data->destroyed_constraints = (uint16)packet->read_integer("destroyed-constraints", object_state_data->constraint_count);
+			object_state_data->loosened_constraints = (uint16)packet->read_integer("loosened-constraints", object_state_data->constraint_count);
+		}
+
+		SET_BIT(*update_mask, _simulation_object_update_constraints_bit, true);
+	}
+
+	decode_success = decode_success && !packet->overflowed();
+	if (!decode_success)
+	{
+		event(_event_warning, "simulation:objects: packet overflowed!");
+	}
+
+	return decode_success;
+}
 
 // Builds creation data for objects
-void __stdcall c_simulation_object_entity_definition__object_build_creation_data(void* _this, datum object_index, s_simulation_object_creation_data* creation_data)
+void __stdcall c_simulation_object_entity_definition__object_build_creation_data(
+	void* _this,
+	datum object_index,
+	s_simulation_object_creation_data* creation_data)
 {
 	const object_datum* object = object_get(object_index);
 	creation_data->object_definition_index = object->definition_index;
@@ -28,7 +220,8 @@ void __stdcall c_simulation_object_entity_definition__object_build_creation_data
 	return;
 }
 
-bool simulation_object_variant_should_sync(s_simulation_object_creation_data* creation_data)
+static bool simulation_object_variant_should_sync(
+	s_simulation_object_creation_data* creation_data)
 {
 	bool sync_variant = creation_data->model_variant_index != NONE;
 	object_definition* object_def = (object_definition*)tag_get_fast(creation_data->object_definition_index);
@@ -47,8 +240,6 @@ bool simulation_object_variant_should_sync(s_simulation_object_creation_data* cr
 	return sync_variant;
 }
 
-typedef void(__stdcall* c_simulation_unit_entity_definition_creation_encode_t)(void*, s_simulation_object_creation_data*, c_bitstream*);
-c_simulation_unit_entity_definition_creation_encode_t p_c_simulation_unit_entity_definition_encode;
 void __stdcall c_simulation_object_entity_definition__object_creation_encode(void* _this, s_simulation_object_creation_data* creation_data, c_bitstream* packet)
 {
 	bool model_variant_id_exists = simulation_object_variant_should_sync(creation_data);
@@ -63,8 +254,6 @@ void __stdcall c_simulation_object_entity_definition__object_creation_encode(voi
 	return;
 }
 
-typedef bool(__stdcall* c_simulation_unit_entity_definition_creation_decode_t)(void* thisptr, void* creation_data, c_bitstream* stream);
-c_simulation_unit_entity_definition_creation_decode_t p_c_simulation_unit_entity_definition_decode;
 bool __stdcall c_simulation_object_entity_definition__object_creation_decode(void* _this, s_simulation_object_creation_data* creation_data, c_bitstream* packet)
 {
 	if (packet->read_bool("model-variant-index-exists"))
@@ -102,7 +291,7 @@ bool __stdcall c_simulation_object_entity_definition__object_setup_placement_dat
 		placement_data->emblem_info = object_creation_data->emblem_info;
 		if (TEST_BIT(*flags, 1))
 		{
-			placement_data->position = state_data->position;
+			placement_data->position = state_data->relative_position;
 			*flags &= ~FLAG(1);
 		}
 		if (TEST_BIT(*flags, 2))

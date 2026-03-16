@@ -20,7 +20,7 @@ private:
 	int32 m_window_index;
 	class c_screen_widget* m_active_screen;
 	class c_screen_widget* m_incoming_screen;
-	s_screen_parameters m_incoming_screen_parameters;
+	c_screen_parameters m_incoming_screen_parameters;
 	class c_screen_widget* m_outgoing_screen;
 	class c_user_interface_widget* m_focussed_widgets[k_focussed_widget_types];
 
@@ -38,7 +38,7 @@ public:
 	virtual void dispose_screens();
 	virtual void update_channel();
 	virtual class c_screen_widget* sub_638025(rectangle2d* bounds);
-	virtual void register_incoming_screen(class c_screen_widget* new_screen, s_screen_parameters* parameters);
+	virtual void register_incoming_screen(class c_screen_widget* new_screen, c_screen_parameters* parameters);
 	virtual void  retreat_one_step();
 	virtual int32  destroy_target_screen(class c_screen_widget* a2);
 	virtual void construct_parameters_from_active_screen();

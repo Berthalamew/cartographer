@@ -87,8 +87,8 @@ class c_screen_network_squad_browser : c_screen_with_menu
 	int32 m_selected_column_index;
 	int32 field_1F08;
 
-	static c_screen_network_squad_browser* __cdecl load_network_browser(s_screen_parameters* parameters);
-	static c_screen_network_squad_browser* __cdecl load_live_browser(s_screen_parameters* parameters);
+	static c_screen_network_squad_browser* __cdecl load_network_browser(c_screen_parameters* parameters);
+	static c_screen_network_squad_browser* __cdecl load_live_browser(c_screen_parameters* parameters);
 
 public:
 	static void apply_patches(void);
@@ -98,6 +98,6 @@ public:
 
 	void build_players_list_fix(c_player_widget_representation* representations, int32 player_count);
 
-	static void* __cdecl load(s_screen_parameters* parameters);
+	static void* __cdecl load(c_screen_parameters* parameters);
 };
 ASSERT_STRUCT_SIZE(c_screen_network_squad_browser, 0x1F0C);

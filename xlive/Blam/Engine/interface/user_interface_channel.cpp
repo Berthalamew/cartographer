@@ -4,7 +4,7 @@
 
 bool c_user_interface_channel::active_or_incoming_screen_exists()
 {
-    return this->m_active_screen || this->m_incoming_screen;
+    return m_active_screen || m_incoming_screen;
 }
 
 void c_user_interface_channel::transition_out()

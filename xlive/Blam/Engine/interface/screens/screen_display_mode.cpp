@@ -130,7 +130,7 @@ void c_display_mode_edit_list::handle_item_pressed_event(s_event_record* const& 
 		rasterizer_settings_process_display_changes(true, false); 
 		rasterizer_settings_update_window_position();
 
-		s_screen_parameters params;
+		c_screen_parameters params;
 		params.m_flags = 0;
 		params.m_window_index = get_parent_render_window();
 		params.m_context = 0;
@@ -168,7 +168,7 @@ const void* c_screen_display_mode_menu::load_proc() const
 }
 
 
-void* __cdecl c_screen_display_mode_menu::load(s_screen_parameters* parameters)
+void* __cdecl c_screen_display_mode_menu::load(c_screen_parameters* parameters)
 {
 	//return INVOKE(0x2491D3, 0x0, c_screen_display_mode_menu::load, parameters);
 
@@ -193,7 +193,7 @@ void* __cdecl c_screen_display_mode_menu::load(s_screen_parameters* parameters)
 	return screen;
 }
 
-void* __cdecl c_screen_display_mode_menu::load_mp(s_screen_parameters* parameters)
+void* __cdecl c_screen_display_mode_menu::load_mp(c_screen_parameters* parameters)
 {
 	//return INVOKE(0x258C02, 0x0, c_screen_display_mode_menu::load_mp, parameters);
 

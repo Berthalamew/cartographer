@@ -43,6 +43,6 @@ private:
 class c_screen_single_player_profile_select_fancy
 {
 public:
-	static void* load(s_screen_parameters* parameters);
+	static void* load(c_screen_parameters* parameters);
 };
 

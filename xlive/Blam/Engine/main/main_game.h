@@ -43,6 +43,8 @@ void main_game_load_from_core_name(const char* core_name);
 
 void main_game_load_post_game_launch();
 
+bool main_game_reset_in_progress(void);
+
 // Starts a new game with the options provided
 bool __cdecl main_game_change(const struct s_game_options* options);
 

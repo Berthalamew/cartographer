@@ -38,17 +38,15 @@ public:
 	bool has_data_to_transmit(void) override;
 	bool build_outgoing_requests(const s_simulation_view_telemetry_data* telemetry_data, int32 maximum_number_of_requests, void* requests) override;
 	int32 terminator_required_bits(void) override;
-	void write_to_packet(void* request_identifier, int32 request_type, void* telemetry_data, int32 packet_sequence_number, class c_bitstream* packet, int32 must_leave_space_bits) override;
-	void write_terminator_to_packet(class c_bitstream* packet) override;
-	int32 read_from_packet(class c_bitstream* packet, int32 maximum_number_of_requests, void* requests, int32* out_number_of_requests) override;
+	void write_to_packet(void* request_identifier, int32 request_type, void* telemetry_data, int32 packet_sequence_number, c_bitstream* packet, int32 must_leave_space_bits) override;
+	void write_terminator_to_packet(c_bitstream* packet) override;
+	int32 read_from_packet(c_bitstream* packet, int32 maximum_number_of_requests, void* requests, int32* out_number_of_requests) override;
 	void process_incoming_request(void* request) override;
 	void notify_packet_acknowledged(void) override;
 	void mark_packet_delivered(bool delivered) override;
 
 	void initialize(int32 world_view_index, class c_replication_entity_manager* entity_manager);
 	void reset(void);
-
-	void create_entity(int32 entity_index);
 
 	void stop_replication(void);
 

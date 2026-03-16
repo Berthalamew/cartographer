@@ -91,6 +91,29 @@ int32 c_bitstream::read_integer(const char* name, uint32 size_in_bits)
 	return INVOKE_TYPE(0xD1EE5, 0xCE49F, read_integer_t, this, name, size_in_bits);
 }
 
+void c_bitstream::read_point3d(
+	char const* debug_string,
+	long_point3d* point, 
+	int32 axis_encoding_size_in_bits)
+{
+	ASSERT(reading());
+	ASSERT(axis_encoding_size_in_bits>=0&&axis_encoding_size_in_bits<=SIZEOF_BITS(point->n[0]));
+
+	for (int32 axis = 0; axis<NUMBEROF(point->n); ++axis)
+	{
+		point->n[axis]= read_value_internal(axis_encoding_size_in_bits);
+		ASSERT(point->n[axis] < (1 << axis_encoding_size_in_bits));
+	}
+
+	return;
+}
+
+uint32 c_bitstream::read_value_internal(int32 size_in_bits)
+{
+	typedef uint32(__thiscall* read_value_internal_t)(c_bitstream*, int32);
+	return INVOKE_TYPE(0xD167B, 0x0, read_value_internal_t, this, size_in_bits);
+}
+
 void c_bitstream::write_raw_data(const char* name, const void* data, uint32 size_in_bits)
 {
 	typedef void(__thiscall* write_raw_data_t)(c_bitstream*, const char*, const void*, uint32);
@@ -122,16 +145,21 @@ void c_bitstream::data_decode_address(const char* name, void* address)
 	INVOKE_TYPE(0xD1FFD, 0xCE5B7, data_decode_address_t, this, name, address);
 }
 
-void c_bitstream::data_encode_quantized_real(const char* name, real32 value, real32 min_value, real32 max_value, int32 size_in_bits, bool exact_midpoint)
+void c_bitstream::write_quantized_real(const char* name, real32 value, real32 min_value, real32 max_value, int32 size_in_bits, bool exact_midpoint)
 {
 	typedef void(__thiscall* data_encode_quantized_real_t)(c_bitstream*, const char*, real32, real32, real32, int32, bool);
 	INVOKE_TYPE(0xD1B9B, 0xCE155, data_encode_quantized_real_t, this, name, value, min_value, max_value, size_in_bits, exact_midpoint);
 }
 
-real32 c_bitstream::data_decode_quantized_real(const char* name, real32 min_value, real32 max_value, int32 size_in_bits, bool exact_midpoint)
+real32 c_bitstream::read_quantized_real(
+	const char* debug_string,
+	real32 min_value,
+	real32 max_value,
+	int32 size_in_bits,
+	bool exact_midpoint)
 {
 	typedef real32(__thiscall* data_decode_quantized_real_t)(c_bitstream*, const char*, real32, real32, int32, bool);
-	return INVOKE_TYPE(0xD2039, 0xCE5F3, data_decode_quantized_real_t, this, name, min_value, max_value, size_in_bits, exact_midpoint);
+	return INVOKE_TYPE(0xD2039, 0xCE5F3, data_decode_quantized_real_t, this, debug_string, min_value, max_value, size_in_bits, exact_midpoint);
 }
 
 void c_bitstream::data_encode_unit_vector(const char* name, real_vector3d* vector)
@@ -164,10 +192,14 @@ void c_bitstream::data_encode_axes(const char* name, real_vector3d* forward, rea
 	INVOKE_TYPE(0xD1D41, 0xCE2FB, data_encode_axes_t, this, name, forward, up);
 }
 
-void c_bitstream::data_decode_axes(const char* name, real_vector3d *out_forward, real_vector3d *out_up)
+void c_bitstream::read_axes(
+	char const* debug_string,
+	real_vector3d* forward,
+	real_vector3d* up)
 {
-	typedef void(__thiscall* data_decode_axes_t)(c_bitstream*, const char*, real_vector3d*, real_vector3d*);
-	INVOKE_TYPE(0xD21DB, 0xCE795, data_decode_axes_t, this, name, out_forward, out_up);
+	typedef void(__thiscall* data_decode_axes_t)(c_bitstream*, char const*, real_vector3d*, real_vector3d*);
+	INVOKE_TYPE(0xD21DB, 0xCE795, data_decode_axes_t, this, debug_string, forward, up);
+	return;
 }
 
 void c_bitstream::data_encode_vector(const char *name, real_vector3d *vector, float min_magnitude_value, float max_magnitude_value, int magnitude_size_in_bits)
@@ -176,10 +208,16 @@ void c_bitstream::data_encode_vector(const char *name, real_vector3d *vector, fl
 	INVOKE_TYPE(0xD1C4B, 0xCE205, data_encode_vector_t, this, name, vector, min_magnitude_value, max_magnitude_value, magnitude_size_in_bits);
 }
 
-void c_bitstream::data_decode_vector(const char *name, real_vector3d *out_vector, float min_magnitude_value, float max_magnitude_value, int magnitude_size_in_bits)
+void c_bitstream::read_vector(
+	char const* debug_string,
+	real_vector3d* value,
+	real32 min_magnitude,
+	real32 max_magnitude,
+	int32 magnitude_size_in_bits)
 {
-	typedef void(__thiscall* data_decode_vector_t)(c_bitstream*, const char*, real_vector3d *, float, float, int);
-	INVOKE_TYPE(0xD210C, 0xCE6C6, data_decode_vector_t, this, name, out_vector, min_magnitude_value, max_magnitude_value, magnitude_size_in_bits);
+	typedef void(__thiscall* data_decode_vector_t)(c_bitstream*, const char*, real_vector3d *, real32, real32, int32);
+	INVOKE_TYPE(0xD210C, 0xCE6C6, data_decode_vector_t, this, debug_string, value, min_magnitude, max_magnitude, magnitude_size_in_bits);
+	return;
 }
 
 void c_bitstream::write_long_integer(const char* name, uint64 value, int size_in_bits)
@@ -206,6 +244,70 @@ void c_bitstream::read_unit_vector(const char* name, real_vector3d* out_unit_vec
 {
 	int32 quantized_vector = read_integer("unit-vector", 19);
 	dequantize_unit_vector3d(quantized_vector, out_unit_vector);
+}
+
+bool c_bitstream::begin_consistency_check(
+	void)
+{
+	ASSERT(!writing());
+	reset(_bitstream_state_none);
+
+	// TODO: ifdef name
+#ifdef NDEBUG
+	return false;
+#else
+	return true;
+#endif
+}
+
+void c_bitstream::finish_consistency_check(
+	void)
+{
+	finish_reading();
+	return;
+}
+
+bool c_bitstream::compare_quantized_reals(
+	real32 value1,
+	real32 value2,
+	real32 min_value,
+	real32 max_value,
+	int32 size_in_bits,
+	bool exact_midpoint,
+	bool circular_comparison)
+{
+	int32 step_count = (1<<size_in_bits)-1;
+
+	ASSERT(size_in_bits>0);
+	ASSERT(max_value>min_value);
+	ASSERT(!exact_midpoint || size_in_bits>1);
+	
+	if (exact_midpoint)
+	{
+		step_count -= step_count % 2;
+	}
+	
+	ASSERT(step_count>0);
+
+	const real32 range = max_value-min_value;
+	const real32 delta= range / step_count;
+	const real32 value_range = fabs(value2-value1);
+
+	bool result = true;
+	if (delta<=value_range)
+	{
+		if (circular_comparison)
+		{
+			const real32 range_difference = fabs(value_range-range);
+			result = range_difference<delta;
+		}
+		else
+		{
+			result = false;
+		}
+	}
+
+	return result;
 }
 
 __declspec(naked) void jmp_write_unit_vector()

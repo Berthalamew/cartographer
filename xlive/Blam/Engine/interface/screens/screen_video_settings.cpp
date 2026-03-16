@@ -23,8 +23,6 @@
 
 #include "H2MOD/Modules/Shell/Config.h"
 
-/* macro defines */
-
 /* constants */
 
 static const char* k_video_setting_list_name = "video settings list";
@@ -205,68 +203,108 @@ void c_video_settings_list::update_list_items(c_list_item_widget* item, int32 sk
 	}
 }
 
-void c_video_settings_list::handle_item_pressed_event(s_event_record* const& event, datum* pitem_index)
+void c_video_settings_list::handle_item_pressed_event(s_event_record* const& event, datum* index)
 {
 	//INVOKE_TYPE(0x24961B, 0x0, void(__thiscall*)(c_video_settings_list*, s_event_record**, datum*), this, pevent, pitem_index);
 
-	if (DATUM_INDEX_TO_ABSOLUTE_INDEX(*pitem_index) == _item_vsync && !g_can_use_vsync)
-	{
-		//disable action when Vsync list item is pressed
-		user_interface_utilities_play_sound(_user_interface_global_sound_error);
-		return;
-	}
+	c_screen_parameters params;
 
-	s_screen_parameters params;
-	params.m_flags = 0;
-	params.m_window_index = _window_4;
-	params.m_context = 0;
-	params.m_user_flags = FLAG(event->controller);
-	params.m_channel_type = _user_interface_channel_type_gameshell_dialog;
-	params.m_screen_state.field_0 = NONE;
-	params.m_screen_state.m_last_focused_item_order = NONE;
-	params.m_screen_state.m_last_focused_item_index = NONE;
-	params.m_load_function = nullptr; // stop warning of using uinitialized var
-
-	switch (DATUM_INDEX_TO_ABSOLUTE_INDEX(*pitem_index))
+	switch (DATUM_INDEX_TO_ABSOLUTE_INDEX(*index))
 	{
 	case _item_display_mode:
-		params.m_load_function = &c_screen_display_mode_menu::load;
+		params.initialize_default_user(
+			FLAG(event->controller),
+			_user_interface_channel_type_gameshell_dialog,
+			_window_4,
+			c_screen_display_mode_menu::load);
+		params.execute_load_function();
 		break;
 	case _item_resolution:
-		params.m_load_function = &c_screen_resolution_menu::load;
+		params.initialize_default_user(
+			FLAG(event->controller),
+			_user_interface_channel_type_gameshell_dialog,
+			_window_4,
+			c_screen_resolution_menu::load);
+		params.execute_load_function();
 		break;
 	case _item_vsync:
-		params.m_load_function = &c_screen_vsync_menu::load;
+		if (g_can_use_vsync)
+		{
+			params.initialize_default_user(
+				FLAG(event->controller),
+				_user_interface_channel_type_gameshell_dialog,
+				_window_4,
+				c_screen_vsync_menu::load);
+			params.execute_load_function();
+		}
+		else
+		{
+			// Disable action when Vsync list item is pressed
+			user_interface_utilities_play_sound(_user_interface_global_sound_error);
+		}
 		break;
 	case _item_brightness_level:
-		params.m_load_function = &c_screen_brightness_level_menu::load;
+		params.initialize_default_user(
+			FLAG(event->controller),
+			_user_interface_channel_type_gameshell_dialog,
+			_window_4,
+			c_screen_brightness_level_menu::load);
+		params.execute_load_function();
 		break;
 	case _item_gamma_setting:
-		params.m_load_function = &c_screen_gamma_menu::load;
+		params.initialize_default_user(
+			FLAG(event->controller),
+			_user_interface_channel_type_gameshell_dialog,
+			_window_4,
+			c_screen_gamma_menu::load);
+		params.execute_load_function();
 		break;
 	case _item_anti_aliasing:
-		params.m_load_function = &c_screen_anti_aliasing_menu::load;
+		params.initialize_default_user(
+			FLAG(event->controller),
+			_user_interface_channel_type_gameshell_dialog,
+			_window_4,
+			c_screen_anti_aliasing_menu::load);
+		params.execute_load_function();
 		break;
 	case _item_lod_setting:
-		params.m_load_function = &c_screen_lod_menu::load;
+		params.initialize_default_user(
+			FLAG(event->controller),
+			_user_interface_channel_type_gameshell_dialog,
+			_window_4,
+			c_screen_lod_menu::load);
+		params.execute_load_function();
 		break;
 	case _item_safe_area:
-		params.m_load_function = &c_screen_safe_area_menu::load;
+		params.initialize_default_user(
+			FLAG(event->controller),
+			_user_interface_channel_type_gameshell_dialog,
+			_window_4,
+			c_screen_safe_area_menu::load);
+		params.execute_load_function();
 		break;
 	case _item_splitscreen:
-		params.m_load_function = &c_screen_splitscreen_menu::load;
+		params.initialize_default_user(
+			FLAG(event->controller),
+			_user_interface_channel_type_gameshell_dialog,
+			_window_4,
+			c_screen_splitscreen_menu::load);
+		params.execute_load_function();
 		break;
 	case _item_restore_defaults:
-		params.m_load_function = &c_screen_restore_video_defaults_setting_menu::load;
+		params.initialize_default_user(
+			FLAG(event->controller),
+			_user_interface_channel_type_gameshell_dialog,
+			_window_4,
+			c_screen_restore_video_defaults_setting_menu::load);
+		params.execute_load_function();
 		break;
 	default:
 		unreachable();
 	}
 
-	if (params.m_load_function != nullptr)
-		params.m_load_function(&params);
+	return;
 }
-
 
 //
 // c_screen_video_settings class starts here
@@ -290,7 +328,7 @@ const void* c_screen_video_settings::load_proc() const
 	return &c_screen_video_settings::load;
 }
 
-void* c_screen_video_settings::load(s_screen_parameters* parameters)
+void* c_screen_video_settings::load(c_screen_parameters* parameters)
 {
 	//return INVOKE(0x21EDC7, 0x0, c_screen_video_settings::load, parameters);
 

@@ -19,7 +19,7 @@ transport_register_transition_functions_t p_transport_register_transition_functi
 bool __cdecl transport_address_equivalent(const transport_address* a1, const transport_address* a2, bool check_network_port);
 
 bool __cdecl transport_address_populate_from_network_channel_and_compare(
-	s_network_channel* network_channel,
+	c_network_channel* network_channel,
 	transport_address* a1,
 	const transport_address* a2,
 	bool check_network_port);
@@ -121,7 +121,7 @@ bool __cdecl transport_address_equivalent(const transport_address* a1, const tra
 }
 
 bool __cdecl transport_address_populate_from_network_channel_and_compare(
-	s_network_channel* network_channel,
+	c_network_channel* network_channel,
 	transport_address* a1,
 	const transport_address* a2,
 	bool check_network_port)

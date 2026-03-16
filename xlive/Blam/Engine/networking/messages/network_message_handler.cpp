@@ -4,15 +4,18 @@
 #include "network_messages_cartographer.h"
 
 #include "cartographer/twizzler/twizzler.h"
+#include "networking/network_memory.h"
 #include "networking/delivery/network_channel.h"
 #include "networking/logic/life_cycle_manager.h"
 #include "networking/messages/network_message_gateway.h"
+#include "networking/messages/network_messages_simulation_synchronous.h"
 #include "networking/messages/network_message_type_collection.h"
 #include "networking/session/network_session.h"
 #include "networking/session/network_session_manager.h"
 #include "networking/session/network_observer.h"
 #include "networking/transport/transport_security.h"
 #include "networking/network_event.h"
+#include "simulation/simulation_view.h"
 
 #include "H2MOD/Modules/CustomVariantSettings/CustomVariantSettings.h"
 #include "H2MOD/Modules/MapManager/MapManager.h"
@@ -59,8 +62,9 @@ void __stdcall handle_out_of_band_message_hook(c_network_message_handler* thisx,
 	if (network_life_cycle_in_squad_session(&session))
 	{
 		/* surprisingly the game doesn't use this too much, pretty much for request-join and time-sync packets */
-		event(_event_message, "h2mod:custom_message: %s - Received message: %s from peer index: %d",
+		/* event(_event_message, "h2mod:custom_message: %s - Received message: %s from peer index: %d",
 			__FUNCTION__, get_network_message_description(message_type), session->get_peer_index_from_address(address));
+		*/
 	}
 
 	if (!is_message_custom(message_type))
@@ -74,7 +78,7 @@ void __stdcall read_channel_message_hook(c_network_message_handler* thisx, int32
 	*/
 
 	transport_address addr{};
-	s_network_channel* peer_network_channel = s_network_channel::get(network_channel_index);
+	c_network_channel* peer_network_channel = network_memory_get_channel(network_channel_index);
 
 	switch (message_type)
 	{
@@ -133,8 +137,10 @@ void __stdcall read_channel_message_hook(c_network_message_handler* thisx, int32
 
 	if (peer_network_channel->get_network_address(&addr))
 	{
+		/*
 		event(_event_verbose, "h2mod:custom_message: %s - Received message: %s from network channel: %d, address: %x",
 			__FUNCTION__, get_network_message_description(message_type), network_channel_index, ntohl(addr.address.raw_ipv4));
+		*/
 	}
 	else
 	{
@@ -237,6 +243,59 @@ void c_network_message_handler::handle_leave_session(const transport_address* ad
 			transport_address_get_string(address)
 		);
 	}
+	return;
+}
+
+void c_network_message_handler::handle_synchronous_update(
+	int32 network_channel_index,
+	const s_network_message_synchronous_update* message)
+{
+#ifdef EVENTS_ENABLED
+	c_network_channel* channel = network_memory_get_channel(network_channel_index);
+#endif
+
+	c_simulation_view* remote_view = simulation_get_remote_view_by_channel(network_channel_index);
+
+	if (remote_view)
+	{
+		if (remote_view->view_type() == _simulation_view_type_synchronous_to_remote_authority)
+		{
+			if (remote_view->handle_synchronous_update(&message->update))
+			{
+				// Success
+			}
+			else
+			{
+				event(
+					_event_warning,
+					"messages:synchronous-update: failed to handle #%d over channel '%s' with view mode %d/%d",
+					message->update.update_number,
+					channel->get_name(),
+					remote_view->get_view_establishment_mode(),
+					remote_view->get_view_establishment_identifier()
+				);
+			}
+		}
+		else
+		{
+			event(
+				_event_warning,
+				"messages:synchronous-update: view not authority for #%d over channel '%s' with view of type #%d",
+				message->update.update_number,
+				channel->get_name(),
+				remote_view->view_type()
+			);
+		}
+	}
+	else
+	{
+		event(
+			_event_message,
+			"messages:synchronous-update: no simulation view for #%d over channel '%s'",
+			message->update.update_number
+		);
+	}
+
 	return;
 }
 

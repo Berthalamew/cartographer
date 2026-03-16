@@ -27,6 +27,8 @@ c_network_heap* network_get_heap(void);
 
 s_network_heap_stats* network_heap_get_description(void);
 
+class c_network_channel* network_memory_get_channel(int32 channel_index);
+
 bool __cdecl network_memory_base_initialize(
 	class c_network_link** link,
 	class c_network_message_type_collection** message_types,

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "network_observer.h"
 
+#include "networking/network_memory.h"
 #include "networking/delivery/network_channel.h"
 #include "networking/messages/network_message_gateway.h"
 
@@ -178,6 +179,39 @@ void c_network_observer::send_message(
 	INVOKE_TYPE(0x1BED40, 0x1B8C1A, observer_channel_send_message_t, this, session_index, observer_index, send_out_of_band, type, size, data);
 }
 
+void c_network_observer::observer_channel_set_waiting_on_backlog(
+	e_network_observer_owner owner_type,
+	int32 observer_index,
+	e_network_message_type message_type)
+{
+	INVOKE_TYPE(
+		0x1BD9FA,
+		0x0,
+		void(__thiscall*)(c_network_observer*, e_network_observer_owner, int32, e_network_message_type),
+		this, 
+		owner_type,
+		observer_index,
+		message_type);
+
+	return;
+}
+
+bool c_network_observer::observer_channel_backlogged(
+	e_network_observer_owner owner_type,
+	int32 observer_index,
+	e_network_message_type message_type) const
+{
+	return INVOKE_TYPE(
+		0x1BD95D,
+		0x0,
+		bool(__thiscall*)(const c_network_observer*, e_network_observer_owner, int32, e_network_message_type),
+		this,
+		owner_type,
+		observer_index,
+		message_type);
+}
+
+
 bool __cdecl is_network_observer_mode_managed()
 {
 	// or in other terms this checks if the network protocol is LIVE
@@ -234,7 +268,7 @@ bool __thiscall c_network_observer::channel_should_send_packet_hook(
 	if (observer_index == NONE)
 		return false;
 
-	s_network_channel* network_channel = s_network_channel::get(network_channel_index);
+	c_network_channel* network_channel = network_memory_get_channel(network_channel_index);
 	s_observer_channel* observer_channel = &this->m_observer_channels[observer_index];
 
 	// we modify the network channel paramters to force the network tickrate
@@ -315,7 +349,6 @@ void c_network_observer::apply_patches()
 	// increase the network heap size
 	WriteValue<int32>(Memory::GetAddress(0x1ACCC8, 0x1ACE96) + 6, k_network_heap_size);
 	WriteValue<int32>(Memory::GetAddress(0x1ACCE0) + 6, k_network_heap_size); //increase network heap for campaign
-	WriteValue<uint32>(Memory::GetAddress(0x1ACCDB + 1), k_network_channel_count_for_campaign);	// increase network_shared_memory_globals.maximum_channel_count for campaign
 
 	PatchCall(Memory::GetAddress(0x1E0FEE, 0x1B5EDE), jmp_get_bandwidth_results);
 	// replace vtable pointer of network_observer::channel_should_send_packet

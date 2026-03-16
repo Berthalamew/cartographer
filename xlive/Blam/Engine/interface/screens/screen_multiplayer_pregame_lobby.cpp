@@ -731,10 +731,6 @@ static void force_online_coop_patches(void)
 {
 	//#todo: move these out to respective files
 
-	//ui-game-patches
-	WriteValue<BYTE>(Memory::GetAddress(0x23EC55 + 1), 0);	// Prevent from pausing during the game
-	NopFill(Memory::GetAddress(0x7AE4), 0x5); // prevent pause menu from showing up when not in focus
-
 	//lifecycle-game-patches
 	WriteValue<BYTE>(Memory::GetAddress(0x1D9A74 + 1), k_maximum_number_of_coop_players);	// increase max players to 4
 	WriteValue<BYTE>(Memory::GetAddress(0x1D9A7D + 1), k_maximum_number_of_coop_players);	// increase max peer-count to 4

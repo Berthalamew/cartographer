@@ -1,33 +1,28 @@
 #pragma once
 #include "simulation_players.h"
-#include "simulation_world.h"
 #include "networking/delivery/network_channel.h"
+#include "networking/network_constants.h"
 
-/* structures */
+/* classes */
 
 class c_simulation_watcher : c_network_channel_owner
 {
 public:
-	void __thiscall generate_player_updates(int32* player_update_count, int32 maximum_player_update_count, simulation_player_update* player_updates)
-	{
-		return INVOKE_TYPE(0x1D5D24, 0x1C2932, void(__thiscall*)(c_simulation_watcher*, int32*, int32, simulation_player_update*), this, player_update_count, maximum_player_update_count, player_updates);
-	}
+	bool need_to_generate_updates(void);
 
-	bool __thiscall need_to_generate_updates(void)
-	{
-		ASSERT(m_world->exists());
+	void generate_player_updates(int32* player_update_count, int32 maximum_player_update_count, struct simulation_player_update* player_updates);
 
-		bool result = INVOKE_TYPE(0x1D4B42, 0x1C188C, bool(__thiscall*)(c_simulation_watcher*), this);
-		return (result || !m_world->simulation_queues_empty()) && m_world->is_distributed() && m_world->is_authority();
-	}
+	void generate_machine_update(bool* machine_update_valid, struct simulation_machine_update* machine_update);
 
-	void maintain_connection()
-	{
-		return INVOKE_TYPE(0x1D6531, 0x0, void(__thiscall*)(c_simulation_watcher*), this);
-	}
+	void maintain_connection(void);
+
+	int32 get_machine_index_by_identifier(struct s_machine_identifier const* remote_machine_identifier) const;
+	bool get_player_is_in_game(int32 player_index, struct s_player_identifier const* player_identifier) const;
+
+	uint32 get_machine_valid_mask(void) const;
 
 private:
-	c_simulation_world* m_world;
+	class c_simulation_world* m_world;
 	class c_network_observer* m_observer;
 	class c_network_session* m_session;
 	int32 m_machine_last_local_membership_update_number;

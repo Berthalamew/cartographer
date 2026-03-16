@@ -7,7 +7,9 @@
 #include "networking/network_event.h"
 #include "networking/network_memory.h"
 
-void c_simulation_queue::allocate(int32 size, s_simulation_queue_element** element_out)
+void c_simulation_queue::allocate(
+	int32 size,
+	s_simulation_queue_element** element_out)
 {
 	ASSERT(size > 0);
 	ASSERT(element_out != NULL);
@@ -93,20 +95,23 @@ void c_simulation_queue::allocate(int32 size, s_simulation_queue_element** eleme
 			);
 		}
 	}
+
+	return;
 }
 
 // transefrs data from the source into ours
-void c_simulation_queue::transfer_elements(c_simulation_queue* simulation_queue)
+void c_simulation_queue::transfer_elements(
+	c_simulation_queue* simulation_queue)
 {
 	bool cutoff = false;
+	const int32 count = simulation_queue->queued_count();
 
 	ASSERT(simulation_queue);
 	ASSERT(queued_count() == 0);
 	ASSERT(queued_size_in_bytes() == 0);
-	//ASSERT(simulation_queue->queued_count() > 0);
-	//ASSERT(simulation_queue->queued_size_in_bytes() > 0);
+	ASSERT(simulation_queue->queued_count() > 0);
+	ASSERT(simulation_queue->queued_size_in_bytes() > 0);
 
-	const int32 count = simulation_queue->queued_count();
 	for (int32 i = 0; i < count; i++)
 	{
 		s_simulation_queue_element* element = NULL;
@@ -134,8 +139,8 @@ void c_simulation_queue::transfer_elements(c_simulation_queue* simulation_queue)
 		ASSERT(simulation_queue->queued_size_in_bytes() == 0);
 	}
 
-	//ASSERT(queued_count() > 0);
-	//ASSERT(queued_size_in_bytes() > 0);
+	ASSERT(queued_count() > 0);
+	ASSERT(queued_size_in_bytes() > 0);
 	ASSERT(simulation_queue->queued_count() >= 0);
 	ASSERT(simulation_queue->queued_size_in_bytes() >= 0);
 	ASSERT(simulation_queue->allocated_count() >= 0);
@@ -151,7 +156,8 @@ void c_simulation_queue::transfer_elements(c_simulation_queue* simulation_queue)
 	return;
 }
 
-void c_simulation_queue::deallocate(s_simulation_queue_element* element)
+void c_simulation_queue::deallocate(
+	s_simulation_queue_element* element)
 {
 	ASSERT(element);
 
@@ -174,7 +180,8 @@ void c_simulation_queue::deallocate(s_simulation_queue_element* element)
 	return;
 }
 
-void c_simulation_queue::enqueue(s_simulation_queue_element* element)
+void c_simulation_queue::enqueue(
+	s_simulation_queue_element* element)
 {
 	ASSERT(element);
 	ASSERT(element->data);
@@ -211,7 +218,8 @@ void c_simulation_queue::enqueue(s_simulation_queue_element* element)
 	return;
 }
 
-void c_simulation_queue::deque(s_simulation_queue_element** element_out)
+void c_simulation_queue::deque(
+	s_simulation_queue_element** element_out)
 {
 	ASSERT(element_out);
 
@@ -240,7 +248,8 @@ void c_simulation_queue::deque(s_simulation_queue_element** element_out)
 	return;
 }
 
-void c_simulation_queue::clear()
+void c_simulation_queue::clear(
+	void)
 {
 	if (initialized())
 	{
@@ -260,7 +269,8 @@ void c_simulation_queue::clear()
 	return;
 }
 
-void c_simulation_queue::dispose()
+void c_simulation_queue::dispose(
+	void)
 {
 	if (initialized())
 	{
@@ -269,12 +279,13 @@ void c_simulation_queue::dispose()
 	}
 }
 
-bool c_simulation_queue::decode(c_bitstream* bitstream)
+bool c_simulation_queue::decode(
+	c_bitstream* bitstream)
 {
 	bool result = true;
 
 	ASSERT(bitstream);
-	//ASSERT(!m_initialized);	FIXME
+	ASSERT(!m_initialized);
 
 	initialize();
 	
@@ -371,7 +382,8 @@ bool c_simulation_queue::decode(c_bitstream* bitstream)
 	return result;
 }
 
-void c_simulation_queue::encode(c_bitstream* bitstream)
+void c_simulation_queue::encode(
+	c_bitstream* bitstream) const
 {
 	ASSERT(bitstream);
 	ASSERT(m_initialized);

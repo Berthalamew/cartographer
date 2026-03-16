@@ -4,5 +4,5 @@
 class c_screen_confirm_resolution
 {
 public:
-	static void* __cdecl load(s_screen_parameters* parameters);
+	static void* __cdecl load(c_screen_parameters* parameters);
 };

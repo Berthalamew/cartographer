@@ -4,7 +4,7 @@
 #include "interface/user_interface_widget_list_item.h"
 #include "interface/user_interface_widget_window.h"
 
-/* macro defines */
+/* constants */
 
 // note :
 // -h2x tag visible items : 2 , screen class items : 3
@@ -12,7 +12,10 @@
 // -both have an extra "unused" item which might be the incomplete ui\screens\game_shell\settings_screen\extras\extras_enabled_dialog.wgit
 // -it has the texts done and looks semi-okayish , should be worth restoring
 //
-#define k_no_of_visible_items_for_settings 7
+enum
+{
+	k_no_of_visible_items_for_settings = 7,
+};
 
 /* classes */
 
@@ -53,8 +56,10 @@ class c_screen_settings : protected c_screen_with_menu
 protected:
 	c_settings_list m_settings_list;
 public:
-	static void* load(s_screen_parameters* parameters);
+	static void* load(c_screen_parameters* parameters);
 	static void apply_patches_on_map_load();
+
+	c_screen_settings(const c_screen_parameters* parameters);
 	c_screen_settings(e_user_interface_channel_type channel_type, e_user_interface_render_window window_index, int16 user_flags);
 
 	// c_screen_settings virtual functions

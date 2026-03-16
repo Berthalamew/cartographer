@@ -201,15 +201,15 @@ c_cartographer_guide_edit_list::c_cartographer_guide_edit_list(uint16 _flags) :
 	m_slot_2(this, &c_cartographer_guide_edit_list::handle_item_pressed_event)
 {
 	data_array* account_list_data = ui_list_data_new(k_cartographer_guide_list_name, k_total_no_of_cartographer_guide_list_items, sizeof(datum));
-	this->m_list_data = account_list_data;
+	m_list_data = account_list_data;
 
 	data_make_valid(account_list_data);
 
-	for (int32 i = 0; i < this->m_list_data->maximum_count; i++) {
-		datum_new(this->m_list_data);
+	for (int32 i = 0; i < m_list_data->maximum_count; i++) {
+		datum_new(m_list_data);
 	}
 
-	linker_type2.link(&this->m_slot_2);
+	linker_type2.link(&m_slot_2);
 }
 
 c_list_item_widget* c_cartographer_guide_edit_list::get_list_items()
@@ -269,7 +269,7 @@ c_cartographer_guide_menu::c_cartographer_guide_menu(e_user_interface_channel_ty
 }
 
 
-void* c_cartographer_guide_menu::load(s_screen_parameters* parameters)
+void* c_cartographer_guide_menu::load(c_screen_parameters* parameters)
 {
 	c_cartographer_guide_menu* guide_menu = nullptr;
 	uint8* ui_buffer = (uint8*)ui_pool_allocate_space(sizeof(c_cartographer_guide_menu), 0);
@@ -284,7 +284,7 @@ void* c_cartographer_guide_menu::load(s_screen_parameters* parameters)
 	return guide_menu;
 }
 
-void c_cartographer_guide_menu::initialize(s_screen_parameters* screen_parameters)
+void c_cartographer_guide_menu::initialize(c_screen_parameters* screen_parameters)
 {
 	c_screen_with_menu::initialize(screen_parameters);
 
@@ -326,15 +326,15 @@ c_cartographer_credits_edit_list::c_cartographer_credits_edit_list(uint16 _flags
 	m_slot_2(this, &c_cartographer_credits_edit_list::handle_item_pressed_event)
 {
 	data_array* account_list_data = ui_list_data_new(k_cartographer_credits_list_name, k_total_no_of_cartographer_credits_list_items, sizeof(datum));
-	this->m_list_data = account_list_data;
+	m_list_data = account_list_data;
 
 	data_make_valid(account_list_data);
 
-	for (int32 i = 0; i < this->m_list_data->maximum_count; i++) {
-		datum_new(this->m_list_data);
+	for (int32 i = 0; i < m_list_data->maximum_count; i++) {
+		datum_new(m_list_data);
 	}
 
-	linker_type2.link(&this->m_slot_2);
+	linker_type2.link(&m_slot_2);
 }
 
 c_list_item_widget* c_cartographer_credits_edit_list::get_list_items()
@@ -373,7 +373,7 @@ c_cartographer_credits_menu::c_cartographer_credits_menu(e_user_interface_channe
 {
 }
 
-void* c_cartographer_credits_menu::load(s_screen_parameters* parameters)
+void* c_cartographer_credits_menu::load(c_screen_parameters* parameters)
 {
 	c_cartographer_credits_menu* credits_menu = nullptr;
 	uint8* ui_buffer = (uint8*)ui_pool_allocate_space(sizeof(c_cartographer_credits_menu), 0);
@@ -393,7 +393,7 @@ const void* c_cartographer_credits_menu::load_proc(void) const
 	return c_cartographer_credits_menu::load;
 }
 
-void c_cartographer_credits_menu::initialize(s_screen_parameters* screen_parameters)
+void c_cartographer_credits_menu::initialize(c_screen_parameters* screen_parameters)
 {
 	c_screen_with_menu::initialize(screen_parameters);
 
@@ -420,15 +420,15 @@ c_cartographer_update_edit_list::c_cartographer_update_edit_list(uint16 _flags) 
 	m_slot_2(this, &c_cartographer_update_edit_list::handle_item_pressed_event)
 {
 	data_array* update_list_data = ui_list_data_new(k_cartographer_update_list_name, k_total_no_of_cartographer_update_list_items, sizeof(datum));
-	this->m_list_data = update_list_data;
+	m_list_data = update_list_data;
 
 	data_make_valid(update_list_data);
 
-	for (int32 i = 0; i < this->m_list_data->maximum_count; i++) {
-		datum_new(this->m_list_data);
+	for (int32 i = 0; i < m_list_data->maximum_count; i++) {
+		datum_new(m_list_data);
 	}
 
-	linker_type2.link(&this->m_slot_2);
+	linker_type2.link(&m_slot_2);
 
 	// ### TODO FIXME this is pretty hacked up, cleanup the system at some point
 	m_keep_screen_open = true;
@@ -519,8 +519,8 @@ void c_cartographer_update_edit_list::handle_item_pressed_event(s_event_record* 
 {
 	int32 button_id = DATUM_INDEX_TO_ABSOLUTE_INDEX(*pitem_index);
 
-	e_user_interface_render_window	parent_render_window = this->get_parent_render_window();
-	e_user_interface_channel_type	parent_screen_ui_channel = this->get_parent_channel();
+	e_user_interface_render_window	parent_render_window = get_parent_render_window();
+	e_user_interface_channel_type	parent_screen_ui_channel = get_parent_channel();
 
 	if (button_id == _item_cartographer_update_status)
 	{
@@ -579,7 +579,7 @@ const void* c_cartographer_update_menu::load_proc(void) const
 	return c_cartographer_update_menu::load;
 }
 
-void c_cartographer_update_menu::initialize(s_screen_parameters* screen_parameters)
+void c_cartographer_update_menu::initialize(c_screen_parameters* screen_parameters)
 {
 	c_screen_with_menu::initialize(screen_parameters);
 
@@ -604,7 +604,7 @@ void c_cartographer_update_menu::set_update_status(e_cartographer_update_status 
 	m_update_edit_list.set_status(status);
 }
 
-void* c_cartographer_update_menu::load(s_screen_parameters* parameters)
+void* c_cartographer_update_menu::load(c_screen_parameters* parameters)
 {
 	c_cartographer_update_menu* update_menu = nullptr;
 	uint8* ui_buffer = (uint8*)ui_pool_allocate_space(sizeof(c_cartographer_update_menu), 0);
@@ -627,15 +627,15 @@ c_cartographer_update_notice_edit_list::c_cartographer_update_notice_edit_list(u
 	m_slot_2(this, &c_cartographer_update_notice_edit_list::handle_item_pressed_event)
 {
 	data_array* account_list_data = ui_list_data_new(k_cartographer_update_notice_list_name, k_total_no_of_cartographer_update_notice_list_items, sizeof(datum));
-	this->m_list_data = account_list_data;
+	m_list_data = account_list_data;
 
 	data_make_valid(account_list_data);
 
-	for (int32 i = 0; i < this->m_list_data->maximum_count; i++) {
-		datum_new(this->m_list_data);
+	for (int32 i = 0; i < m_list_data->maximum_count; i++) {
+		datum_new(m_list_data);
 	}
 
-	linker_type2.link(&this->m_slot_2);
+	linker_type2.link(&m_slot_2);
 }
 
 c_list_item_widget* c_cartographer_update_notice_edit_list::get_list_items()
@@ -667,8 +667,8 @@ void c_cartographer_update_notice_edit_list::handle_item_pressed_event(s_event_r
 {
 	int16 button_id = DATUM_INDEX_TO_ABSOLUTE_INDEX(*pitem_index);
 
-	e_user_interface_render_window	parent_render_window = this->get_parent_render_window();
-	e_user_interface_channel_type	parent_screen_ui_channel = this->get_parent_channel();
+	e_user_interface_render_window	parent_render_window = get_parent_render_window();
+	e_user_interface_channel_type	parent_screen_ui_channel = get_parent_channel();
 
 	if (button_id == _item_cartographer_update_notice_yes) 
 	{
@@ -694,7 +694,7 @@ const void* c_cartographer_update_notice_menu::load_proc(void) const
 	return c_cartographer_update_notice_menu::load;
 }
 
-void c_cartographer_update_notice_menu::initialize(s_screen_parameters* screen_parameters)
+void c_cartographer_update_notice_menu::initialize(c_screen_parameters* screen_parameters)
 {
 	c_screen_with_menu::initialize(screen_parameters);
 
@@ -714,7 +714,7 @@ void c_cartographer_update_notice_menu::initialize(s_screen_parameters* screen_p
 	}
 }
 
-void* c_cartographer_update_notice_menu::load(s_screen_parameters* parameters)
+void* c_cartographer_update_notice_menu::load(c_screen_parameters* parameters)
 {
 	c_cartographer_update_notice_menu* update_notice_menu = nullptr;
 	uint8* ui_buffer = (uint8*)ui_pool_allocate_space(sizeof(c_cartographer_update_notice_menu), 0);

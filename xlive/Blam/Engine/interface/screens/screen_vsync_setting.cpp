@@ -1,4 +1,4 @@
-﻿#include "stdafx.h"
+#include "stdafx.h"
 #include "screen_vsync_setting.h"
 
 #include "interface/user_interface_memory.h"
@@ -121,7 +121,7 @@ c_screen_vsync_menu::c_screen_vsync_menu(e_user_interface_channel_type channel_t
 {
 }
 
-void c_screen_vsync_menu::initialize(s_screen_parameters* parameters)
+void c_screen_vsync_menu::initialize(c_screen_parameters* parameters)
 {
 	c_screen_with_menu::initialize(parameters);
 
@@ -158,7 +158,7 @@ const void* c_screen_vsync_menu::load_proc() const
 	return &c_screen_vsync_menu::load;
 }
 
-void* c_screen_vsync_menu::load(s_screen_parameters* parameters)
+void* c_screen_vsync_menu::load(c_screen_parameters* parameters)
 {
 	c_screen_vsync_menu* screen;
 

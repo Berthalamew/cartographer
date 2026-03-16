@@ -18,6 +18,7 @@
 #include "screen_multiplayer_video_settings_menu.h"
 #include "screen_video_settings.h"
 #include "screen_resolution.h"
+#include "screen_pause_game.h"
 
 void screens_apply_patches_on_map_load()
 {
@@ -52,4 +53,5 @@ void screens_apply_patches()
 	c_controller_settings_edit_list::apply_instance_patches();
 	c_screen_multiplayer_video_settings::apply_instance_patches();
 	c_screen_resolution_menu::apply_instance_patches();
+	screen_pause_game_apply_patches();
 }

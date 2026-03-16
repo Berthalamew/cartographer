@@ -37,6 +37,7 @@
 #include "interface/new_hud.h"
 #include "interface/new_hud_draw.h"
 #include "interface/user_interface_controller.h"
+#include "interface/user_interface_objectives.h"
 #include "interface/user_interface_text.h"
 #include "interface/user_interface_utilities.h"
 #include "interface/screens/screens_patches.h"
@@ -83,6 +84,7 @@
 #include "shell/shell.h"
 #include "simulation/simulation.h"
 #include "simulation/simulation_players.h"
+#include "simulation/game_interface/simulation_game_device_machines.h"
 #include "simulation/game_interface/simulation_game_objects.h"
 #include "simulation/game_interface/simulation_game_units.h"
 #include "tag_files/files_windows.h"
@@ -626,6 +628,7 @@ static void h2mod_apply_hooks(void)
 	main_apply_patches();
 	main_time_apply_patches();
 	game_statborg_apply_patches();
+	simulation_game_device_machines_apply_patches();
 	simulation_game_objects_apply_patches();
 	simulation_game_units_apply_patches();
 	players_apply_patches();
@@ -707,6 +710,7 @@ static void h2mod_apply_hooks(void)
 		bipeds_apply_patches();
 		unit_apply_patches();
 
+		user_interface_objectives_apply_patches();
 		user_interface_text_apply_hooks();
 		user_interface_controller_apply_patches();
 		hud_messaging_apply_hooks();

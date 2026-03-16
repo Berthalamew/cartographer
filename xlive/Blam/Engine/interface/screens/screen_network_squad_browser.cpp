@@ -10,7 +10,7 @@
 
 /* typedefs */
 
-typedef c_screen_network_squad_browser* (__cdecl* load_network_browser_t)(s_screen_parameters*);
+typedef c_screen_network_squad_browser* (__cdecl* load_network_browser_t)(c_screen_parameters*);
 load_network_browser_t p_load_network_browser;
 load_network_browser_t p_load_live_browser;
 
@@ -55,12 +55,12 @@ void c_network_squad_list::sort_event(s_event_record* event, int32 selected_colu
 	return;
 }
 
-c_screen_network_squad_browser* c_screen_network_squad_browser::load_network_browser(s_screen_parameters* parameters)
+c_screen_network_squad_browser* c_screen_network_squad_browser::load_network_browser(c_screen_parameters* parameters)
 {
 	return p_load_network_browser(parameters);
 }
 
-c_screen_network_squad_browser* c_screen_network_squad_browser::load_live_browser(s_screen_parameters* parameters)
+c_screen_network_squad_browser* c_screen_network_squad_browser::load_live_browser(c_screen_parameters* parameters)
 {
 	c_screen_network_squad_browser* screen = p_load_live_browser(parameters);
 
@@ -99,7 +99,7 @@ void c_screen_network_squad_browser::build_players_list_fix(c_player_widget_repr
 
 #pragma endregion
 
-void* __cdecl c_screen_network_squad_browser::load(s_screen_parameters* parameters)
+void* __cdecl c_screen_network_squad_browser::load(c_screen_parameters* parameters)
 {
 	return INVOKE(0x21A238, 0x0, c_screen_network_squad_browser::load, parameters);
 }

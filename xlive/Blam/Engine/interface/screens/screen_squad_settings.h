@@ -57,9 +57,11 @@ class c_screen_squad_settings : protected c_screen_widget
 protected:
 	c_squad_settings_list m_squad_settings_list;
 public:
-	static void* load(s_screen_parameters* parameters);	
+	static void* load(c_screen_parameters* parameters);	
 	static void apply_patches_on_map_load();
 	static void apply_instance_patches();	
+
+	c_screen_squad_settings(const c_screen_parameters* parameters);
 	c_screen_squad_settings(e_user_interface_channel_type channel_type, e_user_interface_render_window window_index, int16 user_flags);
 
 	// c_screen_squad_settings virtual functions
@@ -67,7 +69,7 @@ public:
 	virtual ~c_screen_squad_settings() = default;
 	virtual void update() override;
 	virtual bool handle_event(s_event_record* event) override;
-	virtual void initialize(s_screen_parameters* parameters) override;
+	virtual void initialize(c_screen_parameters* parameters) override;
 	virtual const void* load_proc(void) const override;
 };
 ASSERT_STRUCT_SIZE(c_screen_squad_settings, 0xEC4);

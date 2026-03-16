@@ -173,19 +173,19 @@ c_cartographer_account_manager_edit_list::c_cartographer_account_manager_edit_li
 	c_list_widget(_flags),
 	m_slot_2(this, &c_cartographer_account_manager_edit_list::handle_item_pressed_event)
 {
-	this->m_cartographer_screen_type = _screen_type;
-	this->m_default_focused_item = _default_selected_button;
+	m_cartographer_screen_type = _screen_type;
+	m_default_focused_item = _default_selected_button;
 
 	data_array* account_list_data = ui_list_data_new(k_cartographer_account_manager_list_name, _button_count, sizeof(datum));
-	this->m_list_data = account_list_data;
+	m_list_data = account_list_data;
 
 	data_make_valid(account_list_data);
 
-	for (int32 i = 0; i < this->m_list_data->maximum_count; i++) {
-		datum_new(this->m_list_data);
+	for (int32 i = 0; i < m_list_data->maximum_count; i++) {
+		datum_new(m_list_data);
 	}
 
-	linker_type2.link(&this->m_slot_2);
+	linker_type2.link(&m_slot_2);
 
 	const wchar_t* placeholder_username, *placeholder_email, *placeholder_password, *placeholder_confirm_password;
 	switch (m_cartographer_screen_type)
@@ -386,8 +386,8 @@ void c_cartographer_account_manager_edit_list::handle_item_pressed_event_for_add
 {
 	int16 button_id = DATUM_INDEX_TO_ABSOLUTE_INDEX(*a3);
 
-	e_user_interface_render_window	parent_render_window = this->get_parent_render_window();
-	e_user_interface_channel_type	parent_screen_ui_channel = this->get_parent_channel();
+	e_user_interface_render_window	parent_render_window = get_parent_render_window();
+	e_user_interface_channel_type	parent_screen_ui_channel = get_parent_channel();
 
 	if (button_id == _item_cartographer_account_add_username)
 	{
@@ -423,19 +423,19 @@ void c_cartographer_account_manager_edit_list::handle_item_pressed_event_for_lis
 {
 	const int32 button_id = DATUM_INDEX_TO_ABSOLUTE_INDEX(*a3);
 
-	e_user_interface_render_window	parent_render_window = this->get_parent_render_window();
-	e_user_interface_channel_type	parent_screen_ui_channel = this->get_parent_channel();
+	e_user_interface_render_window	parent_render_window = get_parent_render_window();
+	e_user_interface_channel_type	parent_screen_ui_channel = get_parent_channel();
 
 	if (button_id == H2AccountCount + 1) // create account
 	{
-		if (!this->account_removal_mode())
+		if (!account_removal_mode())
 		{
 			c_cartographer_account_manager_menu::load_for_account_create_context();
 		}
 	}
 	else if (button_id == H2AccountCount + 2) // add account
 	{
-		if (!this->account_removal_mode())
+		if (!account_removal_mode())
 		{
 			c_cartographer_account_manager_menu::load_for_account_add_context();
 		}
@@ -443,13 +443,13 @@ void c_cartographer_account_manager_edit_list::handle_item_pressed_event_for_lis
 	else if (button_id == H2AccountCount + 3) // account removal mode switch
 	{
 		//remove next selected account.
-		g_account_manager_remove_mode = !this->account_removal_mode();
+		g_account_manager_remove_mode = !account_removal_mode();
 		user_interface_back_out_from_channel(parent_screen_ui_channel, parent_render_window);
 		g_account_manager_remove_mode ? c_cartographer_account_manager_menu::load_for_account_remove_from_list_context() : c_cartographer_account_manager_menu::load_for_account_list_context();
 	}
 	else if (H2AccountCount > 0 && button_id >= 0 && button_id < H2AccountCount) // account selection (either for deletion or login)
 	{
-		if (this->account_removal_mode())
+		if (account_removal_mode())
 		{
 			H2AccountAccountRemove(button_id);
 			// re-open the menu
@@ -510,8 +510,8 @@ void c_cartographer_account_manager_edit_list::handle_item_pressed_event_for_cre
 {
 	const int32 button_id = DATUM_INDEX_TO_ABSOLUTE_INDEX(*a3);
 
-	e_user_interface_render_window	parent_render_window = this->get_parent_render_window();
-	e_user_interface_channel_type	parent_screen_ui_channel = this->get_parent_channel();
+	e_user_interface_render_window	parent_render_window = get_parent_render_window();
+	e_user_interface_channel_type	parent_screen_ui_channel = get_parent_channel();
 
 	if (button_id == _item_cartographer_account_create_username)
 	{
@@ -558,7 +558,7 @@ void c_cartographer_account_manager_edit_list::handle_item_pressed_event_for_cre
 }
 
 c_cartographer_account_manager_menu::c_cartographer_account_manager_menu(e_user_interface_channel_type _ui_channel, e_user_interface_render_window _window_index, uint16 _flags, e_cartographer_account_manager_screen_type _screen_type, int32 _button_count, int32 _selected_button) :
-	c_screen_with_menu(_screen_brightness_level, _ui_channel, _window_index, _flags, &this->m_account_edit_list),
+	c_screen_with_menu(_screen_brightness_level, _ui_channel, _window_index, _flags, &m_account_edit_list),
 	m_account_edit_list(_flags, _button_count, _selected_button, _screen_type)
 {
 	m_cartographer_screen_type = _screen_type;
@@ -598,7 +598,7 @@ void c_cartographer_account_manager_menu::pre_destroy()
 }
 
 // c_screen_with_menu specific interface
-void c_cartographer_account_manager_menu::initialize(s_screen_parameters* screen_parameters)
+void c_cartographer_account_manager_menu::initialize(c_screen_parameters* screen_parameters)
 {
 	c_screen_with_menu::initialize(screen_parameters);
 
@@ -667,7 +667,7 @@ void c_cartographer_account_manager_menu::set_menu_open_context(e_cartographer_a
 }
 
 
-void* __cdecl c_cartographer_account_manager_menu::load(s_screen_parameters* parameters)
+void* __cdecl c_cartographer_account_manager_menu::load(c_screen_parameters* parameters)
 {
 	ASSERT(g_open_cartographer_account_manager_context != _cartographer_account_manager_screen_type_none);
 
@@ -714,7 +714,7 @@ void* __cdecl c_cartographer_account_manager_menu::load(s_screen_parameters* par
 	return account_list_menu;
 }
 
-void* c_cartographer_account_manager_menu::load_default_context(s_screen_parameters* parameters)
+void* c_cartographer_account_manager_menu::load_default_context(c_screen_parameters* parameters)
 {
 	set_menu_open_context(_cartographer_account_manager_screen_type_list);
 	return load(parameters);

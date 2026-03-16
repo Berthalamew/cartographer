@@ -119,8 +119,17 @@ int32 c_virtual_keyboard_button::get_bitmap_active_index()
 	return INVOKE_TYPE(0x23ADB1, 0x0, int32(__thiscall*)(c_button_widget*), this);
 }
 
+c_screen_virtual_keyboard::c_screen_virtual_keyboard(
+	const c_screen_parameters* parameters) :
+	c_screen_virtual_keyboard(parameters->get_channel_type(), parameters->get_window_index(), parameters->get_user_flags())
+{
+	return;
+}
 
-c_screen_virtual_keyboard::c_screen_virtual_keyboard(e_user_interface_channel_type _channel_type, e_user_interface_render_window _window_index, uint16 _user_flags) :
+c_screen_virtual_keyboard::c_screen_virtual_keyboard(
+	e_user_interface_channel_type _channel_type,
+	e_user_interface_render_window _window_index,
+	uint16 _user_flags) :
 	c_screen_widget(_screen_virtual_keyboard, _channel_type, _window_index, _user_flags)
 {
 	m_context = _vkbd_context_invalid;
@@ -146,6 +155,7 @@ c_screen_virtual_keyboard::c_screen_virtual_keyboard(e_user_interface_channel_ty
 	}
 
 	ui_set_virtual_keyboard_in_use(true);
+	return;
 }
 
 c_screen_virtual_keyboard::~c_screen_virtual_keyboard()
@@ -169,7 +179,7 @@ bool c_screen_virtual_keyboard::handle_event(s_event_record* event)
 	return INVOKE_TYPE(0x23D060, 0x0, bool(__thiscall*)(c_screen_virtual_keyboard*, s_event_record*), this, event);
 }
 
-void c_screen_virtual_keyboard::initialize(s_screen_parameters* parameters)
+void c_screen_virtual_keyboard::initialize(c_screen_parameters* parameters)
 {
 	e_vkbd_context_type old_context = m_context;
 	if (IN_RANGE(this->m_context, k_virtual_keyboard_custom_context_start, k_virtual_keyboard_custom_context_end))
@@ -190,7 +200,7 @@ void c_screen_virtual_keyboard::initialize(s_screen_parameters* parameters)
 	}
 
 	// call the orignal screen initializer
-	INVOKE_TYPE(0x23BF3E, 0x0, int(__thiscall*)(c_screen_virtual_keyboard*, s_screen_parameters*), this, parameters);
+	INVOKE_TYPE(0x23BF3E, 0x0, int(__thiscall*)(c_screen_virtual_keyboard*, c_screen_parameters*), this, parameters);
 
 	update_custom_labels(old_context);
 }
@@ -229,25 +239,22 @@ void c_screen_virtual_keyboard::set_context(e_vkbd_context_type context)
 	m_context = context;
 }
 
-void* c_screen_virtual_keyboard::load(s_screen_parameters* parameters)
+void* c_screen_virtual_keyboard::load(c_screen_parameters* parameters)
 {
-	c_screen_virtual_keyboard* virtual_keyboard_menu = nullptr;
-	BYTE* ui_buffer = ui_pool_allocate_space(sizeof(c_screen_virtual_keyboard), 0);
-	if (ui_buffer) {
-		virtual_keyboard_menu = new (ui_buffer) c_screen_virtual_keyboard(parameters->m_channel_type, parameters->m_window_index, parameters->m_user_flags);
-		virtual_keyboard_menu->m_allocated = true;
-	}
+	void* pool;
+	c_screen_virtual_keyboard* screen = (pool = ui_pool_allocate_space(sizeof(c_screen_virtual_keyboard), 0)) ? new (pool) c_screen_virtual_keyboard(parameters) : NULL;
+	ASSERT(screen != NULL);
 
-	user_interface_register_screen_to_channel(virtual_keyboard_menu, parameters);
-	return virtual_keyboard_menu;
+	screen->m_allocated = true;
+	user_interface_register_screen_to_channel(screen, parameters);
+	return screen;
 }
 
 void* ui_load_virtual_keyboard(wchar_t* out_keyboard_text, uint32 out_keyboard_text_length, e_vkbd_context_type keyboard_type)
 {
-	s_screen_parameters virtual_keyboard_params;
-	virtual_keyboard_params.m_context = nullptr;
-	virtual_keyboard_params.data_new(0, FLAG(0), _user_interface_channel_type_virtual_keyboard, _window_4, c_screen_virtual_keyboard::load);
-	c_screen_virtual_keyboard* virtual_keyboard = (c_screen_virtual_keyboard*)virtual_keyboard_params.ui_screen_load_proc_exec();
+	c_screen_parameters virtual_keyboard_params;
+	virtual_keyboard_params.initialize_default_user(FLAG(0), _user_interface_channel_type_virtual_keyboard, _window_4, c_screen_virtual_keyboard::load);
+	c_screen_virtual_keyboard* virtual_keyboard = (c_screen_virtual_keyboard*)virtual_keyboard_params.execute_load_function();
 
 	virtual_keyboard->set_context(keyboard_type);
 	virtual_keyboard->set_input_string_buffer(out_keyboard_text, out_keyboard_text_length);

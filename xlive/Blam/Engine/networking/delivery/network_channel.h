@@ -59,8 +59,24 @@ public:
 	virtual void notify_packet_retired(int32 outgoing_packet_sequence_number, bool delivered) = 0;
 };
 
-struct s_network_channel
+class c_network_channel
 {
+public:
+	bool get_network_address(transport_address* address_out) const;
+
+	int32 get_message_space_available(void) const;
+
+	bool has_simulation_interface() const { return simulation_interface != NULL; }
+	bool is_simulation_authority() const { return has_simulation_interface() && *(bool*)((uint8*)simulation_interface + 48); }
+	bool is_channel_state_5() const { return channel_state == _network_channel_state_5; }
+
+	const char* get_name(
+		void) const
+	{
+		return "TODO: IMPLEMENT";
+	}
+
+private:
 	void* m_network_link;
 	void* m_network_message_gateway;
 	void* network_message_handler;
@@ -102,15 +118,8 @@ struct s_network_channel
 	int8 gap_DC[4];
 	int64 field_E0;
 	int8 gap[10];
-
-	static s_network_channel* get(int32 channel_index);
-	bool get_network_address(transport_address* address_out);
-
-	bool has_simulation_interface() const { return simulation_interface != NULL; }
-	bool is_simulation_authority() const { return has_simulation_interface() && *(bool*)((uint8*)simulation_interface + 48); }
-	bool is_channel_state_5() const { return channel_state == _network_channel_state_5; }
 };
-ASSERT_STRUCT_SIZE(s_network_channel, 248);
+ASSERT_STRUCT_SIZE(c_network_channel, 248);
 
 struct s_network_channel_client_info
 {
@@ -121,6 +130,11 @@ ASSERT_STRUCT_SIZE(s_network_channel_client_info, 8);
 
 class c_network_channel_simulation_interface
 {
+public:
+	void set_established(bool established);
+	bool established(void) const;
+
+private:
 	bool m_initialized;
 	void* m_simulation_context;
 	void(__cdecl* m_simulation_closure_callback)(void*);

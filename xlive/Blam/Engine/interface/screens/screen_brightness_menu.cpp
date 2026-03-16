@@ -9,12 +9,12 @@
 */
 
 c_brightness_menu::c_brightness_menu(e_user_interface_channel_type _ui_channel, e_user_interface_render_window _window_index, uint16 _flags) :
-	c_screen_with_menu(_screen_brightness_level, _ui_channel, _window_index, _flags, &this->m_list_widgets),
+	c_screen_with_menu(_screen_brightness_level, _ui_channel, _window_index, _flags, &m_list_widgets),
 	m_list_widgets(_flags)
 {
 }
 
-void* __cdecl c_brightness_menu::open_brightness_menu(s_screen_parameters* parameters)
+void* __cdecl c_brightness_menu::open_brightness_menu(c_screen_parameters* parameters)
 {
 	c_brightness_menu* brightness_menu = nullptr;
 	c_brightness_menu* ui_buffer = (c_brightness_menu*)ui_pool_allocate_space(sizeof(c_brightness_menu), 0);

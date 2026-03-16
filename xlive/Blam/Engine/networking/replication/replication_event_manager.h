@@ -9,7 +9,7 @@ public:
 	void destroy(void);
 
 	void reset(void);
-
+	
 	void register_client(
 		class c_simulation_event_handler* client)
 	{

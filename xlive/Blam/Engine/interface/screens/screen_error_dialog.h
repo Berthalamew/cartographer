@@ -3,12 +3,11 @@
 enum e_user_interface_channel_type;
 enum e_user_interface_render_window;
 enum e_ui_error_types : uint32;
-struct s_screen_parameters;
 
 class c_screen_error_dialog_ok
 {
 public:
-	static void* __cdecl load_for_active_users(s_screen_parameters* parameters);
+	static void* __cdecl load_for_active_users(class c_screen_parameters* parameters);
 	static void apply_patches();
 };
 
