@@ -699,7 +699,7 @@ bool c_simulation_world::iterator_next(
 	while (iterator->next_world_view_index<NUMBEROF(m_views))
 	{
 		c_simulation_view* current_view = m_views[iterator->next_world_view_index++];
-		if (current_view && TEST_FLAG(current_view->view_type(), iterator->view_type_mask))
+		if (current_view && TEST_BIT(iterator->view_type_mask, current_view->view_type()))
 		{
 			*view = current_view;
 			result = true;

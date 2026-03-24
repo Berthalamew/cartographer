@@ -15,11 +15,11 @@ class c_replication_event_manager_view : c_replication_scheduler_client
 {
 public:
 	bool has_data_to_transmit() override;
-	bool build_outgoing_requests(const s_simulation_view_telemetry_data* telemetry_data, int32 maximum_number_of_requests, void* requests) override;
+	bool build_outgoing_requests(void const* telemetry_data, int32 maximum_number_of_requests, s_replication_incoming_request* requests) override;
 	int32 terminator_required_bits() override;
 	void write_to_packet(void* request_identifier, int32 request_type, void* telemetry_data, int32 packet_sequence_number, c_bitstream* packet, int32 must_leave_space_bits) override;
 	void write_terminator_to_packet(c_bitstream* packet) override;
-	int32 read_from_packet(c_bitstream* packet, int32 maximum_number_of_requests, void* requests,int32* out_number_of_requests) override;
+	e_network_read_result read_from_packet(int32 packet_sequence_number, class c_bitstream* packet, int32 maximum_number_of_requests, s_replication_incoming_request* requests, int32* out_number_of_requests) override;
 	void process_incoming_request(void* request) override;
 	void notify_packet_acknowledged() override;
 	void mark_packet_delivered(bool delivered) override;

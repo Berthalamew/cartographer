@@ -23,9 +23,9 @@ struct s_simulation_view_telemetry_data
 };
 ASSERT_STRUCT_SIZE(s_simulation_view_telemetry_data, 160);
 
-struct c_simulation_view_telemetry_provider
+class c_simulation_view_telemetry_provider
 {
-	int m_field_0;
+	int32 m_field_0;
 	class c_simulation_view* m_view;
 	s_simulation_view_telemetry_data m_telemetry_data;
 };

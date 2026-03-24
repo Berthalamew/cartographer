@@ -1,6 +1,6 @@
 #pragma once
 #include "networking/delivery/network_channel.h"
-#include "simulation/simulation_view_telemetry.h"
+#include "networking/network_constants.h"
 
 /* structures */
 
@@ -11,11 +11,11 @@ private:
 
 public:
 	virtual bool has_data_to_transmit() = 0;
-	virtual bool build_outgoing_requests(const s_simulation_view_telemetry_data* telemetry_data, int32 maximum_number_of_requests, void* requests) = 0;
+	virtual bool build_outgoing_requests(void const* telemetry_data, int32 maximum_number_of_requests, struct s_replication_incoming_request* requests) = 0;
 	virtual int32 terminator_required_bits() = 0;
 	virtual void write_to_packet(void* request_identifier, int32 request_type, void* telemetry_data, int32 packet_sequence_number, class c_bitstream* packet, int32 must_leave_space_bits) = 0;
 	virtual void write_terminator_to_packet(class c_bitstream* packet) = 0;
-	virtual int32 read_from_packet(class c_bitstream* packet, int32 maximum_number_of_requests, void* requests, int32* out_number_of_requests) = 0;
+	virtual e_network_read_result read_from_packet(int32 packet_sequence_number, class c_bitstream* packet, int32 maximum_number_of_requests, struct s_replication_incoming_request* requests, int32* out_number_of_requests) = 0;
 	virtual void process_incoming_request(void* request) = 0;
 	virtual void notify_packet_acknowledged() = 0;
 	virtual void mark_packet_delivered(bool delivered) = 0;
@@ -26,10 +26,10 @@ class c_replication_scheduler : c_network_channel_client
 private:
 	bool m_initialized;
 	int32 m_view_index;
-	c_replication_scheduler_client* m_clients[3];
+	class c_replication_scheduler_client* m_clients[3];
 	int32 m_client_terminator_bits[3];
 	int32 m_total_terminator_bits;
-	c_simulation_view_telemetry_provider* m_telemetry_provider;
+	class c_simulation_view_telemetry_provider* m_telemetry_provider;
 
 public:
 	c_replication_scheduler() = default;

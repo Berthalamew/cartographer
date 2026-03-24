@@ -280,7 +280,7 @@ void simulation_queue_player_update_apply(const s_simulation_queue_element* elem
 		}
 		else
 		{
-			simulation_get_globals()->fatal_error = true;
+			simulation_get_globals()->simulation_fatal_error = true;
 			event(_event_error, "networking:simulation:player_update_apply: failed to apply player update");
 		}
 	}

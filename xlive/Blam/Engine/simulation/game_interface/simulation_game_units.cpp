@@ -8,6 +8,7 @@
 
 #include "game/game_globals.h"
 #include "game/game_engine.h"
+#include "game/players.h"
 #include "math/color_math.h"
 #include "memory/bitstream.h"
 #include "networking/network_constants.h"
@@ -104,7 +105,7 @@ bool c_simulation_unit_entity_definition::entity_update_decode(
 	{
 		if (packet->read_bool("controlling-player-exists"))
 		{
-			unit_state_data->controlling_player_absolute_index = (int16)packet->read_integer("controlling-player-index", k_player_index_bit_count);
+			unit_state_data->controlling_player_absolute_index = (int16)packet->read_integer("controlling-player-index", k_player_index_bits);
 			decode_success = decode_success && VALID_INDEX(unit_state_data->controlling_player_absolute_index, k_maximum_players);
 			if (!decode_success)
 			{
@@ -311,7 +312,7 @@ static datum __stdcall c_simulation_unit_entity_definition__create_object(
 	// We check the following in order to force the player colour
 	// The unit is not controlled by an actor
 	// The function game_engine_get_change_colors is able to retrieve the colours for the engine mode
-	if ((initial_state_data->controlling_actor_index == NONE) &&
+	if ((initial_state_data->controlling_simulation_actor_index == NONE) &&
 		game_engine_get_change_colors(&creation_data->appearance, creation_data->team, change_colors))
 	{
 		placement_data.change_color_override_mask |= MASK(4);

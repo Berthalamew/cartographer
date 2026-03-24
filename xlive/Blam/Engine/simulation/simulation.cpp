@@ -346,10 +346,7 @@ void simulation_build_update(
 	ASSERT(simulation_globals->initialized);
 	ASSERT(simulation_globals->world);
 
-	if (simulation_globals->simulation_aborted)
-	{
-		DISPLAY_ASSERT("simulation aborted inside game update");
-	}
+	vassert(!simulation_globals->simulation_aborted, "simulation aborted inside game update", NULL);
 
 	ASSERT(simulation_globals->world->exists());
 	ASSERT(game_in_progress());
@@ -363,10 +360,14 @@ void simulation_build_update(
 		(!simulation_globals->world->is_distributed() || simulation_globals->world->is_playback()) &&
 		!simulation_globals->world->is_out_of_sync())
 	{
+		bool out_of_sync = false;
+
 		if (update->flush_gamestate)
 		{
 			simulation_globals->world->gamestate_flush();
 		}
+
+		random_seed_allow_use();
 
 		if (update->update_number!=simulation_globals->world->get_next_update_number())
 		{
@@ -376,6 +377,8 @@ void simulation_build_update(
 				update->update_number,
 				simulation_globals->world->get_next_update_number()
 			);
+
+			out_of_sync = true;
 		}
 		else if (update->verify_game_time!=simulation_globals->world->get_time())
 		{
@@ -386,11 +389,10 @@ void simulation_build_update(
 				update->verify_game_time,
 				simulation_globals->world->get_time()
 			);
+
+			out_of_sync = true;
 		}
-		else if (
-			random_seed_allow_use();
-			update->verify_random_seed!=get_random_seed()
-		)
+		else if (update->verify_random_seed!=get_random_seed())
 		{
 			event(
 				_event_error,
@@ -400,11 +402,16 @@ void simulation_build_update(
 				update->verify_random_seed,
 				get_random_seed()
 			);
+
+			out_of_sync = true;
 		}
+
 		random_seed_disallow_use();
 
-		
-simulation_globals->world->go_out_of_sync();
+		if (out_of_sync)
+		{
+			simulation_globals->world->go_out_of_sync();
+		}
 	}
 	
 	profile_attribute_exit(2, _profile_attribution_subsystem_9);
@@ -621,7 +628,8 @@ void simulation_fatal_error(
 	ASSERT(simulation_globals->initialized);
 	event(_event_error, "simulation:global: fatal error raised at time [%d]", game_time_get());
 
-	simulation_globals->fatal_error = true;
+	simulation_globals->simulation_fatal_error = true;
+
 	return;
 }
 

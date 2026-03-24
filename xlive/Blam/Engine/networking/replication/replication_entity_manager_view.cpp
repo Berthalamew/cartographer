@@ -1,7 +1,10 @@
 #include "stdafx.h"
 #include "replication_entity_manager_view.h"
 
+#include "replication_entity.h"
+
 #include "memory/bitstream.h"
+#include "networking/network_event.h"
 
 /* public code */
 
@@ -22,11 +25,11 @@ bool c_replication_entity_manager_view::has_data_to_transmit(
 }
 
 bool c_replication_entity_manager_view::build_outgoing_requests(
-	const s_simulation_view_telemetry_data* telemetry_data,
+	void const* telemetry_data,
 	int32 maximum_number_of_requests,
-	void* requests)
+	s_replication_incoming_request* requests)
 {
-	return INVOKE_TYPE(0x1D180C, 0x1D6A98, bool(__thiscall*)(c_replication_entity_manager_view*, const s_simulation_view_telemetry_data*, int32, void*), 
+	return INVOKE_TYPE(0x1D180C, 0x1D6A98, bool(__thiscall*)(c_replication_entity_manager_view*, void const*, int32, s_replication_incoming_request*),
 		this, telemetry_data, maximum_number_of_requests, requests);
 }
 
@@ -45,7 +48,7 @@ void c_replication_entity_manager_view::write_to_packet(
 	c_bitstream* packet,
 	int32 must_leave_space_bits)
 {
-	INVOKE_TYPE(0x1D2C24, 0x1D7EB4, void(__thiscall*)(c_replication_entity_manager_view*, void*, int32, void*, int32, c_bitstream*, int32),
+	INVOKE_TYPE(0x1D2C24, 0x1D7EB4, void(__thiscall*)(c_replication_entity_manager_view*, void*, int32, void const*, int32, c_bitstream*, int32),
 		this, request_identifier, request_type, telemetry_data, packet_sequence_number, packet, must_leave_space_bits);
 	return;
 }
@@ -55,16 +58,18 @@ void c_replication_entity_manager_view::write_terminator_to_packet(
 {
 	packet->write_integer("code", 0, 3);
 	m_outgoing_packet = nullptr;
+
 	return;
 }
 
-int32 c_replication_entity_manager_view::read_from_packet(
+e_network_read_result c_replication_entity_manager_view::read_from_packet(
+	int32 packet_sequence_number,
 	c_bitstream* packet,
 	int32 maximum_number_of_requests,
-	void* requests,
+	s_replication_incoming_request* requests,
 	int32* out_number_of_requests)
 {
-	return INVOKE_TYPE(0x1D1C46, 0x1D6ED2, int32(__thiscall*)(c_replication_entity_manager_view*, c_bitstream*, int32, void*, int32*),
+	return INVOKE_TYPE(0x1D1C46, 0x1D6ED2, e_network_read_result(__thiscall*)(c_replication_entity_manager_view*, c_bitstream*, int32, void*, int32*),
 		this, packet, maximum_number_of_requests, requests, out_number_of_requests);
 }
 
@@ -91,16 +96,21 @@ void c_replication_entity_manager_view::mark_packet_delivered(
 }
 
 void c_replication_entity_manager_view::initialize(
-	int32 world_view_index,
+	int32 view_index,
 	class c_replication_entity_manager* entity_manager)
 {
-	m_entity_manager = entity_manager;
-	m_view_index = world_view_index;
-	m_view_mask = 1 << world_view_index;
-	m_packet_list = nullptr;
-	m_outgoing_packet = nullptr;
+	ASSERT(!m_initialized);
+	ASSERT(view_index>=0 && view_index<k_short_bits);
 
-	for (uint32 i = 0; i < k_replication_entity_manager_view_max_entities; ++i)
+	event(_event_status, "networking:replication:entity:[%d] entity view allocated", view_index);
+
+	m_entity_manager = entity_manager;
+	m_view_index = view_index;
+	m_view_mask = FLAG(view_index);
+	m_packet_list = NULL;
+	m_outgoing_packet = NULL;
+
+	for (uint32 i = 0; i<k_replication_entity_manager_view_max_entities; ++i)
 	{
 		s_replication_entity_view_data* data = &m_entity_data[i];
 

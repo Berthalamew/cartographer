@@ -2,6 +2,7 @@
 
 #include "machine_id.h"
 #include "game/game_results.h"
+#include "game/players.h"
 #include "memory/ring_buffer.h"
 #include "networking/delivery/network_channel.h"
 #include "networking/messages/network_message_type_collection.h"
@@ -9,6 +10,7 @@
 #include "networking/replication/replication_entity_manager_view.h"
 #include "networking/replication/replication_event_manager_view.h"
 #include "networking/replication/replication_scheduler.h"
+#include "simulation/simulation_view_telemetry.h"
 
 /* enums */
 
