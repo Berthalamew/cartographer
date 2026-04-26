@@ -131,7 +131,7 @@ bool __cdecl rasterizer_dx9_render_scene_start(const struct rasterizer_scene_beg
 
 bool __cdecl rasterizer_dx9_render_scene_end(void);
 
-void __cdecl rasterizer_frame_begin(const struct s_frame_parameters* parameters);
+void __cdecl rasterizer_frame_begin(const struct rasterizer_frame_begin_parameters* parameters);
 
 void __cdecl rasterizer_dx9_clear_render_target(uint32 flags, pixel32 color, real32 z, bool stencil);
 

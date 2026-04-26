@@ -70,15 +70,15 @@ struct s_frame
 };
 ASSERT_STRUCT_SIZE(s_frame, 664);
 
-struct s_frame_parameters
+struct rasterizer_frame_begin_parameters
 {
-	uint32 frame_type;
+	e_frame_type frame_type;
 	int32 unk0;
 	real64 time;
 	int32 dword_10;
 	int32 dword_14;
 };
-ASSERT_STRUCT_SIZE(s_frame_parameters, 24);
+ASSERT_STRUCT_SIZE(rasterizer_frame_begin_parameters, 24);
 
 struct window_bound
 {
@@ -143,7 +143,7 @@ uint32* global_frame_index_get(void);
 
 int32* get_global_window_bound_index(void);
 
-s_frame_parameters* global_frame_parameters_get(void);
+rasterizer_frame_begin_parameters* global_frame_parameters_get(void);
 
 int32* global_rasterizer_pixel_shader_index_get(void);
 

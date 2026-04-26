@@ -912,7 +912,7 @@ bool __cdecl rasterizer_dx9_render_scene_end(void)
 }
 
 void __cdecl rasterizer_frame_begin(
-	const s_frame_parameters* parameters)
+	const rasterizer_frame_begin_parameters* parameters)
 {
 	IDirect3DDevice9Ex* global_d3d_device = rasterizer_dx9_device_get_interface();
 
@@ -942,6 +942,12 @@ void __cdecl rasterizer_frame_begin(
 
 	rasterizer_globals->clipping_parameters.z_near = rasterizer_get_near_clip_distance();
 	rasterizer_globals->clipping_parameters.z_far = rasterizer_get_far_clip_distance();
+
+#ifdef RASTERIZER_PROFILE_ENABLED
+	rasterizer_profile_frame_begin();
+#endif
+
+	rasterizer_occlusion_begin_for_new_frame();
 
 	ASSERT(!rasterizer_loading_screen_active());
 
@@ -999,10 +1005,12 @@ void __cdecl rasterizer_frame_begin(
 		}
 	}
 
-	*Memory::GetAddress<bool*>(0xA3E3B5) = true;	// only used here?
-	*Memory::GetAddress<bool*>(0xA3E3B6) = true;	// rendering shadows?
+	*Memory::GetAddress<bool*>(0xA3E3B5) = false;	// only used here?
+	*Memory::GetAddress<bool*>(0xA3E3B6) = false;	// rendering shadows?
+
 	rasterizer_globals->bitmaps.field_91 = true;
 	rasterizer_globals->bitmaps.field_90 = true;
+
 	render_prt_begin_frame();
 
 	return;

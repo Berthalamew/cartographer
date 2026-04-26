@@ -122,7 +122,7 @@ void rasterizer_dx9_postprocess_scene(int32 render_layer_debug_view, bool lens_f
 			}
 
 			rasterizer_dx9_perf_event_begin("bloom", NULL);
-			rasterizer_dx9_dof_render_bloom(k_bloom_blur_amount, bloom_threshold, brightness, k_bloom_box_factor, k_bloom_max_factor, true, global_frame_parameters_get()->frame_type == 6);
+			rasterizer_dx9_dof_render_bloom(k_bloom_blur_amount, bloom_threshold, brightness, k_bloom_box_factor, k_bloom_max_factor, true, global_frame_parameters_get()->frame_type==_render_frame_6);
 			rasterizer_dx9_perf_event_end("bloom");
 		}
 	}

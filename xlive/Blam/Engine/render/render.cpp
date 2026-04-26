@@ -142,9 +142,9 @@ s_frame* global_window_parameters_get(void)
 	return Memory::GetAddress<s_frame*>(0xA3DF70);
 }
 
-s_frame_parameters* global_frame_parameters_get(void)
+rasterizer_frame_begin_parameters* global_frame_parameters_get(void)
 {
-	return Memory::GetAddress<s_frame_parameters*>(0xA3E208);
+	return Memory::GetAddress<rasterizer_frame_begin_parameters*>(0xA3E208);
 }
 
 int32* global_rasterizer_pixel_shader_index_get(void)
@@ -856,10 +856,11 @@ bool render_scene_is_splitscreen(void)
 		get_player_window_count() > 1;
 }
 
-void rasterizer_render_scene(bool is_texture_camera)
+void rasterizer_render_scene(
+	bool is_texture_camera)
 {
 	const s_frame* global_window_parameters = global_window_parameters_get();
-	const s_frame_parameters* g_frame_parameters = global_frame_parameters_get();
+	const rasterizer_frame_begin_parameters* g_frame_parameters = global_frame_parameters_get();
 
 	bool lens_flare_occlusion_test;
 	bool render_layer_selfibloomination;
@@ -891,8 +892,8 @@ void rasterizer_render_scene(bool is_texture_camera)
 	}
 	else if (!is_texture_camera)
 	{
-		lens_flare_occlusion_test = g_frame_parameters->frame_type != 6;
-		render_layer_selfibloomination = (g_frame_parameters->frame_type != 7 ? !render_scene_is_splitscreen() : false);
+		lens_flare_occlusion_test = g_frame_parameters->frame_type != _render_frame_6;
+		render_layer_selfibloomination = (g_frame_parameters->frame_type != _render_frame_7 ? !render_scene_is_splitscreen() : false);
 	}
 	else
 	{
@@ -901,6 +902,7 @@ void rasterizer_render_scene(bool is_texture_camera)
 	}
 	
 	render_scene(render_layer_debug_view, render_transparent_geo, lens_flare_occlusion_test, render_layer_selfibloomination, 0, 0, depth_range);
+
 	return;
 }
 
