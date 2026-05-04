@@ -208,7 +208,7 @@ void input_add_key(int32 msg, uint32 wParam, uint32 lParam, bool fHandled);
 
 void __cdecl input_update_gamepads(uint32 duration_ms);
 //void __cdecl input_update_mouse(DIMOUSESTATE2* mouse_state, uint32 duration_ms);
-bool __cdecl input_has_gamepad(uint16 gamepad_index, bool* a2);
+bool __cdecl input_has_gamepad(int16 gamepad_index, bool* a2);
 bool __cdecl input_has_gamepad_plugged(uint16 gamepad_index);
 bool __cdecl input_gamepad_just_left(uint16 gamepad_index);
 uint8 __cdecl input_get_connected_gamepads_count();

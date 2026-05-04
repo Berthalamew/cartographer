@@ -80,10 +80,16 @@ void c_screen_widget::verify_and_load_from_layout(datum widget_tag, s_interface_
 {
 	INVOKE_TYPE(0x210A44, 0x0, void(__thiscall*)(c_screen_widget*, datum, s_interface_expected_screen_layout*), this, widget_tag, expected_layout);
 }
-void c_screen_widget::apply_new_representations_to_players(c_player_widget_representation* representations, int32 player_count)
+void c_screen_widget::apply_new_representations_to_players(
+	c_player_widget_representation* representations,
+	int32 player_count)
 {
+	ASSERT(representations || player_count==0);
+
 	INVOKE_TYPE(0x211CD0, 0x0, void(__thiscall*)(c_screen_widget*, c_player_widget_representation*, int32), this, representations, player_count);
+	return;
 }
+
 void c_screen_widget::initialize_button_keys_text(bool add_new_child)
 {
 	return INVOKE_TYPE(0x20FF73, 0x0, void(__thiscall*)(c_screen_widget*, bool), this, add_new_child);

@@ -126,3 +126,7 @@ public:
 /* prototypes */
 
 void cartographer_account_manager_open_list(void);
+
+/* globals */
+
+extern e_controller_index g_controller_logging_in;

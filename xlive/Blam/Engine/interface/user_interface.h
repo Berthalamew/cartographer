@@ -494,8 +494,12 @@ enum e_user_interface_screen_id : uint32;
 bool __cdecl user_interface_automation_is_active(void);
 uint32 __cdecl user_interface_milliseconds(void);
 
-class c_user_interface_channel* __fastcall user_interface_get_channel(e_user_interface_render_window window_index, e_user_interface_channel_type channel_index);
 
+class c_user_interface_channel* __fastcall user_interface_get_channel(e_user_interface_render_window window_index, e_user_interface_channel_type channel_index);
+bool __cdecl user_interface_channel_is_active(void);
+void __cdecl user_interface_dispose_all_active_ui(void);
+
+bool __cdecl user_interface_force_load_mainmenu(void);
 bool __cdecl user_interface_error_display_allowed(void);
 bool __cdecl user_interface_has_responding_controller(int32 user_index);
 bool __cdecl user_interface_channel_is_busy(e_user_interface_channel_type channel_type);
@@ -539,6 +543,7 @@ void set_debug_show_screen_tag_path(bool value);
 void user_interface_show_current_screen_tag(const char* path);
 
 void debug_set_ui_beta(bool value);
+bool user_interface_is_beta(void);
 
 void user_interface_test_error_ok(int16 id);
 

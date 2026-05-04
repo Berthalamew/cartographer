@@ -119,7 +119,7 @@ void H2DedicatedServerStartup() {
 		BYTE abOnline[20];
 		XNetRandom(abEnet, sizeof(abEnet));
 		XNetRandom(abOnline, sizeof(abOnline));
-		ConfigureUserDetails("[Username]", "12345678901234567890123456789012", rand(), 0, H2Config_ip_lan, ByteToHexStr(abEnet, sizeof(abEnet)).c_str(), ByteToHexStr(abOnline, sizeof(abOnline)).c_str(), false);
+		ConfigureUserDetails("[Username]", "12345678901234567890123456789012", rand(), 0, H2Config_ip_lan, ByteToHexStr(abEnet, sizeof(abEnet)).c_str(), ByteToHexStr(abOnline, sizeof(abOnline)).c_str(), 0, false);
 	}
 }
 

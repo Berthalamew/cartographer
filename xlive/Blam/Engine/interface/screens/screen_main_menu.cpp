@@ -6,6 +6,7 @@
 #include "screen_campaign_options_dialog.h"
 
 #include "game/preferences.h"
+#include "game/player_constants.h"
 #include "interface/user_interface_controller.h"
 #include "interface/user_interface_memory.h"
 #include "interface/user_interface_widget_text.h"
@@ -50,8 +51,8 @@ enum e_main_menu_list_skin_texts
 
 /* constants */
 
-const char* k_main_menu_list_name = "main menu list";
-const wchar_t* k_online_button_text[k_language_count] =
+static const char* k_main_menu_list_name = "main menu list";
+static const wchar_t* k_online_button_text[k_language_count] =
 {
 	L"ONLINE",
 	L"オンライン",
@@ -69,7 +70,7 @@ const wchar_t* k_online_button_text[k_language_count] =
 static bool __cdecl screen_show_campaign_options_without_achievement(e_controller_index controller_index);
 static bool __cdecl screen_show_screen_4way_signin_splitscreen_offline(e_controller_index controller_index);
 static bool __cdecl screen_show_screen_4way_signin_system_link_offline(e_controller_index controller_index);
-static bool __cdecl screen_show_screen_4way_signin_xbox_live_callback(void);
+static bool __cdecl screen_show_screen_4way_signin_xbox_live_callback(void* data);
 
 /* public */
 
@@ -97,7 +98,7 @@ c_main_menu_list::c_main_menu_list(int16 user_flags) :
 			controller != k_no_controller;
 			controller = next_controller(controller))
 		{
-			user_interface_controller_sign_out(controller);
+			user_interface_controller_reset(controller);
 		}
 	}
 }
@@ -278,7 +279,7 @@ void c_main_menu_list::handle_item_xbox_live(s_event_record* const& event)
 		return true;
 	*/
 
-	c_networking_panorama_friends* friends = get_networking_panorama_friends();
+	c_panorama_friends* friends = panorama_friends_get();
 	if (!friends->has_active_task())
 	{
 		friends->initialize_startup();
@@ -427,9 +428,10 @@ static bool __cdecl screen_show_campaign_options_without_achievement(e_controlle
 	return true;
 }
 
-static bool __cdecl screen_show_screen_4way_signin_splitscreen_offline(e_controller_index controller_index)
+static bool __cdecl screen_show_screen_4way_signin_splitscreen_offline(
+	e_controller_index controller_index)
 {
-	online_account_transition_to_offline();
+	online_account_transition_to_offline(user_interface_controller_get_user_index(controller_index));
 	user_interface_transition_to_offline();
 	
 	if (user_interface_controller_get_signed_in_controller_count() <= 0)
@@ -455,9 +457,10 @@ static bool __cdecl screen_show_screen_4way_signin_splitscreen_offline(e_control
 	return true;
 }
 
-static bool __cdecl screen_show_screen_4way_signin_system_link_offline(e_controller_index controller_index)
+static bool __cdecl screen_show_screen_4way_signin_system_link_offline(
+	e_controller_index controller_index)
 {
-	online_account_transition_to_offline();
+	online_account_transition_to_offline(user_interface_controller_get_user_index(controller_index));
 	user_interface_transition_to_offline();
 
 	if (user_interface_controller_get_signed_in_controller_count() <= 0)
@@ -496,36 +499,42 @@ static bool __cdecl screen_show_screen_4way_signin_system_link_offline(e_control
 	return true;
 }
 
-static bool __cdecl screen_show_screen_4way_signin_xbox_live_callback(void)
+static bool __cdecl screen_show_screen_4way_signin_xbox_live_callback(void* data)
 {
-	if (!XUserSignedOnline(_controller0))
-		return true;
+	int32 user_index;
+	
+	bool result = true;
+	bool user_signed_in = false;
 
-	if (!user_interface_controller_is_player_profile_valid(_controller0))
+	for (user_index= 0; user_index< k_number_of_users; ++user_index)
 	{
-		// dont allow transitioning into live if _controller_index_0 is inactive
-		screen_error_ok_dialog_show(
-			_user_interface_channel_type_game_error,
-			_ui_error_xblive_user_not_authorized,
-			_window_4,
-			NONE,// allow all controllers
-			user_interface_controller_sign_out_all_controllers,
-			nullptr);
+		if (XUserSignedOnline(user_index))
+		{
+			user_signed_in = true;
+			break;
+		}
 	}
 
-	s_screen_parameters params;
-	params.m_flags = 0;
-	params.m_window_index = _window_4;
-	params.m_context = 0;
-	params.m_user_flags = user_interface_controller_get_signed_in_controllers_mask();
-	params.m_channel_type = _user_interface_channel_type_gameshell_screen;
-	params.m_screen_state.field_0 = NONE;
-	params.m_screen_state.m_last_focused_item_order = NONE;
-	params.m_screen_state.m_last_focused_item_index = NONE;
-	params.m_load_function = &c_screen_4way_signin::load_for_xbox_live;
 
-	params.m_load_function(&params);
-	return true;
+	if (user_signed_in)
+	{
+		e_controller_index controller = user_interface_controller_get_controller_for_user(user_index);
+
+		s_screen_parameters params;
+		params.m_flags = 0;
+		params.m_window_index = _window_4;
+		params.m_context = 0;
+		params.m_user_flags = FLAG(controller);
+		params.m_channel_type = _user_interface_channel_type_gameshell_screen;
+		params.m_screen_state.field_0 = NONE;
+		params.m_screen_state.m_last_focused_item_order = NONE;
+		params.m_screen_state.m_last_focused_item_index = NONE;
+		params.m_load_function = &c_screen_4way_signin::load_for_xbox_live;
+
+		params.m_load_function(&params);
+	}
+
+	return result;
 }
 
 

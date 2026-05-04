@@ -26,13 +26,19 @@ bool __cdecl network_session_interface_get_local_user_properties(
 	enum e_controller_index* controller_index,
 	struct s_player_configuration* player_data,
 	uint32* player_voice_settings,
-	int32* out_player_text_chat);
+	uint32* player_text_chat_settings);
 bool network_session_interface_set_local_user_character_type(int32 user_index, enum e_character_type character_type);
 bool network_session_interface_get_local_user_identifier(int32 user_index, struct s_player_identifier* out_identifier);
 int32 network_session_interface_get_team_index(int32 user_index);
 void network_session_interface_set_local_user_rank(int32 user_index, int8 rank);
 int32 __cdecl network_session_interface_add_local_user(struct s_player_identifier const* user_identifier);
 void network_session_interface_set_user_identifier(int32 user_index, struct s_player_identifier const* user_identifier);
+void network_session_interface_set_local_user_properties(
+	int32 user_index,
+	e_controller_index controller_index,
+	s_player_configuration const* p_data,
+	int32 player_voice_exists,
+	int32 player_text_chat_exists);
 bool network_session_get_membership(
 	class c_network_session *session,
 	int32* update_number,
@@ -46,3 +52,5 @@ bool network_session_get_membership(
 	struct s_network_session_player const **players);
 enum e_network_session_class network_squad_session_get_session_class(void);
 bool network_session_is_online(e_network_session_class session_class);
+bool network_squad_session_delegate_leadership(int32 player_index);
+bool network_squad_session_boot_player(int32 player_index);

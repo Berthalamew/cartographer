@@ -641,6 +641,24 @@ void player_appearance_initialize(
 	return;
 }
 
+bool player_appearance_valid(
+	struct s_player_appearance const* player_appearance)
+{
+	bool valid = true;
+
+	for (int32 cc_index = 0; cc_index<NUMBEROF(player_appearance->change_color_index); ++cc_index)
+	{
+		valid = valid && player_appearance->change_color_index[cc_index].in_range();
+	}
+
+	valid = valid && player_appearance->player_character_type.in_range();
+	valid = valid && VALID_INDEX(player_appearance->emblem_info.foreground_emblem, k_emblem_foreground_count);
+	valid = valid && VALID_INDEX(player_appearance->emblem_info.background_emblem, k_emblem_background_count);
+	valid = valid && player_appearance->emblem_info.emblem_flags.valid();
+
+	return valid;
+}
+
 char const* player_identifier_get_string(
 	s_player_identifier const* player_id)
 {
@@ -659,6 +677,13 @@ char const* player_identifier_get_string(
 	}
 
 	return player_id_string;
+}
+
+bool player_identifier_compare(
+	s_player_identifier const* player1, 
+	s_player_identifier const* player2)
+{
+	return player1 && player2 && !csmemcmp(player1, player2, sizeof(*player1));
 }
 
 char const* clan_identifier_get_string(

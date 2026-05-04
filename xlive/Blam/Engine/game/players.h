@@ -253,8 +253,10 @@ void players_joined_in_progress_allow_spawn(void);
 void clan_identifier_clear(struct s_clan_identifier* clan_id);
 
 void player_appearance_initialize(struct s_player_appearance* player_appearance);
+bool player_appearance_valid(struct s_player_appearance const* player_appearance);
 
 char const* player_identifier_get_string(struct s_player_identifier const* player_id);
+bool player_identifier_compare(s_player_identifier const* player1, s_player_identifier const* player2);
 
 char const* clan_identifier_get_string(struct s_clan_identifier const* clan_id);
 

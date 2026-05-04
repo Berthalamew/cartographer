@@ -17,27 +17,27 @@ enum e_context_id
 enum e_context_variant
 {
 	_context_variant_ctf = 0,
-	_context_variant_slayer = 1,
-	_context_variant_oddball = 2,
-	_context_variant_koth = 3,
-	_context_variant_juggernaut = 4,
-	_context_variant_territories = 5,
-	_context_variant_assault = 6,
+	_context_variant_slayer,
+	_context_variant_oddball,
+	_context_variant_koth,
+	_context_variant_juggernaut,
+	_context_variant_territories,
+	_context_variant_assault,
 	k_context_variant_count
 };
 
 enum e_context_presence
 {
 	_context_presence_mainmenu = 0,
-	_context_presence_settings = 1,
-	_context_presence_server_browser = 2,
-	_context_presence_singleplayer = 3,
-	_context_presence_lobby = 4,
-	_context_presence_results = 5,
-	_context_presence_live_in_game = 6,
-	_context_presence_public_game = 7,
-	_context_presence_invite_only_game = 8,
-	_context_presence_network_in_game = 9
+	_context_presence_settings,
+	_context_presence_server_browser,
+	_context_presence_singleplayer,
+	_context_presence_lobby,
+	_context_presence_results,
+	_context_presence_live_in_game,
+	_context_presence_public_game,
+	_context_presence_invite_only_game,
+	_context_presence_network_in_game
 };
 
 

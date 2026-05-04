@@ -1,6 +1,6 @@
 #include "stdafx.h"
-
 #include "screen_4way_signin.h"
+
 #include "screen_network_squad_browser.h"
 #include "screen_bungie_news.h"
 #include "screen_press_start_introduction.h"
@@ -226,11 +226,6 @@ static const rectangle2d k_model_viewports[] = {
 		{0   , -320,-240	, 320 }   ,
 };
 
-/* globals */
-
-uint32 ui_recover_from_disconnection_return_address = NULL;
-bool g_show_split_inputs_option = false;
-datum edit_profile_bitmap_datum = NONE;
 
 /* prototypes */
 
@@ -239,6 +234,12 @@ static void add_button_key_split_input(c_text_widget* button_key_text);
 static void modify_controller_bitmap_for_split(c_bitmap_widget* signin_bitmap, c_text_widget* join_text);
 
 static void user_interface_recover_4way_screen(e_session_protocol protocol);
+
+/* globals */
+
+static uint32 ui_recover_from_disconnection_return_address = NULL;
+static bool g_show_split_inputs_option = false;
+static datum edit_profile_bitmap_datum = NONE;
 
 /* public code */
 
@@ -260,7 +261,7 @@ void c_screen_4way_signin::update(void)
 		controller != k_no_controller;
 		controller = user_interface_controller_get_next_valid_index(controller))
 	{
-		bool gamepad_connected = user_interface_controller_has_gamepad(controller);
+		bool gamepad_connected = user_interface_controller_connected(controller);
 		bool controller_has_joined = has_live_privileges && user_interface_controller_is_player_profile_valid(controller);
 		bool show_gamertag_text = false;
 
@@ -273,7 +274,7 @@ void c_screen_4way_signin::update(void)
 			c_player_widget_representation* current_player = &representations[controller];
 			current_player->set_appearance(&profile.appearance);
 			current_player->set_player_name(profile.name);
-			show_gamertag_text = user_interface_controller_has_xbox_live(controller);
+			show_gamertag_text = user_interface_controller_xbox_live_account_signed_in(controller);
 		}
 
 		const s_screen_4way_items* item = &k_4way_screen_items[controller];
@@ -327,6 +328,7 @@ void c_screen_4way_signin::update(void)
 			else
 				ui_player_model_a->set_visible(false);
 		}
+
 		c_model_widget* ui_player_model_b = this->try_find_model_widget(item->model_ui_player_b);
 		if (ui_player_model_b)
 		{
@@ -368,15 +370,17 @@ void c_screen_4way_signin::update(void)
 			// signout any leftover profile
 			// in h2x this is not needed as the error screen pops up and forces you to connect controller to proceed
 			// todo : fix the removed controller process, its annoying the way it is now
-			user_interface_controller_sign_out(controller);
+			user_interface_controller_reset(controller);
 		}
 	}
 	g_show_split_inputs_option = false;
-	if (IN_RANGE(input_get_connected_gamepads_count(), 1, k_number_of_controllers - 1)
-		&& user_interface_controller_is_player_profile_valid(k_windows_device_controller_index))
+	
+	if (IN_RANGE(input_get_connected_gamepads_count(), 1, k_number_of_controllers-1) &&
+		user_interface_controller_is_player_profile_valid(k_windows_device_controller_index))
 	{
 		g_show_split_inputs_option = true;
 	}
+
 	this->update_button_key_texts();
 
 	this->apply_new_representations_to_players(representations, k_number_of_controllers);
@@ -385,7 +389,6 @@ void c_screen_4way_signin::update(void)
 
 bool c_screen_4way_signin::handle_event(s_event_record* event)
 {
-
 	bool result = false;
 
 	if (user_interface_channel_is_busy(_user_interface_channel_type_game_error))
@@ -467,7 +470,7 @@ const void* c_screen_4way_signin::load_proc(void) const
 bool __cdecl user_interface_mainmenu_sign_out_controller_callback(e_controller_index controller_index)
 {
 	//return INVOKE(0xA421, 0x0, user_interface_mainmenu_sign_out_controller_callback, controller_index);
-	user_interface_controller_sign_out(controller_index);
+	user_interface_controller_reset(controller_index);
 	user_interface_enter_game_shell(2);
 	
 	return true;
@@ -475,7 +478,7 @@ bool __cdecl user_interface_mainmenu_sign_out_controller_callback(e_controller_i
 }
 bool __cdecl user_interface_sign_out_controller_default_callback(e_controller_index controller_index)
 {
-	user_interface_controller_sign_out(controller_index);
+	user_interface_controller_reset(controller_index);
 
 	return true;
 }
@@ -514,7 +517,7 @@ bool c_screen_4way_signin::handle_controller_button_pressed_event(s_event_record
 		params.m_screen_state.m_last_focused_item_index = NONE;
 		params.m_load_function = nullptr;
 
-		switch (this->m_call_context)
+		switch (m_call_context)
 		{
 		case _4_way_signin_type_campaign:
 
@@ -569,17 +572,17 @@ bool c_screen_4way_signin::handle_controller_button_pressed_event(s_event_record
 		}
 		else
 		{
-
 			if (user_interface_controller_get_guest_controllers_count_for_master(event->controller) <= 0)
 			{
-				if (this->m_call_context == _4_way_signin_type_crossgame_invite)
+				if (m_call_context == _4_way_signin_type_crossgame_invite)
 				{
 					user_interface_error_ok_cancel_dialog_show_confirmation(
 						_user_interface_channel_type_gameshell_dialog,
 						_window_4,
 						FLAG(event->controller),
 						user_interface_mainmenu_sign_out_controller_callback,
-						_ui_error_confirm_controller_sign_out);
+						_ui_error_confirm_controller_sign_out
+					);
 				}
 				else
 				{
@@ -588,15 +591,23 @@ bool c_screen_4way_signin::handle_controller_button_pressed_event(s_event_record
 						_window_4,
 						FLAG(event->controller),
 						user_interface_sign_out_controller_default_callback,
-						_ui_error_confirm_controller_sign_out);
+						_ui_error_confirm_controller_sign_out
+					);
 				}
 			}
 			else
 			{
-				screen_error_ok_dialog_show(_user_interface_channel_type_gameshell_dialog, _ui_error_cant_sign_out_master_with_guests, _window_4, FLAG(event->controller), NULL, NULL);
-
+				screen_error_ok_dialog_show(
+					_user_interface_channel_type_gameshell_dialog,
+					_ui_error_cant_sign_out_master_with_guests,
+					_window_4,
+					FLAG(event->controller),
+					NULL,
+					NULL
+				);
 			}
-			this->m_controllers_mask |= FLAG(event->controller);
+
+			SET_BIT(m_controllers_mask, event->controller, true);
 		}
 
 	}
@@ -666,7 +677,7 @@ bool c_screen_4way_signin::handle_split_input_event(s_event_record* event)
 		&& g_show_split_inputs_option)
 	{
 		// add a basic progress menu to stop 4way from taking excessive input
-		c_screen_xbox_live_task_progress_dialog::add_task(input_split_task_progress_callback);
+		c_screen_xbox_live_task_progress_dialog::add_task_ex(NONE, event->controller, input_split_task_progress_callback, NULL, NULL);
 
 		// signout all profiles other than k_windows_device_controller_index the moment split/unsplit transition occurs
 		// note : we assume here that k_windows_device_controller_index is always signed in before we signout other controllers
@@ -679,7 +690,7 @@ bool c_screen_4way_signin::handle_split_input_event(s_event_record* event)
 				&& user_interface_controller_is_player_profile_valid(controller))
 			{
 				// todo : fix the removed controller process, its annoying the way it is now
-				user_interface_controller_sign_out(controller);
+				user_interface_controller_reset(controller);
 			}
 		}
 

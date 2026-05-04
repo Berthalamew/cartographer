@@ -78,7 +78,17 @@ void UpdateMasterLoginStatus(bool developer) {
 	}
 }
 
-int ConfigureUserDetails(const char* username, const char* login_token, unsigned long long xuid, unsigned long xnaddr, unsigned long lanaddr, const char* machineUID, const char* abOnline, bool online_signin, bool developer) {
+int ConfigureUserDetails(
+	const char* username,
+	const char* login_token, 
+	unsigned long long xuid,
+	unsigned long xnaddr,
+	unsigned long lanaddr,
+	const char* machineUID,
+	const char* abOnline,
+	uint32 user_index, 
+	bool online_signin,
+	bool developer) {
 
 	bool xuidValid = xuid != 0;
 	size_t usernameLen = strnlen(username, XUSER_NAME_SIZE);
@@ -99,7 +109,7 @@ int ConfigureUserDetails(const char* username, const char* login_token, unsigned
 
 	int result = strlen(login_token) == 32 ? 1 : 2;
 
-	XUserSetup(0, xuid, username, xnaddr, lanaddr, H2Config_base_port, machineUID, abOnline, online_signin);
+	XUserSetup(user_index, xuid, username, xnaddr, lanaddr, H2Config_base_port, machineUID, abOnline, online_signin);
 	TEST_N_DEF(PC4);
 	UpdateMasterLoginStatus(developer);
 
@@ -149,7 +159,11 @@ int ConfigureUserDetails(const char* username, const char* login_token, unsigned
 	return result;
 }
 
-static int InterpretMasterLogin(char* response_content, char* prev_login_token) {
+static int InterpretMasterLogin(
+	char* response_content,
+	char* prev_login_token,
+	uint32 user_index)
+{
 	int result = 0;
 
 	char username[XUSER_NAME_SIZE] = {};
@@ -307,7 +321,7 @@ static int InterpretMasterLogin(char* response_content, char* prev_login_token) 
 		return result;
 	}
 
-	int user_configure_result = ConfigureUserDetails(username, login_token, xuid, xnaddr, H2Config_ip_lan, machineUID, abOnline, true, result == 4);
+	int user_configure_result = ConfigureUserDetails(username, login_token, xuid, xnaddr, H2Config_ip_lan, machineUID, abOnline, user_index, true, result == 4);
 	if (user_configure_result != 0) {
 		//allow no login_token from backend in DB emergencies / random logins.
 		if (user_configure_result == 1) {
@@ -341,7 +355,12 @@ static int InterpretMasterLogin(char* response_content, char* prev_login_token) 
 	return result;
 }
 
-bool HandleGuiLogin(char* ltoken, char* identifier, char* password, int* out_master_login_interpret_result) {
+bool HandleGuiLogin(
+	char* ltoken,
+	char* identifier,
+	char* password,
+	int* out_master_login_interpret_result,
+	uint32 user_index) {
 
 	bool result = false;
 	char* rtn_result = 0;
@@ -408,7 +427,7 @@ bool HandleGuiLogin(char* ltoken, char* identifier, char* password, int* out_mas
 	free(http_request_body_build);
 
 	if (error_code == 0) {
-		error_code = InterpretMasterLogin(rtn_result, ltoken);
+		error_code = InterpretMasterLogin(rtn_result, ltoken, user_index);
 		if (error_code > 0) {
 			result = true;
 		}
@@ -479,7 +498,7 @@ HRESULT WINAPI XLiveSignin(PWSTR pszLiveIdName, PWSTR pszLiveIdPassword, DWORD d
 		//currently credentials are taken from the config file.
 		//also don't enable this since nothing's initialised for the server.
 		addDebugText("Signing in dedicated server online.");
-		if (HandleGuiLogin(0, H2Config_login_identifier, H2Config_login_password, nullptr))
+		if (HandleGuiLogin(0, H2Config_login_identifier, H2Config_login_password, nullptr, 0))
 		{
 			XUserSignInSetStatusChanged(0);
 		}

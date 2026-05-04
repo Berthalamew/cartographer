@@ -8,6 +8,7 @@
 
 #include "main/game_preferences.h"
 #include "memory/data.h"
+#include "interface/user_interface_guide.h"
 #include "interface/user_interface_memory.h"
 #include "interface/screens/screen_xbox_live_task_progress_dialog.h"
 #include "text/unicode.h"
@@ -108,6 +109,12 @@ struct s_cartographer_account_login_data
 	char password[128];
 };
 
+struct s_account_login_proc_data
+{
+	int32 button_id;
+	int32 user_index;
+};
+
 /* global externs */
 
 extern bool g_force_cartographer_update;
@@ -152,20 +159,28 @@ If password is the default label then return the pointer to password
 */
 static const wchar_t* cartographer_account_manager_set_password_label(const wchar_t* password, wchar_t* password_censored_buffer);
 
+static int32 screen_cartographer_account_get_user_index_to_sign_in(e_controller_index controller_index);
+
 /* globals */
 
+
 static bool g_account_manager_remove_mode;
+
+static s_cartographer_account_login_data g_account_add_login_data;
+static s_cartographer_account_create_data g_account_create_data;
+
+static s_account_login_proc_data g_account_login_proc_data;
+
+static e_cartographer_account_manager_screen_type g_open_cartographer_account_manager_context = _cartographer_account_manager_screen_type_none;
+
+static int g_account_manager_master_login_code;
+static HANDLE g_account_manager_login_thread_handle = NULL;
+static HANDLE g_account_manager_thread_handle = NULL;
+
 bool c_cartographer_account_manager_menu::g_accounting_go_back_to_list = false;
 int32 c_cartographer_account_manager_menu::g_accounting_active_handle_count = 0;
 
-s_cartographer_account_login_data g_account_add_login_data;
-s_cartographer_account_create_data g_account_create_data;
-
-e_cartographer_account_manager_screen_type g_open_cartographer_account_manager_context = _cartographer_account_manager_screen_type_none;
-
-int g_account_manager_master_login_code;
-HANDLE g_account_manager_login_thread_handle = NULL;
-HANDLE g_account_manager_thread_handle = NULL;
+e_controller_index g_controller_logging_in = _controller0;	// Make sure this is 0 so we do an offline sign in using controller 0 at startup
 
 /* public code */
 
@@ -404,17 +419,25 @@ void c_cartographer_account_manager_edit_list::handle_item_pressed_event_for_add
 	}
 	else if (button_id == _item_cartographer_account_add_login) // login button id
 	{
-		if (g_account_manager_login_thread_handle == NULL) {
-
+		if (g_account_manager_login_thread_handle == NULL)
+		{
 			c_cartographer_account_manager_menu::g_accounting_go_back_to_list = false;
 			c_cartographer_account_manager_menu::update_accounting_active_handle(true);
+			
 			snprintf(g_account_add_login_data.email_or_username, ARRAYSIZE(g_account_add_login_data.email_or_username), "%S", m_account_add.email_or_username);
 			snprintf(g_account_add_login_data.password, ARRAYSIZE(g_account_add_login_data.password), "%S", m_account_add.password);
 
-			g_account_manager_login_thread_handle = CreateThread(NULL, 0, thread_account_login_proc_cb, (LPVOID)NONE, 0, NULL);
-			c_screen_xbox_live_task_progress_dialog::add_task(sign_in_xbox_task_progress_cb);
+			g_account_login_proc_data.button_id = NONE;
+			g_account_login_proc_data.user_index = screen_cartographer_account_get_user_index_to_sign_in(event->controller);
+			g_controller_logging_in = event->controller;
 
-			user_interface_back_out_from_channel(parent_screen_ui_channel, parent_render_window);
+			if (g_account_login_proc_data.user_index != NONE)
+			{
+				g_account_manager_login_thread_handle = CreateThread(NULL, 0, thread_account_login_proc_cb, NULL, 0, NULL);
+				c_screen_xbox_live_task_progress_dialog::add_task_ex(NONE, event->controller, sign_in_xbox_task_progress_cb, NULL, NULL);
+
+				user_interface_back_out_from_channel(parent_screen_ui_channel, parent_render_window);
+			}
 		}
 	}
 }
@@ -463,10 +486,17 @@ void c_cartographer_account_manager_edit_list::handle_item_pressed_event_for_lis
 			c_cartographer_account_manager_menu::g_accounting_go_back_to_list = false;
 			c_cartographer_account_manager_menu::update_accounting_active_handle(true);
 			
-			g_account_manager_login_thread_handle = CreateThread(NULL, 0, thread_account_login_proc_cb, (LPVOID)button_id, 0, NULL);
-			c_screen_xbox_live_task_progress_dialog::add_task(sign_in_xbox_task_progress_cb);
-			
-			user_interface_back_out_from_channel(parent_screen_ui_channel, parent_render_window);
+			g_account_login_proc_data.button_id = button_id;
+			g_account_login_proc_data.user_index = screen_cartographer_account_get_user_index_to_sign_in(event->controller);
+			g_controller_logging_in = event->controller;
+
+			if (g_account_login_proc_data.user_index!=NONE)
+			{
+				g_account_manager_login_thread_handle = CreateThread(NULL, 0, thread_account_login_proc_cb, NULL, 0, NULL);
+				c_screen_xbox_live_task_progress_dialog::add_task_ex(NONE, event->controller, sign_in_xbox_task_progress_cb, NULL, NULL);
+
+				user_interface_back_out_from_channel(parent_screen_ui_channel, parent_render_window);
+			}
 		}
 	}
 	// play offline button
@@ -477,7 +507,19 @@ void c_cartographer_account_manager_edit_list::handle_item_pressed_event_for_lis
 		XNetRandom(abEnet, sizeof(abEnet));
 		XNetRandom(abOnline, sizeof(abOnline));
 		g_account_manager_remove_mode = false;
-		if (ConfigureUserDetails("[Username]", "12345678901234567890123456789012", rand(), 0, H2Config_ip_lan, ByteToHexStr(abEnet, 6).c_str(), ByteToHexStr(abOnline, 20).c_str(), false))
+		if (
+			ConfigureUserDetails(
+				"[Username]",
+				"12345678901234567890123456789012",
+				rand(), 
+				screen_cartographer_account_get_user_index_to_sign_in(event->controller),
+				H2Config_ip_lan,
+				ByteToHexStr(abEnet, 6).c_str(),
+				ByteToHexStr(abOnline, 20).c_str(),
+				user_interface_controller_get_user_index(event->controller),
+				false
+			)
+		)
 		{
 			//show select profile gui
 			extern int notify_xlive_ui;
@@ -551,7 +593,7 @@ void c_cartographer_account_manager_edit_list::handle_item_pressed_event_for_cre
 
 			user_interface_back_out_from_channel(parent_screen_ui_channel, parent_render_window);
 			g_account_manager_thread_handle = CreateThread(NULL, 0, thread_account_create_proc_cb, (LPVOID)0, 0, NULL);
-			c_screen_xbox_live_task_progress_dialog::add_task(create_account_xbox_task_progress_cb);
+			c_screen_xbox_live_task_progress_dialog::add_task_ex(NONE, event->controller, create_account_xbox_task_progress_cb, NULL, NULL);
 		}
 	}
 	return;
@@ -857,24 +899,24 @@ void sign_in_xbox_task_progress_cb(c_screen_xbox_live_task_progress_dialog* dial
 					notify_xlive_ui = 0;
 					XUserSignInSetStatusChanged(0);
 #endif
-
+					user_interface_controller_xbox_live_account_set_signed_in(g_controller_logging_in, true);
 				}
 			}
 		}
 	}
+
+
 	return;
 }
 
 DWORD WINAPI thread_account_login_proc_cb(LPVOID lParam)
 {
-	int button_id = (int)lParam;
-
 	//gotta delay it a little to make sure the menu's decide to render correctly.
 	Sleep(200L);
 
-	if (button_id == -1) 
+	if (g_account_login_proc_data.button_id==NONE)
 	{
-		if (HandleGuiLogin(NULL, g_account_add_login_data.email_or_username, g_account_add_login_data.password, &g_account_manager_master_login_code)) 
+		if (HandleGuiLogin(NULL, g_account_add_login_data.email_or_username, g_account_add_login_data.password, &g_account_manager_master_login_code, g_account_login_proc_data.user_index))
 		{
 			H2AccountLastUsed = 0;
 		}
@@ -884,9 +926,9 @@ DWORD WINAPI thread_account_login_proc_cb(LPVOID lParam)
 	else 
 	{
 		//login to account
-		if (HandleGuiLogin(H2AccountArrayLoginToken[button_id], NULL, NULL, &g_account_manager_master_login_code))
+		if (HandleGuiLogin(H2AccountArrayLoginToken[g_account_login_proc_data.button_id], NULL, NULL, &g_account_manager_master_login_code, g_account_login_proc_data.user_index))
 		{
-			H2AccountLastUsed = button_id;
+			H2AccountLastUsed = g_account_login_proc_data.button_id;
 		}
 	}
 
@@ -951,4 +993,37 @@ static const wchar_t* cartographer_account_manager_set_password_label(const wcha
 	}
 
 	return is_default_password_label ? password : password_censored_text;
+}
+
+static int32 screen_cartographer_account_get_user_index_to_sign_in(
+	e_controller_index controller_index)
+{
+	// First try and get the user index from the controller index used to sign in
+	int32 user_index = user_interface_controller_get_user_index(controller_index);
+
+	// If the controller used to sign in is not registered (is NONE):
+	// Go through every other controller and pick the first one that's assigned a user index to be "signed in"
+	if (user_index==NONE)
+	{
+		e_controller_index first = user_interface_controller_get_first_valid_controller();
+
+		for (e_controller_index controller = first; controller!=k_no_controller; controller = next_controller(controller))
+		{
+			int32 test_user_index = user_interface_controller_get_user_index((e_controller_index)controller);
+
+			if (test_user_index != NONE)
+			{
+				user_index = test_user_index;
+				break;
+			}
+		}
+	}
+
+	// Default to user 0 for initial sign-in
+	if (user_index == NONE)
+	{
+		user_index = 0;
+	}
+
+	return user_index;
 }

@@ -91,7 +91,7 @@ static const s_variant_description_map k_launch_multiplayer_variants[k_variant_c
 	{ "territories", _game_variant_description_territories }
 };
 
-static bool g_main_menu_launch_delay_xlive_ui = true;
+static bool g_main_menu_launch_display_esrb_warning = false;
 
 int32 g_main_game_launch_user_count = 1;
 s_game_options g_main_game_launch_options;
@@ -308,11 +308,11 @@ void main_menu_launch(uint32 context)
 
 void main_menu_launch_force(void)
 {
-	if (g_main_menu_launch_delay_xlive_ui)
+	if (g_main_menu_launch_display_esrb_warning)
 	{
 		XNotifyDelayUI(120000);
 		main_menu_launch(9);
-		g_main_menu_launch_delay_xlive_ui = false;
+		g_main_menu_launch_display_esrb_warning = false;
 	}
 	else
 	{

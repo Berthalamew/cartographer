@@ -417,9 +417,28 @@ uint32 __cdecl user_interface_milliseconds(void)
 	return INVOKE(0x2096AE, 0x0, user_interface_milliseconds);
 }
 
-c_user_interface_channel* __fastcall user_interface_get_channel(e_user_interface_render_window window_index, e_user_interface_channel_type channel_index)
+c_user_interface_channel* __fastcall user_interface_get_channel(
+	e_user_interface_render_window window_index,
+	e_user_interface_channel_type channel_index)
 {
 	return INVOKE(0x209957, 0x0, user_interface_get_channel, window_index, channel_index);
+}
+
+bool __cdecl user_interface_channel_is_active(void)
+{
+	return INVOKE(0x20A644, 0x0, user_interface_channel_is_active);
+}
+
+void __cdecl user_interface_dispose_all_active_ui(void)
+{
+	INVOKE(0x20B249, 0x0, user_interface_dispose_all_active_ui);
+
+	return;
+}
+
+bool __cdecl user_interface_force_load_mainmenu(void)
+{
+	return INVOKE(0x20A89F, 0x0, user_interface_force_load_mainmenu);
 }
 
 bool __cdecl user_interface_error_display_allowed(void)
@@ -452,7 +471,13 @@ bool __cdecl user_interface_error_screen_is_active(e_user_interface_channel_type
 	return INVOKE(0x20A77D, 0x0, user_interface_error_screen_is_active, channel_index, window_index, error_code);
 }
 
-void __cdecl screen_error_ok_dialog_show(e_user_interface_channel_type channel_type, e_ui_error_types ui_error_index, e_user_interface_render_window window_index, int16 user_flags, void* ok_callback, void* fallback)
+void __cdecl screen_error_ok_dialog_show(
+	e_user_interface_channel_type channel_type,
+	e_ui_error_types ui_error_index,
+	e_user_interface_render_window window_index,
+	int16 user_flags,
+	void* ok_callback,
+	void* fallback)
 {
 	INVOKE(0x20E1D8, 0x0, screen_error_ok_dialog_show, channel_type, ui_error_index, window_index, user_flags, ok_callback, fallback);
 	return;
@@ -645,10 +670,16 @@ void user_interface_show_current_screen_tag(const char* path)
 	return;
 }
 
-void debug_set_ui_beta(bool value)
+void debug_set_ui_beta(
+	bool value)
 {
 	user_interface_globals_get()->build_is_beta = value;
 	return;
+}
+
+bool user_interface_is_beta(void)
+{
+	return user_interface_globals_get()->build_is_beta;
 }
 
 void user_interface_test_error_ok(int16 id)

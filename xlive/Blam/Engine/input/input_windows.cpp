@@ -621,8 +621,10 @@ void __cdecl input_update_gamepads(uint32 duration_ms)
 //	INVOKE(0x2E60C, 0x0, input_update_mouse, mouse_state, duration_ms);
 //}
 
-bool __cdecl input_has_gamepad(uint16 gamepad_index, bool* a2)
+bool __cdecl input_has_gamepad(int16 gamepad_index, bool* a2)
 {
+	ASSERT(gamepad_index>=0 && gamepad_index<k_number_of_controllers);
+
 	return INVOKE(0x2F3CD, 0x0, input_has_gamepad, gamepad_index, a2);
 }
 

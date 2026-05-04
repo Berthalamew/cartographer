@@ -83,7 +83,7 @@ void user_interface_controller_apply_patches(void)
 	NopFill(Memory::GetAddress(0x20CF20), 6); // fixes auto guest-signout when leaving a match
 	WriteValue<uint8>(Memory::GetAddress(0x20CEB5 + 6), 0); // disable _ui_error_demo_version_no_more_for_you
 	DETOUR_ATTACH(p_user_interface_controller_sign_in, Memory::GetAddress<t_user_interface_controller_sign_in>(0x2087BF), user_interface_controller_sign_in);
-	DETOUR_ATTACH(p_user_interface_controller_sign_out, Memory::GetAddress<t_user_interface_controller_sign_out>(0x208257, 0x1F491B), user_interface_controller_sign_out);
+	DETOUR_ATTACH(p_user_interface_controller_sign_out, Memory::GetAddress<t_user_interface_controller_sign_out>(0x208257, 0x1F491B), user_interface_controller_reset);
 	PatchCall(Memory::GetAddress(0x20CB4B), user_interface_controller_update); // fix infinite controller-disconnect looping
 	return;
 }
@@ -135,35 +135,43 @@ void __cdecl user_interface_controller_update(void)
 		// dont run this when we are adjusting device ports
 		user_interface_controller_removed_handler();
 	}
+
 	user_interface_controller_boot_to_dash_check();
+	
 	return;
 }
 
 /* public code */
 
-bool __cdecl user_interface_controller_is_player_profile_valid(e_controller_index controller_index)
+bool __cdecl user_interface_controller_is_player_profile_valid(
+	e_controller_index controller_index)
 {
 	//return INVOKE(0x206B50, 0x1F3F78, user_interface_controller_is_player_profile_valid, controller_index);
 	return user_interface_controller_get(controller_index)->flags.test(_controller_state_has_valid_profile_bit);
 }
 
-e_controller_index __cdecl user_interface_controller_get_next_valid_index(e_controller_index controller_index)
+e_controller_index __cdecl user_interface_controller_get_next_valid_index(
+	e_controller_index controller_index)
 {
 	return INVOKE(0x206B13, 0x1F3F3A, user_interface_controller_get_next_valid_index, controller_index);
 }
 
-uint32 __cdecl user_interface_controller_get_user_index(e_controller_index controller_index)
+uint32 __cdecl user_interface_controller_get_user_index(
+	e_controller_index controller_index)
 {
-	return INVOKE(0x20687F, 0x1F3CE8, user_interface_controller_get_user_index, controller_index);
+	return user_interface_controller_get(controller_index)->user_index;
 }
 
-void __cdecl user_interface_controller_set_user_index(e_controller_index controller_index, uint32 user_index)
+void __cdecl user_interface_controller_set_user_index(
+	e_controller_index controller_index,
+	uint32 user_index)
 {
 	INVOKE(0x207342, 0x1F43F2, user_interface_controller_set_user_index, controller_index, user_index);
 	return;
 }
 
-e_controller_index __cdecl user_interface_controller_get_controller_for_user(uint32 user_index)
+e_controller_index __cdecl user_interface_controller_get_controller_for_user(
+	uint32 user_index)
 {
 	return INVOKE(0x207365, 0x1F4415, user_interface_controller_get_controller_for_user, user_index);
 }
@@ -186,45 +194,73 @@ e_controller_index __cdecl user_interface_controller_get_first_valid_controller(
 	return main_controller;
 }
 
-e_game_team __cdecl user_interface_controller_get_user_active_team(e_controller_index controller_index)
+e_game_team __cdecl user_interface_controller_get_user_active_team(
+	e_controller_index controller_index)
 {
 	return INVOKE(0x206907, 0, user_interface_controller_get_user_active_team, controller_index);
 }
 
-void __cdecl user_interface_controller_set_desired_team_index(e_controller_index controller_index, e_game_team team)
+void __cdecl user_interface_controller_set_desired_team_index(
+	e_controller_index controller_index,
+	e_game_team team)
 {
 	INVOKE(0x2068F2, 0x0, user_interface_controller_set_desired_team_index, controller_index, team);
 	return;
 }
 
-bool __cdecl user_interface_controller_get_rumble_enabled(e_controller_index controller_index)
+void user_interface_controller_set_replicated_achievement(
+	e_controller_index controller_index,
+	int32 replicated_achievements)
+{
+	s_user_interface_controller* s_user_interface_controller = user_interface_controller_get(controller_index);
+	
+	ASSERT(IN_RANGE(replicated_achievements, 0, (1<<k_replicated_achievement_count)-1));
+
+	if (replicated_achievements != s_user_interface_controller->achievement_flags)
+	{
+		s_user_interface_controller->achievement_flags = replicated_achievements;
+		user_interface_controller_update_network_properties(controller_index);
+	}
+
+	return;
+}
+
+bool __cdecl user_interface_controller_get_rumble_enabled(
+	e_controller_index controller_index)
 {
 	return INVOKE(0x207600, 0x0, user_interface_controller_get_rumble_enabled, controller_index);
 }
 
-bool __cdecl user_interface_controller_get_autolevel_enabled(e_controller_index controller_index)
+bool __cdecl user_interface_controller_get_autolevel_enabled(
+	e_controller_index controller_index)
 {
 	return INVOKE(0x207627, 0, user_interface_controller_get_autolevel_enabled, controller_index);
 }
 
-e_user_interface_controller_handicap __cdecl user_interface_controller_get_user_handicap_level(e_controller_index controller_index)
+e_user_interface_controller_handicap __cdecl user_interface_controller_get_user_handicap_level(
+	e_controller_index controller_index)
 {
 	return INVOKE(0x206938, 0, user_interface_controller_get_user_handicap_level, controller_index);
 }
 
-void __cdecl user_interface_controller_set_user_handicap_level(e_controller_index controller_index, e_user_interface_controller_handicap handicap)
+void __cdecl user_interface_controller_set_user_handicap_level(
+	e_controller_index controller_index,
+	e_user_interface_controller_handicap handicap)
 {
 	INVOKE(0x206923, 0, user_interface_controller_set_user_handicap_level, controller_index, handicap);
 	return;
 }
 
-void __cdecl user_interface_controller_set_griefer(e_controller_index controller_index, bool griefing)
+void __cdecl user_interface_controller_set_griefer(
+	e_controller_index controller_index,
+	bool griefing)
 {
 	INVOKE(0x206949, 0, user_interface_controller_set_griefer, controller_index, griefing);
 	return;
 }
 
-wchar_t* __cdecl user_interface_controller_get_player_profile_name(e_controller_index controller_index)
+wchar_t const* __cdecl user_interface_controller_get_player_profile_name(
+	e_controller_index controller_index)
 {
 	return INVOKE(0x206B67, 0, user_interface_controller_get_player_profile_name, controller_index);
 }
@@ -239,29 +275,52 @@ uint16 __cdecl user_interface_controller_get_signed_in_controllers_mask(void)
 	return INVOKE(0x20758D, 0, user_interface_controller_get_signed_in_controllers_mask);
 }
 
-uint32 __cdecl user_interface_controller_get_last_level_played(e_controller_index controller_index)
+uint32 __cdecl user_interface_controller_get_last_level_played(
+	e_controller_index controller_index)
 {
 	return INVOKE(0xFE106, 0, user_interface_controller_get_last_level_played, controller_index);
 }
 
-uint32 __cdecl user_interface_controller_get_highest_campaign_level_in_signed_in_controllers()
+uint32 __cdecl user_interface_controller_get_highest_campaign_level_in_signed_in_controllers(void)
 {
 	return INVOKE(0x2076F7, 0, user_interface_controller_get_highest_campaign_level_in_signed_in_controllers);
 }
 
-bool __cdecl user_interface_controller_sign_in(e_controller_index controller_index, s_saved_game_player_profile* profile, uint32 enumerated_file_index)
+bool __cdecl user_interface_controller_sign_in(
+	e_controller_index controller_index,
+	s_saved_game_player_profile* profile,
+	uint32 enumerated_file_index)
 {
 	bool result = p_user_interface_controller_sign_in(controller_index, profile, enumerated_file_index);
+	
 	if (result)
+	{
 		cartographer_player_profile_sign_in(controller_index, enumerated_file_index);
+	}
 
 	return result;
 }
 
-void __cdecl user_interface_controller_sign_out(e_controller_index controller_index)
+void __cdecl user_interface_controller_reset(
+	e_controller_index controller_index)
 {
 	p_user_interface_controller_sign_out(controller_index);
 	cartographer_player_profile_sign_out(controller_index);
+	return;
+}
+
+void user_interface_controller_switch_to_offline(
+	e_controller_index controller_index)
+{
+	s_user_interface_controller* controller = user_interface_controller_get(controller_index);
+
+	controller->flags.set(_controller_state_has_xbox_live_bit, false);
+	controller->bungienet_user_flags = 0;
+	controller->player_is_griefer = false;
+
+	csmemset(&controller->player_identifier, 0, sizeof(controller->player_identifier));
+	csmemcpy(controller->player_name, controller->player_profile.name, sizeof(controller->player_name));
+	
 	return;
 }
 
@@ -271,31 +330,41 @@ void __cdecl user_interface_controller_sign_out_all_controllers()
 	return;
 }
 
-void __cdecl user_interface_controller_get_profile_data(e_controller_index controller_index, s_saved_game_player_profile* profile, uint32* profile_index)
+void __cdecl user_interface_controller_get_profile_data(
+	e_controller_index controller_index,
+	s_saved_game_player_profile* profile,
+	uint32* profile_index)
 {
 	INVOKE(0x206890, 0x0, user_interface_controller_get_profile_data, controller_index, profile, profile_index);
 	return;
 }
 
-void __cdecl user_interface_controller_get_user_properties(e_controller_index controller_index, s_player_identifier* controller_user_identifier, s_player_configuration* properties)
+void __cdecl user_interface_controller_get_user_properties(
+	e_controller_index controller_index,
+	s_player_identifier* controller_user_identifier,
+	s_player_configuration* properties)
 {
 	INVOKE(0x20696F, 0x0, user_interface_controller_get_user_properties, controller_index, controller_user_identifier, properties);
 	return;
 }
 
-void __cdecl user_interface_controller_event_submit(s_event_record* event)
+void __cdecl user_interface_controller_event_submit(
+	s_event_record* event)
 {
 	INVOKE(0x20D0C5, 0x0, user_interface_controller_event_submit, event);
 	return;
 }
 
-void __cdecl user_interface_controller_update_network_properties(e_controller_index controller_index)
+void __cdecl user_interface_controller_update_network_properties(
+	e_controller_index controller_index)
 {
 	INVOKE(0x206A97, 0x0, user_interface_controller_update_network_properties, controller_index);
 	return;
 }
 
-void __cdecl user_interface_controller_pick_profile_dialog(e_controller_index controller_index, bool online_user)
+void __cdecl user_interface_controller_pick_profile_dialog(
+	e_controller_index controller_index,
+	bool online_user)
 {
 	// second argument is not used by the function although it is pushed to the stack
 	// TODO : reimplement this to make use of the second argument
@@ -303,53 +372,60 @@ void __cdecl user_interface_controller_pick_profile_dialog(e_controller_index co
 	return;
 }
 
-bool __cdecl user_interface_controller_pick_profile_offline(e_controller_index controller_index)
+bool __cdecl user_interface_controller_pick_profile_offline(
+	e_controller_index controller_index)
 {
 	// INVOKE(0x212F56, 0x0, user_interface_controller_pick_profile_dialog_wrapper, controller_index);
+
 	user_interface_controller_pick_profile_dialog(controller_index, false);
+	
 	return true;
 }
 
-bool __cdecl user_interface_controller_has_gamepad(e_controller_index controller_index)
+bool __cdecl user_interface_controller_connected(
+	e_controller_index controller_index)
 {
-	bool result = false;
-	if (VALID_INDEX(controller_index, k_number_of_controllers))
-	{
-		result = input_has_gamepad((uint16)controller_index, nullptr);
-		//result = input_has_gamepad_plugged(controller_index);
-	}
-	return result;
+	ASSERT(controller_index>=0 && controller_index<k_number_of_controllers);
+
+	return input_has_gamepad((int16)controller_index, NULL);
 }
 
-bool __cdecl user_interface_controller_has_gamepad_just_left(e_controller_index controller_index)
+bool __cdecl user_interface_controller_has_gamepad_just_left(
+	e_controller_index controller_index)
 {
 	bool result = false;
+
 	if (VALID_INDEX(controller_index, k_number_of_controllers))
 	{
 		result = input_gamepad_just_left((uint16)controller_index);
 	}
+
 	return result;
 }
 
-bool __cdecl user_interface_controller_is_guest(e_controller_index controller_index)
+bool __cdecl user_interface_controller_is_guest(
+	e_controller_index controller_index)
 {
-	s_user_interface_controller_globals* g_user_interface_controller_globals = user_interface_controller_globals_get();
-	XUID* identifier = (XUID*)&g_user_interface_controller_globals->controllers[controller_index].controller_user_identifier;
-	if (!ONLINE_USER_VALID(*identifier))
-		return false;
+	bool result = false;
+	s_user_interface_controller* controller = user_interface_controller_get(controller_index);
 
-	return online_xuid_is_guest_account(*identifier);
+	if (ONLINE_USER_VALID(*(int64*)&controller->controller_user_identifier))
+	{
+		result = online_xuid_is_guest_account(&controller->controller_user_identifier);;
+	}
+
+	return result;
 }
 
-uint32 __cdecl user_interface_controller_get_guest_controllers_count_for_master(e_controller_index master_controller_index)
+uint32 __cdecl user_interface_controller_get_guest_controllers_count_for_master(
+	e_controller_index master_controller_index)
 {
 	if (user_interface_controller_is_guest(master_controller_index))
 		return 0;
 
+	s_user_interface_controller* controller = user_interface_controller_get(master_controller_index);
 
-	s_user_interface_controller_globals* g_user_interface_controller_globals = user_interface_controller_globals_get();
-	XUID master_identifier = *(XUID*)&g_user_interface_controller_globals->controllers[master_controller_index].controller_user_identifier;
-	if (!ONLINE_USER_VALID(master_identifier))
+	if (!ONLINE_USER_VALID(*(int64*)&controller->controller_user_identifier))
 		return 0;
 
 	uint32 count = 0;
@@ -360,16 +436,20 @@ uint32 __cdecl user_interface_controller_get_guest_controllers_count_for_master(
 		if (controller_idx == master_controller_index)
 			continue;
 
-
-		if (user_interface_controller_has_xbox_live(controller_idx))
+		if (user_interface_controller_xbox_live_account_signed_in(controller_idx))
 		{
-			s_player_identifier player_id = g_user_interface_controller_globals->controllers[controller_idx].controller_user_identifier;
-			XUID compare_id = *(XUID*)&g_user_interface_controller_globals->controllers[controller_idx].controller_user_identifier;
-			if (!ONLINE_USER_VALID(compare_id))
+			s_user_interface_controller* current_controller = user_interface_controller_get(controller_idx);
+
+			if (!ONLINE_USER_VALID(*(int64*)&controller->controller_user_identifier))
 				continue;
 
+			int64 compare_id = *(int64*)&current_controller->controller_user_identifier;
+			int64 master_identifier = *(int64*)&controller->controller_user_identifier;
+
 			if ((compare_id & ~0x3ULL) == (master_identifier & ~0x3ULL))
+			{
 				count++;
+			}
 		}
 
 	}
@@ -378,14 +458,60 @@ uint32 __cdecl user_interface_controller_get_guest_controllers_count_for_master(
 
 }
 
-bool __cdecl user_interface_controller_has_xbox_live(e_controller_index controller_index)
+bool __cdecl user_interface_controller_xbox_live_account_signed_in(
+	e_controller_index controller_index)
 {
 	return user_interface_controller_get(controller_index)->flags.test(_controller_state_has_xbox_live_bit);
 }
 
-void __cdecl user_interface_controller_xbox_live_account_set_signed_in(e_controller_index controller_index, bool active)
+void user_interface_controller_set_xbox_live_account(
+	e_controller_index controller_index,
+	XUID* account)
+{
+	// INVOKE(0x208986, 0x0, user_interface_controller_set_xbox_live_account, controller_index, account);
+
+	bool guest;
+	s_player_identifier* controller_user_identifier;
+
+	s_user_interface_controller* controller = user_interface_controller_get(controller_index);
+	
+	ASSERT(account!=NULL);
+	ASSERT(ONLINE_USER_VALID(*account));
+	
+	vassert(controller->flags.test(_controller_state_has_valid_profile_bit), "player profile must be chosen prior to selecting gamertag", NULL);
+
+	csmemcpy(&controller->player_identifier, account, sizeof(controller->player_identifier));
+
+	guest = online_xuid_is_guest_account(&controller->player_identifier);
+
+	user_interface_controller_update_player_name(controller_index);
+
+	if (controller->user_index==NONE)
+	{
+		controller->user_index = network_session_interface_add_local_user(&controller->controller_user_identifier);
+	}
+	
+	controller_user_identifier = NULL;
+
+	if (&controller->player_identifier)
+	{
+		controller_user_identifier = &controller->player_identifier;
+	}
+
+	csmemcpy(&controller->controller_user_identifier, controller_user_identifier, sizeof(controller->controller_user_identifier));
+	network_session_interface_set_user_identifier(controller->user_index, &controller->controller_user_identifier);
+
+	event(_event_message, "lifecycle: UI-LIVE-SIGNIN %d %s%s", controller_index, "", guest ? " (guest)" : "");
+	
+	return;
+}
+
+void __cdecl user_interface_controller_xbox_live_account_set_signed_in(
+	e_controller_index controller_index,
+	bool active)
 {
 	//INVOKE(0x208A01, 0x0, user_interface_controller_xbox_live_account_set_signed_in, controller_index, active);
+
 	s_user_interface_controller* controller = user_interface_controller_get(controller_index);
 	
 	if (active)
@@ -396,43 +522,43 @@ void __cdecl user_interface_controller_xbox_live_account_set_signed_in(e_control
 	{
 		controller->flags.set(_controller_state_has_xbox_live_bit, false);
 
-		// not calling update_name here to prevent recursion lock
-		//user_interface_controller_update_player_name(controller_index);
+		user_interface_controller_update_player_name(controller_index);
 	}
+	
 	return;
 }
 
 
-void __cdecl user_interface_controller_update_player_name(e_controller_index controller_index)
+void __cdecl user_interface_controller_update_player_name(
+	e_controller_index controller_index)
 {
 	// INVOKE(0x208312, 0x0, user_interface_controller_update_player_name, controller_index);
 
 	s_user_interface_controller* controller = user_interface_controller_get(controller_index);
-	c_user_interface_guide_state_manager* guide = user_interface_guide_state_manager_get();
+	
 	if (online_connected_to_xbox_live())
 	{
-		XUID* controller_xuid = (XUID*)(&controller->controller_user_identifier);
-		if (online_xuid_is_guest_account(*controller_xuid))
+		if (online_xuid_is_guest_account(&controller->controller_user_identifier))
 		{
-			uint8 guest_no = online_xuid_get_guest_account_number(*controller_xuid);
 			c_maximum_interface_text format;
+			uint8 guest_no = online_xuid_get_guest_account_number(&controller->controller_user_identifier);
+			
 			user_interface_global_string_get(_string_id_guest_of_ascii_gamertag_unicode_format_string, &format);// %d %hs
 			usnprintf(controller->player_name,
 				NUMBEROF(controller->player_name),
 				format.get_string(),
 				guest_no,
-				guide->m_gamertag);
+				user_interface_guide_state_manager_get()->m_gamertag
+			);
 		}
 		else
 		{
 			usnprintf(controller->player_name,
 				NUMBEROF(controller->player_name),
 				L"%hs",
-				guide->m_gamertag);
+				user_interface_guide_state_manager_get()->m_gamertag
+			);
 		}
-
-		//todo move this out of here and figure out why the guide live signin fails to set the bit
-		user_interface_controller_xbox_live_account_set_signed_in(controller_index, true);
 	}
 	else if (user_interface_controller_is_player_profile_valid(controller_index))
 	{
@@ -442,7 +568,9 @@ void __cdecl user_interface_controller_update_player_name(e_controller_index con
 	{
 		controller->player_name[0] = '\0';
 	}
+	
 	user_interface_controller_update_network_properties(controller_index);
+
 	return;
 }
 
@@ -466,12 +594,14 @@ static bool __cdecl user_interface_controller_verify_reconnection(void)
 	return INVOKE(0x20841E, 0x0, user_interface_controller_verify_reconnection);
 }
 
-static bool __cdecl user_interface_controller_verify_reconnection_failed(c_screen_widget* error_screen)
+static bool __cdecl user_interface_controller_verify_reconnection_failed(
+	c_screen_widget* error_screen)
 {
 	return INVOKE(0x208485, 0x0, user_interface_controller_verify_reconnection_failed, error_screen);
 }
 
-static void __cdecl user_interface_controller_process_events(uint32 elapsed_time)
+static void __cdecl user_interface_controller_process_events(
+	uint32 elapsed_time)
 {
 	INVOKE(0x207750, 0x0, user_interface_controller_process_events, elapsed_time);
 	return;
@@ -479,17 +609,19 @@ static void __cdecl user_interface_controller_process_events(uint32 elapsed_time
 
 static bool user_inteface_controller_has_removed_screen_active(void)
 {
-	//h2v only checked for _ui_error_controller_removed
-	if (user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller_removed)
-		|| user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller1_removed)
-		|| user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller2_removed)
-		|| user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller3_removed)
-		|| user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller4_removed))
-	{
+	bool result = false;
 
-		return true;
+	//h2v only checked for _ui_error_controller_removed
+	if (user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller_removed) ||
+		user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller1_removed) ||
+		user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller2_removed) ||
+		user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller3_removed) ||
+		user_interface_error_screen_is_active(_user_interface_channel_type_hardware_error, _window_4, _ui_error_controller4_removed))
+	{
+		result = true;
 	}
-	return false;
+
+	return result;
 }
 
 static void user_interface_controller_update_disconnect(void)

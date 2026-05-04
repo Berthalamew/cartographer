@@ -17,6 +17,11 @@
 #include "networking/session/network_session.h"
 #include "networking/network_globals.h"
 
+/* prototypes */
+
+static int32 user_interface_session_get_player_index(s_player_identifier const* player_identifier, c_network_session* session);
+static int32 get_another_squad_member(void);
+
 /* globals */
 
 s_game_auto_join_globals g_game_auto_join;
@@ -50,24 +55,97 @@ bool session_protocol_has_coop(e_session_protocol protocol)
 		|| protocol == _session_protocol_xbox_live_coop;
 }
 
-bool __cdecl user_interface_create_new_squad(bool a1, bool online)
+bool __cdecl user_interface_create_new_squad(
+	bool a1,
+	bool online)
 {
 	return INVOKE(0x216345, 0x0, user_interface_create_new_squad, a1, online);
 }
 
-bool __cdecl user_interface_squad_local_peer_is_leader()
+bool user_interface_squad_local_peer_is_host(void)
+{
+	return network_life_cycle_squad_local_peer_is_leader();
+}
+
+bool __cdecl user_interface_squad_local_peer_is_leader(void)
 {
 	return INVOKE(0x2152B0, 0x0, user_interface_squad_local_peer_is_leader);
 }
 
-bool __cdecl user_interface_session_get_map(uint32* campaign_id, uint32* map_id, uint32* custom_map_id)
+bool __cdecl user_interface_session_get_map(
+	uint32* campaign_id,
+	uint32* map_id,
+	uint32* custom_map_id)
 {
 	return INVOKE(0x21564E, 0x0, user_interface_session_get_map, campaign_id, map_id, custom_map_id);
 }
 
-bool __cdecl user_interface_squad_session_is_xbox_live()
+bool __cdecl user_interface_squad_session_is_xbox_live(void)
 {
 	return INVOKE(0x2156B9, 0x0, user_interface_squad_local_peer_is_leader);
+}
+
+bool user_interface_squad_is_booting_allowed(void)
+{
+	bool booting_allowed = false;
+
+	if (network_initialized())
+	{
+		if (user_interface_squad_local_peer_is_leader())
+		{
+			switch (network_life_cycle_get_state())
+			{
+			case _life_cycle_state_none:
+			case _life_cycle_state_start_game:
+			case _life_cycle_state_joining:
+				break;
+			case _life_cycle_state_pre_game:
+			case _life_cycle_state_in_game:
+			case _life_cycle_state_post_game:
+				booting_allowed = true;
+				break;
+			default:
+				unreachable();
+			}
+		}
+	}
+
+	return booting_allowed;
+}
+
+e_session_game_mode user_interface_get_session_game_mode(void)
+{
+	e_session_game_mode game_mode = _session_game_mode_none;
+
+	if (network_initialized())
+	{
+		switch (network_life_cycle_get_state())
+		{
+		case _life_cycle_state_none:
+			game_mode = _session_game_mode_none;
+			break;
+		case _life_cycle_state_pre_game:
+		case _life_cycle_state_start_game:
+			game_mode = _session_game_mode_pregame;
+			break;
+		case _life_cycle_state_in_game:
+			game_mode = _session_game_mode_ingame;
+			break;
+		case _life_cycle_state_post_game:
+			game_mode = _session_game_mode_postgame;
+			break;
+		case _life_cycle_state_joining:
+			game_mode = _session_game_mode_joining;
+			break;
+		case _life_cycle_state_matchmaking:
+			game_mode = _session_game_mode_matchmaking;
+			break;
+		default:
+			unreachable();
+		}
+	}
+
+	return game_mode;
 }
 
 int16 __cdecl user_interface_session_get_campaign_difficulty(void)
@@ -88,6 +166,36 @@ e_session_protocol __cdecl user_interface_squad_get_active_protocol()
 s_game_variant* __cdecl user_interface_session_get_game_variant(void)
 {
 	return INVOKE(0x215692, 0x0, user_interface_session_get_game_variant);
+}
+
+void user_interface_networking_leave_squad(bool immediate)
+{
+	network_life_cycle_leave_squad(immediate);
+
+	return;
+}
+
+bool user_interface_squad_delegate_leadership(
+	int32 player_index)
+{
+	bool delegated = false;
+
+	if (network_life_cycle_squad_local_peer_is_leader())
+	{
+		if (player_index==NONE)
+		{
+			player_index = get_another_squad_member();
+		}
+
+		if (player_index != NONE &&
+			user_interface_squad_is_player_valid(player_index) &&
+			!user_interface_squad_is_local_player(player_index))
+		{
+			delegated = network_squad_session_delegate_leadership(player_index);
+		}
+	}
+
+	return delegated;
 }
 
 void user_interface_networking_set_globals(bool a1, XSESSION_INFO* session, int32 unused, bool from_game_invite)
@@ -138,7 +246,85 @@ void __cdecl user_interface_set_desired_multiplayer_mode(int32 desired_mode)
 	INVOKE(0x217138, 0x0, user_interface_set_desired_multiplayer_mode, desired_mode);
 }
 
-void user_interface_networking_join_game(XSESSION_INFO* session, int32 user_index, bool from_game_invite)
+bool user_interface_squad_is_player_valid(
+	int32 player_index)
+{
+	bool valid = false;
+	
+	if (player_index!=NONE)
+	{
+		uint32 player_valid_flags;
+		int16 absolute_index = DATUM_INDEX_TO_ABSOLUTE_INDEX(player_index);
+		
+		ASSERT(absolute_index>=0 && absolute_index<k_network_maximum_players_per_session);
+
+		if (network_group_session_get_membership(NULL, NULL, NULL, NULL, NULL, NULL, NULL, &player_valid_flags, NULL) &&
+			absolute_index < k_network_maximum_players_per_session &&
+			TEST_BIT(player_valid_flags, absolute_index))
+		{
+			valid = true;
+		}
+	}
+
+	return valid;
+}
+
+bool user_interface_squad_is_local_player(
+	int32 player_index)
+{
+	int32 local_peer_index;
+	uint32 player_valid_flags;
+	s_network_session_player const* players;
+
+	bool local_player = false;
+	int16 absolute_index = DATUM_INDEX_TO_ABSOLUTE_INDEX(player_index);
+
+	ASSERT(absolute_index>=0 && absolute_index<k_network_maximum_players_per_session);
+	ASSERT(user_interface_squad_is_player_valid(player_index));
+
+	if (network_group_session_get_membership(NULL, &local_peer_index, NULL, NULL, NULL, NULL, NULL, &player_valid_flags, &players) &&
+		TEST_BIT(player_valid_flags, absolute_index) &&
+		players[absolute_index].peer_index == local_peer_index)
+	{
+		local_player = true;
+	}
+
+	return local_player;
+}
+
+int32 user_interface_squad_get_player_index(
+	s_player_identifier const* player_identifier)
+{
+	int32 player_index = NONE;
+	c_network_session* session = NULL;
+
+	if (network_life_cycle_in_squad_session(&session))
+	{
+		player_index = user_interface_session_get_player_index(player_identifier, session);
+	}
+
+	return player_index;
+}
+
+bool user_interface_squad_boot_player(
+	int32 player_index)
+{
+	bool success = false;
+
+	if (user_interface_squad_is_booting_allowed() &&
+		user_interface_squad_is_player_valid(player_index) &&
+		!user_interface_squad_is_local_player(player_index))
+	{
+		success = network_squad_session_boot_player(player_index);
+	}
+
+	return success;
+}
+
+void user_interface_networking_join_game(
+	XSESSION_INFO* session,
+	int32 user_index,
+	bool from_game_invite)
 {
 	//INVOKE(0x2161E1, 0x1FD827, user_interface_networking_join_game, session_info, a2, from_game_invite);
 	int32 local_player_count;
@@ -267,4 +453,56 @@ void user_interface_networking_update_auto_join()
 			}
 		}
 	}
+}
+
+/* private code */
+
+static int32 user_interface_session_get_player_index(
+	s_player_identifier const* identifier,
+	c_network_session* session)
+{
+	int32 player_index = NONE;
+	uint32 player_valid_flags = 0;
+
+	ASSERT(identifier);
+	ASSERT(session);
+
+	if (session)
+	{
+		if (identifier && session->established())
+		{
+			s_session_membership const* membership = session->get_session_membership(NULL, NULL);
+			s_network_session_player const* players = membership->players;
+
+			player_valid_flags = membership->player_valid_flags;
+			
+			for (int32 test_player_index = 0; test_player_index<NUMBEROF(membership->players); ++test_player_index)
+			{
+				if (TEST_BIT(player_valid_flags, test_player_index) &&
+					player_identifier_compare(&players[test_player_index].identifier, identifier))
+				{
+					player_index = test_player_index;
+					break;
+				}
+			}
+		}
+	}
+
+	return player_index;
+}
+
+static int32 get_another_squad_member(void)
+{
+	int32 player_index = NONE;
+
+	for (int32 test_player_index = 0; test_player_index < k_maximum_players; ++test_player_index)
+	{
+		if (user_interface_squad_is_player_valid(test_player_index) && !user_interface_squad_is_local_player(test_player_index))
+		{
+			player_index = test_player_index;
+			break;
+		}
+	}
+
+	return player_index;
 }

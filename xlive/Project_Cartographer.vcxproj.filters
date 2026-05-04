@@ -323,7 +323,6 @@
     <ClCompile Include="Blam\Engine\cseries\cseries_system_memory.cpp" />
     <ClCompile Include="Blam\Engine\networking\panorama\panorama_friends.cpp" />
     <ClCompile Include="Blam\Engine\networking\panorama\panorama_favorites.cpp" />
-    <ClCompile Include="Blam\Engine\networking\panorama\panorama_user_history.cpp" />
     <ClCompile Include="Blam\Engine\networking\panorama\panorama_achievements.cpp" />
     <ClCompile Include="Blam\Engine\networking\panorama\panorama_presence.cpp" />
     <ClCompile Include="Blam\Engine\game\game_results.cpp" />
@@ -485,7 +484,7 @@
     <ClCompile Include="H2MOD\Modules\SpecialEvents\Events\MapObjectPlacements\Halloween\Coagulation.cpp" />
     <ClCompile Include="H2MOD\Modules\SpecialEvents\Events\MapObjectPlacements\Halloween\Lockout.cpp" />
     <ClCompile Include="Blam\Engine\cache\cache_files_windows.cpp" />
-    <ClCompile Include="Blam\Engine\achievements\achievement_live_interface.cpp" />
+    <ClCompile Include="Blam\Engine\achievements\achievement_manager.cpp" />
     <ClCompile Include="Blam\Engine\cseries\cseries_windows_debug.cpp" />
     <ClCompile Include="Blam\Engine\cseries\profile.cpp" />
     <ClCompile Include="Blam\Engine\debug\menu\debug_menu_main.cpp" />
@@ -558,6 +557,9 @@
     <ClCompile Include="Blam\Engine\cache\xbox_sound_cache.cpp" />
     <ClCompile Include="Blam\Engine\achievements\achievement_manager.cpp" />
     <ClCompile Include="Blam\Engine\networking\logic\life_cycle\life_cycle_handler_joining.cpp" />
+    <ClCompile Include="Blam\Engine\achievements\achievement_live_interface.cpp" />
+    <ClCompile Include="Blam\Engine\networking\panorama\panorama_user_history.cpp" />
+    <ClCompile Include="Blam\Engine\networking\panorama\panorama_user_profile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3rdparty\miniupnpc\include\miniupnpc\codelength.h" />
@@ -1058,7 +1060,6 @@
     <ClInclude Include="Blam\Engine\networking\panorama\panorama_friends.h" />
     <ClInclude Include="Blam\Engine\networking\panorama\panorama_favorites.h" />
     <ClInclude Include="Blam\Engine\networking\panorama\panorama_achievements.h" />
-    <ClInclude Include="Blam\Engine\networking\panorama\panorama_user_history.h" />
     <ClInclude Include="Blam\Engine\networking\panorama\panorama_presence.h" />
     <ClInclude Include="Blam\Engine\game\game_results.h" />
     <ClInclude Include="Blam\Engine\interface\screens\screen_cartographer_account_manager.h" />
@@ -1964,7 +1965,7 @@
     <ClInclude Include="Blam\Engine\networking\transport\transport_address.h" />
     <ClInclude Include="Blam\Engine\networking\transport\transport_security.h" />
     <ClInclude Include="Blam\Engine\cache\cache_files_windows.h" />
-    <ClInclude Include="Blam\Engine\achievements\achievement_live_interface.h" />
+    <ClInclude Include="Blam\Engine\achievements\achievement_manager.h" />
     <ClInclude Include="Blam\Engine\cseries\cseries_windows_debug.h" />
     <ClInclude Include="Blam\Engine\cseries\profile.h" />
     <ClInclude Include="Blam\Engine\debug\menu\debug_menu_main.h" />
@@ -2095,6 +2096,8 @@
     <ClInclude Include="Blam\Engine\interface\user_interface_widget_group.h" />
     <ClInclude Include="Blam\Engine\bitmaps\bitmap_types.h" />
     <ClInclude Include="Blam\Engine\networking\logic\life_cycle\life_cycle_handler_joining.h" />
+    <ClInclude Include="Blam\Engine\networking\panorama\panorama_user_profile.h" />
+    <ClInclude Include="Blam\Engine\networking\panorama\panorama_user_history.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resources\Resource.rc" />

@@ -11,32 +11,30 @@ struct s_panorama_friends_block
 };
 ASSERT_STRUCT_SIZE(s_panorama_friends_block, 12);
 
-
 /* classes */
-class c_networking_panorama_friends
+
+class c_panorama_friends
 {
+public:
+	bool has_active_task(void);
+	void initialize_startup(void);
+	void cancel_task(void);
+	void start(void);
+
 protected:
 	void* m_current_task;
-	PXOVERLAPPED pOverlapped;
-	uint32 field_8;
-	uint32 field_C;
-	uint32 field_10;
-	uint32 field_14;
-	uint32 field_18;
-	uint32 field_1C;
+	XOVERLAPPED m_overlapped;
 	HANDLE m_enumerator;
-	uint32 field_24;
-	uint8 gap_28[24];
-	s_panorama_friends_block* m_pending_friends_block;
-	s_panorama_friends_block* field_44;
-	bool field_48;
+	int32 m_field_24;
+	uint8 m_gap_28[24];
+	struct s_panorama_friends_block* m_pending_friends_block;
+	struct s_panorama_friends_block* field_44;
+	bool m_field_48;
 	bool m_op_pending;
-	uint8 gap_4A[6];
-
-public:
-	bool has_active_task();
-	void initialize_startup();
+	uint8 m_gap_4A[6];
 };
-ASSERT_STRUCT_SIZE(c_networking_panorama_friends, 0x50);
+ASSERT_STRUCT_SIZE(c_panorama_friends, 0x50);
 
-c_networking_panorama_friends* get_networking_panorama_friends(void);
+/* prototypes */
+
+c_panorama_friends* panorama_friends_get(void);

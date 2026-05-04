@@ -105,9 +105,9 @@ bool __cdecl network_session_interface_get_local_user_properties(
 	e_controller_index* controller_index,
 	s_player_configuration* player_data,
 	uint32* player_voice_settings,
-	int32* out_player_text_chat)
+	uint32* player_text_chat_settings)
 {
-	return INVOKE(0x1B10E0, 0x1970A8, network_session_interface_get_local_user_properties, user_index, controller_index, player_data, player_voice_settings, out_player_text_chat);
+	return INVOKE(0x1B10E0, 0x1970A8, network_session_interface_get_local_user_properties, user_index, controller_index, player_data, player_voice_settings, player_text_chat_settings);
 }
 
 bool network_session_interface_set_local_user_character_type(
@@ -190,6 +190,33 @@ void network_session_interface_set_user_identifier(
 
 	event(_event_message, "logic:session: local user %d set user identifier=%s", user_index, player_identifier_get_string(&user_properties->player_identifier));
 
+	return;
+}
+
+void network_session_interface_set_local_user_properties(
+	int32 user_index,
+	e_controller_index controller_index,
+	s_player_configuration const* p_data,
+	int32 player_voice_exists,
+	int32 player_text_chat_exists)
+{
+	s_network_session_interface_globals* session_interface_globals = network_session_interface_globals_get();
+
+	ASSERT(user_index>=0 && user_index<k_number_of_users);
+	ASSERT(controller_index>=0 && controller_index<k_number_of_controllers);
+	ASSERT(p_data);
+	
+	ASSERT(ustrlen(p_data->name)<=NUMBEROF(p_data->name));
+
+	ASSERT(player_appearance_valid(&p_data->appearance));
+
+	ASSERT(session_interface_globals->users[user_index].user_exists);
+
+	session_interface_globals->users[user_index].controller_index = controller_index;
+	session_interface_globals->users[user_index].player_data = *p_data;
+	session_interface_globals->users[user_index].player_voice_exists = player_voice_exists;
+	session_interface_globals->users[user_index].player_text_chat_exists = player_text_chat_exists;
+	
 	return;
 }
 
@@ -288,6 +315,153 @@ bool network_session_is_online(
 	e_network_session_class session_class)
 {
 	return session_class==_network_session_class_xbox_live;
+}
+
+bool network_squad_session_delegate_leadership(
+	int32 player_index)
+{
+	int32 local_peer_index;
+	int32 leader_peer_index;
+	int32 peer_count;
+	uint32 player_valid_flags;
+	s_network_session_peer const* peers;
+	s_network_session_player const* players;
+
+	bool delegated = false;
+	c_network_session* squad_session = NULL;
+
+	ASSERT(player_index>=0 && player_index<k_maximum_players);
+
+	if (network_life_cycle_in_squad_session(&squad_session) &&
+		network_group_session_get_membership(NULL, &local_peer_index, NULL, &leader_peer_index, &peer_count, &peers, NULL, &player_valid_flags, &players))
+	{
+		if (local_peer_index == leader_peer_index)
+		{
+			if (TEST_BIT(player_valid_flags, player_index))
+			{
+				s_network_session_player const* player = &players[player_index];
+
+				if (player->peer_index!=local_peer_index)
+				{
+					ASSERT(player->peer_index>=0 && player->peer_index<peer_count);
+					
+					if (squad_session->leader_request_delegate_leadership(&peers[player->peer_index].secure_address))
+					{
+						delegated = true;
+					}
+					else
+					{
+						event(
+							_event_error,
+							"logic:squad: failed to delegate leadership to player [#%d] peer [#%d]",
+							player_index,
+							player->peer_index
+						);
+					}
+				}
+				else
+				{
+					event(
+						_event_error,
+						"logic:squad: can't delegate leadership to player [#%d], they are on our local machine [peer #%d]",
+						player_index,
+						local_peer_index
+					);
+				}
+			}
+			else
+			{
+				event(_event_error, "logic:squad: can't delegate leadership to invalid player index [#%d]", player_index);
+			}
+		}
+		else
+		{
+			event(_event_error, "logic:squad: can't delegate leadership, we are not leader of our squad");
+		}
+	}
+	else
+	{
+		event(_event_error, "logic:squad: can't delegate leadership, no established squad session exists");
+	}
+
+	return delegated;
+}
+
+bool network_squad_session_boot_player(
+	int32 player_index)
+{
+	int32 local_peer_index;
+	int32 leader_peer_index;
+	int32 peer_count;
+	uint32 player_valid_flags;
+	s_network_session_peer const* peers;
+	s_network_session_player const* players;
+
+	bool booted = false;
+	c_network_session* squad_session = NULL;
+
+	ASSERT(player_index>=0 && player_index<k_maximum_players);
+
+
+	if (network_life_cycle_in_squad_session(&squad_session) &&
+		network_group_session_get_membership(NULL, &local_peer_index, NULL, &leader_peer_index, &peer_count, &peers, NULL, &player_valid_flags, &players))
+	{
+		if (local_peer_index==leader_peer_index)
+		{
+			if (TEST_BIT(player_valid_flags, player_index))
+			{
+				s_network_session_player const* player = &players[player_index];
+			
+				if (player->peer_index!=local_peer_index)
+				{
+					ASSERT(player->peer_index>=0 && player->peer_index<peer_count);
+
+					if (squad_session->leader_request_boot_machine(&peers[player->peer_index].secure_address))
+					{
+						booted = true;
+					}
+					else
+					{
+						event(
+							_event_error,
+							"logic:squad: failed to boot player [#%d] peer [#%d]",
+							player_index,
+							player->peer_index
+						);
+					}
+				}
+				else
+				{
+					event(
+						_event_error,
+						"logic:squad: failed to boot player [#%d], they are on our local machine peer [#%d]",
+						player_index,
+						local_peer_index
+					);
+				}
+			}
+			else
+			{
+				event(_event_error, "logic:squad: can't boot invalid player index [#%d]", player_index);
+			}
+		}
+		else
+		{
+			event(
+				_event_error,
+				"logic:squad: can't boot player [#%d], we are not leader of our squad us [#%d] != leader [#%d]",
+				player_index,
+				local_peer_index,
+				leader_peer_index
+			);
+		}
+	}
+	else
+	{
+		event(_event_error, "logic:squad: can't boot player, no squad session exists");
+	}
+
+	return booted;
 }
 
 /* private code */

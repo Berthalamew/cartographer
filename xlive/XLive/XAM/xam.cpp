@@ -200,7 +200,19 @@ BOOL WINAPI XNotifyGetNext(HANDLE hNotification, DWORD dwMsgFilter, PDWORD pdwId
 				
 			if (*pParam) 
 			{
-				if (XUserSignedIn(0))
+				bool signed_in = false;
+
+				// player 1-4
+				for (int i = 0; i < 4; i++)
+				{
+					if (XUserSignedIn(i))
+					{
+						signed_in = true;
+						break;
+					}
+				}
+
+				if (signed_in)
 				{
 					sys_storage = 0;
 					sys_profile = 0;
