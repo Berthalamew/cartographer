@@ -272,7 +272,7 @@ void c_screen_4way_signin::update(void)
 
 			c_player_widget_representation* current_player = &representations[controller];
 			current_player->set_appearance(&profile.appearance);
-			current_player->set_player_name_from_configuration((s_player_configuration*)profile.name); //hacky
+			current_player->set_player_name(profile.name);
 			show_gamertag_text = user_interface_controller_has_xbox_live(controller);
 		}
 
