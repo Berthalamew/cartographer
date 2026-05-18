@@ -11,42 +11,48 @@ void __cdecl saved_game_player_profile_set_default_variant(void* saved_game_vari
 	return;
 }
 
-void saved_game_player_profile_default_new(s_saved_game_player_profile* profile, int32 default_profile_type)
+void saved_game_player_profile_default_new(
+	s_saved_game_player_profile* profile,
+	int32 default_profile_type)
 {
 	s_gamepad_input_preferences input_preferences;
 
 	csmemset(profile, 0, sizeof(s_saved_game_player_profile));
+	
 	profile->valid_maybe = true;
+	
 	ustrncpy(profile->name, L"Guest", NUMBEROF(s_saved_game_player_profile::name));
+
 	profile->appearance.change_color_index[0] = _player_color_colbat;
 	profile->appearance.change_color_index[1] = _player_color_white;
 	profile->appearance.change_color_index[2] = _player_color_white;
 	profile->appearance.change_color_index[3] = _player_color_white;
 	profile->appearance.emblem_info.foreground_emblem = _emblem_foreground_seventh_column;
 	profile->appearance.emblem_info.background_emblem = _emblem_background_solid;
-	SET_BIT(profile->unk, 0, true);
+	profile->flags.set(_saved_game_player_profile_guest_bit, true);
 	profile->input_preferences.controller_sensitivity = 3;
 	profile->input_preferences.mouse_sensitivity = 3;
 	profile->input_preferences.flags.clear();
 
-	if(default_profile_type)
+	switch (default_profile_type)
 	{
-		if(default_profile_type == 1)
-		{
-			profile->input_preferences.controller_button_layout = _button_preset_default;
-			profile->input_preferences.controller_thumbstick_layout = _joystick_preset_default;
-			profile->input_preferences.flags.set(_saved_game_profile_input_preference_bit_controller_look_inversion, true);
-			profile->input_preferences.flags.set(_saved_game_profile_input_preference_bit_mouse_look_inversion, true);
-		}
-	}
-	else
-	{
+	case 0:
 		profile->input_preferences.controller_button_layout = _button_preset_default;
 		profile->input_preferences.controller_thumbstick_layout = _joystick_preset_default;
+		break;
+	case 1:
+		profile->input_preferences.controller_button_layout = _button_preset_default;
+		profile->input_preferences.controller_thumbstick_layout = _joystick_preset_default;
+		profile->input_preferences.flags.set(_saved_game_profile_input_preference_bit_controller_look_inversion, true);
+		profile->input_preferences.flags.set(_saved_game_profile_input_preference_bit_mouse_look_inversion, true);
+		break;
 	}
+	
 	saved_game_player_profile_set_default_variant(&profile->variant);
 	input_abstraction_get_default_preferences(&input_preferences, _joystick_preset_default, _button_preset_default, _custom_keyboard_preset_right_hold, 0);
 	input_abstraction_set_controller_settings_from_preferences(&input_preferences, &profile->input_preferences);
+
+	return;
 }
 
 bool saved_game_player_profile_read_file(uint32 enumerated_file_index, s_saved_game_player_profile* profile)
