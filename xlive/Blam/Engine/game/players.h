@@ -1,11 +1,11 @@
 #pragma once
+#include "aim_assist.h"
 #include "game_globals.h"
-#include "player_constants.h"
-#include "player_control.h"
 
 #include "input/controllers.h"
 #include "memory/data.h"
 #include "objects/emblems.h"
+#include "units/unit_control.h"
 
 /* constants */
 
@@ -13,6 +13,10 @@ enum
 {
 	k_shot_entries_per_player = 8
 };
+
+/* macros */
+
+#define player_get(index) ((struct player_datum*)datum_get(player_data_get(), index))
 
 /* enums */
 
@@ -96,6 +100,21 @@ struct s_player_configuration
 };
 ASSERT_STRUCT_SIZE(s_player_configuration, 132);
 
+struct s_player_interaction
+{
+	int16 type;
+	int16 data;
+	datum object_index;
+};
+ASSERT_STRUCT_SIZE(s_player_interaction, 8);
+
+struct s_player_action_context
+{
+	s_player_interaction interaction;
+	datum melee_target_unit_index;
+};
+ASSERT_STRUCT_SIZE(s_player_action_context, 12);
+
 struct player_action
 {
 	uint32 control_flags1;
@@ -168,6 +187,8 @@ struct player_datum
 ASSERT_STRUCT_SIZE(player_datum, 516);
 #pragma pack(pop)
 
+/* classes */
+
 class c_player_in_game_iterator 
 {
 public:
@@ -198,36 +219,7 @@ private:
 	data_iterator m_data_iterator;
 };
 
-struct s_players_globals
-{
-	int32 players_in_game_count;
-	bool all_players_dead;
-	bool any_players_dead;
-	bool input_disabled;
-	bool disable_movement;
-	int16 local_player_count;
-	int16 player_controller_count;
-	datum player_user_mapping[k_number_of_users];
-	datum player_controller_mapping[k_number_of_users];
-	int32 machine_valid_mask;
-	s_machine_identifier machine_identifier[17];
-	bool local_machine_exists;
-	s_machine_identifier local_machine_identifier;
-	int8 gap_A5[3];
-	int32 local_machine_index;
-	int16 coop_respawn_hud_message_type;
-	bool display_coop_respawn_message;
-	int8 display_fail_respawn_message;
-	int32 respawn_time;
-	int16 bsp_switch_trigger_volume_index;
-	int16 unk_AE;
-	int32 player_datum_that_triggered_bsp_switch;
-	int32 teleported_unit_datum;
-	int8 gap_B8[128];
-};
-ASSERT_STRUCT_SIZE(s_players_globals, 312);
-
-s_players_globals* get_players_globals(void);
+/* prototypes */
 
 data_array* player_data_get(void);
 
@@ -261,6 +253,10 @@ void player_user_weapon_interaction_reset(void);
 
 int16 local_player_count(void);
 
+int32* player_user_mapping_get(void);
+
+int32* player_controller_mapping_get(void);
+
 void __cdecl players_update_before_game(const struct simulation_update* update);
 
 void __cdecl players_update_after_game(const struct simulation_update* update);
@@ -278,7 +274,3 @@ char const* player_identifier_get_string(struct s_player_identifier const* playe
 char const* clan_identifier_get_string(struct s_clan_identifier const* clan_id);
 
 void players_apply_patches(void);
-
-/* macros */
-
-#define player_get(index) ((struct player_datum*)datum_get(player_data_get(), index))

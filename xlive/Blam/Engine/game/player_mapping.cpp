@@ -7,16 +7,17 @@
 
 int32 player_mapping_first_active_output_user(void)
 {
-    s_players_globals* players_globals = get_players_globals();
-
+    int32* mapping = player_user_mapping_get();
     int32 result = 0;
-    for (size_t i = 0; players_globals->player_user_mapping[i] == NONE; ++i)
+
+    for (size_t i = 0; mapping[i] == NONE; ++i)
     {
-        if (i + 1 >= NUMBEROF(players_globals->player_user_mapping))
+        if (i + 1 >= NUMBEROF(mapping))
         {
             result = NONE;
             break;
         }
     }
+
     return result;
 }

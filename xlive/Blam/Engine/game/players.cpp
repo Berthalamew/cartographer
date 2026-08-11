@@ -1,10 +1,13 @@
 #include "stdafx.h"
 #include "players.h"
 
+#include "game.h"
+#include "game_engine.h"
+#include "game_globals.h"
 #include "game_time.h"
-#include "game/game.h"
-#include "game/game_engine.h"
-#include "game/game_globals.h"
+#include "player_constants.h"
+#include "player_control.h"
+
 #include "interface/user_interface_controller.h"
 #include "networking/network_event.h"
 #include "saved_games/game_variant.h"
@@ -19,7 +22,40 @@
 #include "H2MOD/Modules/Shell/Config.h"
 #include "H2MOD/Modules/SpecialEvents/SpecialEvents.h"
 
+/* structures */
+
+struct s_players_globals
+{
+	int32 players_in_game_count;
+	bool all_players_dead;
+	bool any_players_dead;
+	bool input_disabled;
+	bool disable_movement;
+	int16 local_player_count;
+	int16 player_controller_count;
+	datum player_user_mapping[k_number_of_users];
+	datum player_controller_mapping[k_number_of_users];
+	int32 machine_valid_mask;
+	s_machine_identifier machine_identifier[17];
+	bool local_machine_exists;
+	s_machine_identifier local_machine_identifier;
+	int8 gap_A5[3];
+	int32 local_machine_index;
+	int16 coop_respawn_hud_message_type;
+	bool display_coop_respawn_message;
+	int8 display_fail_respawn_message;
+	int32 respawn_time;
+	int16 bsp_switch_trigger_volume_index;
+	int16 unk_AE;
+	int32 player_datum_that_triggered_bsp_switch;
+	int32 teleported_unit_datum;
+	int8 gap_B8[128];
+};
+ASSERT_STRUCT_SIZE(s_players_globals, 312);
+
 /* prototypes */
+
+static s_players_globals* get_players_globals(void);
 
 static void player_configuration_validate_team(int32 player_index, s_player_configuration* configuration_data);
 static int32 player_get_spawn_protection_time(real32 timer);
@@ -115,11 +151,6 @@ datum c_player_with_unit_iterator::get_index(void) const
 int32 c_player_with_unit_iterator::get_absolute_index(void) const
 {
 	return m_data_iterator.absolute_index;
-}
-
-s_players_globals* get_players_globals(void)
-{
-	return *Memory::GetAddress<s_players_globals**>(0x4A825C, 0x4D64C0);
 }
 
 datum __cdecl player_index_from_user_index(int32 user_index)
@@ -580,6 +611,16 @@ int16 local_player_count(void)
 	return get_players_globals()->local_player_count;
 }
 
+int32* player_user_mapping_get(void)
+{
+	return get_players_globals()->player_user_mapping;
+}
+
+int32* player_controller_mapping_get(void)
+{
+	return get_players_globals()->player_controller_mapping;
+}
+
 void __cdecl players_update_before_game(
 	const struct simulation_update* update)
 {
@@ -710,6 +751,11 @@ void players_apply_patches(void)
 }
 
 /* private code */
+
+static s_players_globals* get_players_globals(void)
+{
+	return *Memory::GetAddress<s_players_globals**>(0x4A825C, 0x4D64C0);
+}
 
 static void player_configuration_validate_team(
 	int32 player_index,

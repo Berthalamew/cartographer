@@ -1,6 +1,6 @@
 #pragma once
 #include "bitmaps/bitmap_types.h"
-#include "main/game_preferences.h"
+#include "cseries/language.h"
 #include "math/color_math.h"
 #include "tag_files/tag_reference.h"
 #include "text/text_group.h"
