@@ -5,12 +5,12 @@
 
 #include "game/game.h"
 #include "game/game_engine_util.h"
-#include "game/game_options.h"
 #include "game/game_statborg.h"
+#include "game/player_constants.h"
 #include "game/players.h"
 #include "items/weapons.h"
-#include "main/game_preferences.h"
 #include "networking/network_event.h"
+#include "saved_games/game_variant.h"
 #include "simulation/game_interface/simulation_game_action.h"
 #include "shell/shell.h"
 
@@ -29,9 +29,11 @@ const wchar_t *const headhunterSoundTable[k_language_count][e_graverobber_sounds
 	{SND_HEADHUNTER_CH, SND_SKULL_SCORED_CH}
 };
 
-void GraveRobber::TriggerSound(e_graverobber_sounds sound, int sleep)
+void GraveRobber::TriggerSound(
+	e_graverobber_sounds sound,
+	int32 sleep)
 {
-	const int language_id = *Memory::GetAddress<int*>(0x412818);
+	const e_language language_id = *Memory::GetAddress<e_language*>(0x412818);
 
 	if (shell_is_dedicated_server()) return;
 
@@ -106,7 +108,7 @@ void GraveRobber::PickupSkull(datum player_index, datum skull_datum)
 
 	if (!shell_is_dedicated_server())
 	{
-		for (int i = 0; i < k_number_of_users; i++)
+		for (uint8 i = 0; i < k_number_of_users; ++i)
 		{
 			if (player_index_from_user_index(i) == player_index)
 			{
@@ -141,7 +143,7 @@ CustomVariantId GraveRobber::GetVariantId()
 	return CustomVariantId::_id_graverobber;
 }
 
-void GraveRobber::OnMapLoad(ExecTime execTime, s_game_options* options)
+void GraveRobber::OnMapLoad(ExecTime execTime, e_game_mode game_mode)
 {
 	switch (execTime)
 	{
@@ -149,7 +151,7 @@ void GraveRobber::OnMapLoad(ExecTime execTime, s_game_options* options)
 		break;
 
 	case ExecTime::_postEventExec:
-		switch (options->game_mode)
+		switch (game_mode)
 		{
 		case _game_mode_multiplayer:
 			this->Initialize();

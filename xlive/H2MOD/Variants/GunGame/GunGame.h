@@ -11,7 +11,7 @@ public:
 	virtual CustomVariantId GetVariantId() override;
 
 	// on map load can be used as Initialize
-	virtual void OnMapLoad(ExecTime execTime, s_game_options* gameOptions) override;
+	virtual void OnMapLoad(ExecTime execTime, enum e_game_mode game_mode) override;
 	virtual void OnPlayerSpawn(ExecTime execTime, datum playerIdx) override;
 	virtual void OnPlayerDeath(ExecTime execTime, datum playerIdx) override;
 

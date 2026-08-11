@@ -2,7 +2,6 @@
 #include "GunGame.h"
 
 #include "game/game.h"
-#include "game/game_options.h"
 #include "game/players.h"
 #include "networking/network_event.h"
 #include "networking/Session/network_session.h"
@@ -61,7 +60,7 @@ CustomVariantId GunGame::GetVariantId()
 	return CustomVariantId::_id_gungame;
 }
 
-void GunGame::OnMapLoad(ExecTime execTime, s_game_options* gameOptions)
+void GunGame::OnMapLoad(ExecTime execTime, e_game_mode game_mode)
 {
 	switch (execTime)
 	{
@@ -69,7 +68,7 @@ void GunGame::OnMapLoad(ExecTime execTime, s_game_options* gameOptions)
 		break;
 
 	case ExecTime::_postEventExec:
-		switch (gameOptions->game_mode)
+		switch (game_mode)
 		{
 			// cleanup when loading main menu
 		case _game_mode_multiplayer:

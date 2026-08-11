@@ -127,10 +127,10 @@ typedef uint16(__cdecl* get_enabled_teams_flags_t)(c_network_session*);
 
 /* globals */
 
-user_interface_controller_set_desired_team_index_t p_user_interface_controller_set_desired_team_index;
-map_cache_load_t p_map_cache_load;
-player_spawn_t p_player_spawn;
-get_enabled_teams_flags_t p_get_enabled_teams_flags;
+static user_interface_controller_set_desired_team_index_t p_user_interface_controller_set_desired_team_index;
+static map_cache_load_t p_map_cache_load;
+static player_spawn_t p_player_spawn;
+static get_enabled_teams_flags_t p_get_enabled_teams_flags;
 
 bool g_h2x_enabled = false;
 bool g_xbox_tickrate_enabled = false;
@@ -379,7 +379,7 @@ static bool __cdecl OnMapLoad(s_game_options* options)
 	static bool resetAfterMatch = false;
 
 	EventHandler::MapLoadEventExecute(EventExecutionType::execute_before, options->game_mode);
-	CustomVariantHandler::OnMapLoad(ExecTime::_preEventExec, options);
+	CustomVariantHandler::OnMapLoad(ExecTime::_preEventExec, options->game_mode);
 
 	bool result = p_map_cache_load(options);
 	if (result == false) // verify if the game didn't fail to load the map
@@ -425,7 +425,7 @@ static bool __cdecl OnMapLoad(s_game_options* options)
 	}
 	else
 	{
-		event(_event_status, "h2mod: engine type: %d", (int)options->game_mode);
+		event(_event_status, "h2mod: engine type: %d", options->game_mode);
 
 		if (!shell_is_dedicated_server())
 		{
@@ -493,7 +493,7 @@ static bool __cdecl OnMapLoad(s_game_options* options)
 
 
 	EventHandler::MapLoadEventExecute(EventExecutionType::execute_after, options->game_mode);
-	CustomVariantHandler::OnMapLoad(ExecTime::_postEventExec, options);
+	CustomVariantHandler::OnMapLoad(ExecTime::_postEventExec, options->game_mode);
 
 	// Clear remaining handle open in the tag injector at the end of post loading injections
 	tag_injection_clear_active_map();

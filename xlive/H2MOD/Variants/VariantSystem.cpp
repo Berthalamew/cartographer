@@ -97,10 +97,12 @@ bool CustomVariantHandler::VariantEnabled(CustomVariantId variantId)
 	return false;
 }
 
-void CustomVariantHandler::OnMapLoad(ExecTime execTime, struct s_game_options* gameOptions)
+void CustomVariantHandler::OnMapLoad(ExecTime execTime, e_game_mode game_mode)
 {
 	if (GetCurrentGameVariant() != nullptr)
-		GetCurrentGameVariant()->OnMapLoad(execTime, gameOptions);
+	{
+		GetCurrentGameVariant()->OnMapLoad(execTime, game_mode);
+	}
 }
 
 void CustomVariantHandler::OnPlayerSpawn(ExecTime execTime, datum playerIdx)
