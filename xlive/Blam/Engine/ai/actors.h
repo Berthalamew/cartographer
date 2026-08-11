@@ -5,7 +5,6 @@
 #include "ai_path.h"
 #include "cl_engine.h"
 #include "pathfinding_utilities.h"
-#include "objects/object_location.h"
 
 /* constants */
 

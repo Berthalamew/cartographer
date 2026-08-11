@@ -1,6 +1,5 @@
 #pragma once
 #include "game/game_allegiance.h"
-#include "objects/object_location.h"
 #include "tag_files/tag_block.h"
 
 /* enums */

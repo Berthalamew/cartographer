@@ -1,6 +1,5 @@
 #pragma once
 #include "math/real_math.h"
-#include "objects/object_location.h"
 
 /* constants */
 

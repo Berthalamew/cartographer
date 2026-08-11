@@ -1,5 +1,4 @@
 #pragma once
-#include "objects/object_location.h"
 
 enum e_collision_test_flags : uint32
 {

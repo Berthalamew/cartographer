@@ -2,7 +2,6 @@
 
 #include "particle_system_definition.h"
 #include "memory/data.h"
-#include "objects/object_location.h"
 
 #define k_max_particle_systems 128
 

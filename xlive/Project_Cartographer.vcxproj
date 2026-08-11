@@ -2163,7 +2163,6 @@
     <ClInclude Include="Blam\Engine\objects\lights_scenario_definitions.h" />
     <ClInclude Include="Blam\Engine\objects\light_definitions.h" />
     <ClInclude Include="Blam\Engine\objects\object_constants.h" />
-    <ClInclude Include="Blam\Engine\objects\object_location.h" />
     <ClInclude Include="Blam\Engine\objects\object_definition.h" />
     <ClInclude Include="Blam\Engine\objects\object_early_movers.h" />
     <ClInclude Include="Blam\Engine\objects\object_globals.h" />
