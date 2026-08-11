@@ -296,6 +296,8 @@ void hs_evaluate_object_cast_up(int16 function_index, int32 thread_index, bool i
 
 /* private code */
 
+#ifdef HS_COMPILER_ENABLED
+
 static void hs_inspect_boolean(
 	int16 type,
 	int32 value,
@@ -355,3 +357,5 @@ static void hs_inspect_enum(int16 type, int32 enum_value, char* buffer, int32 bu
 	csstrncpy(buffer, enum_definition->identifiers[enum_value], buffer_size);
 	return;
 }
+
+#endif

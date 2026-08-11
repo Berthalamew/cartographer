@@ -293,7 +293,9 @@ extern const int32 hs_type_weapon_default;
 extern const int32 hs_type_device_default;
 extern const int32 hs_type_scenery_default;
 
+#ifdef HS_COMPILER_ENABLED
 extern const hs_enum_definition hs_enum_table[NUMBER_OF_HS_ENUM_TYPES];
+#endif
 
 /* globals */
 
