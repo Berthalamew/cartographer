@@ -4,17 +4,112 @@
 #include "simulation_queue_global_events.h"
 #include "simulation_entity_database.h"
 #include "simulation_event_handler.h"
+#include "simulation_update.h"
 #include "simulation_watcher.h"
+#include "simulation_world.h"
 
+#include "cartographer/discord/discord_interface.h"
 #include "game/game.h"
 #include "game/players.h"
+#include "networking/logic/life_cycle_manager.h"
+#include "networking/session/network_session.h"
 #include "objects/objects.h"
+#include "shell/shell.h"
 #include "units/units.h"
 #include "simulation/game_interface/simulation_game_action.h"
 
-s_simulation_globals* simulation_get_globals()
+#include "H2MOD/Modules/EventHandler/EventHandler.hpp"
+
+
+/* structures */
+
+struct s_simulation_globals
 {
-	return Memory::GetAddress<s_simulation_globals*>(0x5178D0, 0x520B60);
+	bool initialized;
+	bool simulation_fatal_error;
+	bool engine_paused;
+	int32 field_4;
+	bool simulation_invalidate;
+	bool simulation_reset_pending;
+	bool simulation_reset_in_progress;
+	bool loading_saved_game;
+	class c_simulation_world* world;
+	class c_simulation_watcher* watcher;
+	class c_simulation_type_collection* type_collection;
+};
+ASSERT_STRUCT_SIZE(s_simulation_globals, 24);
+
+/* prototypes */
+
+static s_simulation_globals* simulation_get_globals(void);
+
+static void simulation_player_joined_game_patch_calls(void);
+static void simulation_player_left_game_patch_calls(void);
+
+/* public code */
+
+void simulation_apply_patches(void)
+{
+	simulation_event_handler_apply_patches();
+	simulation_world_apply_patches();
+	simulation_entity_database_apply_patches();
+	simulation_game_action_apply_patches();
+
+	PatchCall(Memory::GetAddress(0x1DD22F, 0x1C46E3), simulation_build_player_updates);	// c_simulation_world::build_update
+
+	WriteJmpTo(Memory::GetAddress(0x1AE6D8, 0x1A8932), simulation_reset);
+
+	simulation_player_joined_game_patch_calls();
+	simulation_player_left_game_patch_calls();
+	return;
+}
+
+void __cdecl simulation_player_joined_game(
+	int32 player_index)
+{
+	s_simulation_globals* simulation_globals = simulation_get_globals();
+
+	ASSERT(simulation_globals->world);
+
+	if (simulation_globals->initialized && !simulation_globals->loading_saved_game)
+	{
+		simulation_globals->world->create_player(player_index);
+		if (!shell_is_dedicated_server())
+		{
+			// Update discord player counts
+			discord_interface_set_player_counts();
+		}
+	}
+
+	// Remove this when new custom variant settings are finished
+	c_network_session* session = NULL;
+
+	if (network_life_cycle_in_squad_session(&session))
+	{
+		EventHandler::NetworkPlayerEventExecute(EventExecutionType::execute_after, session->get_player_membership(player_index)->peer_index, EventHandler::NetworkPlayerEventType::add);
+	}
+
+	return;
+}
+
+void __cdecl simulation_player_left_game(
+	int32 player_index)
+{
+	s_simulation_globals* simulation_globals = simulation_get_globals();
+
+	ASSERT(simulation_globals->world);
+
+	if (simulation_globals->initialized && !simulation_globals->loading_saved_game)
+	{
+		simulation_globals->world->delete_player(player_index);
+		if (!shell_is_dedicated_server())
+		{
+			// Update discord player counts
+			discord_interface_set_player_counts();
+		}
+	}
+
+	return;
 }
 
 c_simulation_world* simulation_get_world()
@@ -32,7 +127,7 @@ bool simulation_is_paused()
 	return simulation_get_globals()->engine_paused;
 }
 
-bool simulation_reset_in_progress()
+bool simulation_reset_in_progress(void)
 {
 	return simulation_get_globals()->simulation_reset_in_progress;
 }
@@ -345,15 +440,24 @@ void __cdecl simulation_build_player_updates(int32* player_update_count, int32 m
 	return;
 }
 
-void simulation_apply_patches(void)
+/* private code */
+
+static s_simulation_globals* simulation_get_globals(void)
 {
-	simulation_event_handler_apply_patches();
-	simulation_world_apply_patches();
-	simulation_entity_database_apply_patches();
-	simulation_game_action_apply_patches();
+	return Memory::GetAddress<s_simulation_globals*>(0x5178D0, 0x520B60);
+}
 
-	PatchCall(Memory::GetAddress(0x1DD22F, 0x1C46E3), simulation_build_player_updates);	// c_simulation_world::build_update
 
-	WriteJmpTo(Memory::GetAddress(0x1AE6D8, 0x1A8932), simulation_reset);
+static void simulation_player_joined_game_patch_calls(void)
+{
+	PatchCall(Memory::GetAddress(0x56447, 0x5E93F), simulation_player_joined_game);
+	PatchCall(Memory::GetAddress(0x5647F, 0x5E977), simulation_player_joined_game);
+	PatchCall(Memory::GetAddress(0x57E85, 0x6037D), simulation_player_joined_game);
+	return;
+}
+
+static void simulation_player_left_game_patch_calls(void)
+{
+	PatchCall(Memory::GetAddress(0x5633A, 0x5E832), simulation_player_left_game);
 	return;
 }

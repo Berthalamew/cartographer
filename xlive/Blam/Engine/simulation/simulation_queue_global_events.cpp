@@ -3,7 +3,7 @@
 
 #include "simulation.h"
 #include "simulation_encoding.h"
-#include "game_interface/simulation_game_action.h"
+#include "simulation_world.h"
 
 #include "main/main.h"
 #include "game/game.h"
@@ -11,6 +11,7 @@
 #include "game/players.h"
 #include "memory/bitstream.h"
 #include "networking/network_event.h"
+#include "simulation/game_interface/simulation_game_action.h"
 
 /* prototypes */
 
@@ -279,7 +280,6 @@ void simulation_queue_player_update_apply(const s_simulation_queue_element* elem
 	}
 	else if (!simulation_players_apply_update(&update))
 	{
-		simulation_get_globals()->simulation_fatal_error = true;
 		event(_event_error, "networking:simulation:player_update_apply: failed to apply player update");
 	}
 

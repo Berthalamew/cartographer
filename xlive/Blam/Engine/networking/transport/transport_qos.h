@@ -1,5 +1,7 @@
 #pragma once
 
+/* structures */
+
 struct s_transport_qos_attempt
 {
 	int16 field_0;
@@ -21,5 +23,7 @@ struct s_qos_attempt_data
 	void* pbData;
 };
 ASSERT_STRUCT_SIZE(s_qos_attempt_data, 32);
+
+/* prototypes */
 
 datum __cdecl transport_qos_target_new_hook(int a1, int a2, int a3, int a4);

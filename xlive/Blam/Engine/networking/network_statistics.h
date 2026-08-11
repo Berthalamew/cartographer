@@ -1,5 +1,7 @@
 #pragma once
 
+/* classes */
+
 class c_network_time_statistics
 {
 	struct s_statistics_interval

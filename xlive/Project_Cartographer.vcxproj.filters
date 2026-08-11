@@ -2153,6 +2153,7 @@
     <ClInclude Include="Blam\Engine\render\render_cartographer_ingame_variant_ui.h" />
     <ClInclude Include="Blam\Engine\interface\cartographer_variant_settings.h" />
     <ClInclude Include="Blam\Engine\memory\ring_buffer.h" />
+    <ClInclude Include="Blam\Engine\simulation\simulation_update.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resources\Resource.rc" />

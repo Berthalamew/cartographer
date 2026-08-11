@@ -3,6 +3,7 @@
 
 #include "simulation.h"
 #include "simulation_queue_entities.h"
+#include "simulation_world.h"
 
 #include "memory/bitstream.h"
 #include "networking/network_event.h"

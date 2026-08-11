@@ -1,5 +1,4 @@
 #pragma once
-
 #include "game/game_options.h"
 #include "memory/rockall_heap_manager.h"
 
@@ -17,12 +16,7 @@ enum
 	k_game_state_size = k_game_state_cpu_size + k_game_state_gpu_size,
 };
 
-class c_gamestate_allocation : public c_allocation_base
-{
-public:
-	virtual void* alloc(size_t bytes);
-	virtual void* free_block(void* block);
-};
+/* structures */
 
 struct game_state_header
 {
@@ -70,12 +64,21 @@ struct s_game_state_globals
 	uint32 allocation_size_checksum;
 
 	uint32 revert_time;
-	game_state_header* header;
+	struct game_state_header* header;
 
 	bool loaded_from_persistent_storage;
-	c_gamestate_allocation* gamestate_allocation;
+	class c_gamestate_allocation* gamestate_allocation;
 };
 ASSERT_STRUCT_SIZE(s_game_state_globals, 9760);
+
+/* classes */
+
+class c_gamestate_allocation : public c_allocation_base
+{
+public:
+	virtual void* alloc(size_t bytes);
+	virtual void* free_block(void* block);
+};
 
 /* prototypes */
 

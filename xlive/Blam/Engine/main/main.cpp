@@ -27,6 +27,7 @@
 #endif
 #include "game/game.h"
 #include "game/game_time.h"
+#include "game/player_control.h"
 #include "game/player_vibration.h"
 #include "input/input_windows.h"
 #include "interface/terminal.h"
@@ -604,13 +605,16 @@ static void main_save_map_private(void)
 
 static void __cdecl main_game_reset_map_blue_screen_detection(void)
 {
-	s_simulation_globals* simulation_globals = simulation_get_globals();
-	if (simulation_globals->simulation_reset_in_progress)
+	bool reset_in_progress = simulation_reset_in_progress();
+
+	if (reset_in_progress)
 	{
 		EventHandler::BlueScreenEventExecute(EventExecutionType::execute_before);
 	}
+	
 	main_reset_map_immediate();
-	if (simulation_globals->simulation_reset_in_progress)
+
+	if (reset_in_progress)
 	{
 		EventHandler::BlueScreenEventExecute(EventExecutionType::execute_after);
 	}

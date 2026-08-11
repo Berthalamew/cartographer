@@ -1,9 +1,12 @@
 #include "stdafx.h"
 #include "simulation_game_action.h"
 
+#include "simulation_game_entities.h"
+
 #include "game/game.h"
 #include "game/game_engine_simulation.h"
 #include "simulation/simulation.h"
+#include "simulation/simulation_world.h"
 
 //Pass datum from new object into object to sync
 void __cdecl simulation_action_object_create(datum object_index)

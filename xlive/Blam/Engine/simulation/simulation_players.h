@@ -1,20 +1,19 @@
 #pragma once
 #include "game/game.h"
 #include "game/players.h"
-#include "game/player_control.h"
 #include "input/controllers.h"
 
 /* enums */
 
-enum e_simulation_player_type   //TODO: determine actual names for this enum field
+enum e_simulation_player_type
 {
-	simulation_player_type_local_authority = 0x0,
-	simulation_player_type_local_no_authority = 0x1,
-	simulation_player_type_local_unk = 0x2,
-	simulation_player_type_foreign_synchronous = 0x3,
-	simulation_player_type_foreign_no_authority = 0x4,
-	simulation_player_type_foreign_distributed = 0x5,
-	k_simulation_player_type_count = 0x6,
+	_simulation_player_type_local_authoritative = 0,
+	_simulation_player_type_local_predicted,
+	_simulation_player_type_local_zombie,
+	_simulation_player_type_remote_synchronous,
+	_simulation_player_type_remote_predicted,
+	_simulation_player_type_remote_replicated,
+	k_simulation_player_type_count,
 };
 
 enum e_simulation_player_update_type
@@ -66,13 +65,12 @@ ASSERT_STRUCT_SIZE(s_player_collection, 0xA44);
 
 /* classes */
 
-#pragma pack(push, 1)
 struct c_simulation_player
 {
 	int32 m_player_index;
-	datum m_player_datum_index;
+	int32 m_player_datum_index;
 	e_simulation_player_type m_player_type;
-	uint64 m_player_identifier;
+	s_player_identifier m_player_identifier;
 	s_machine_identifier m_player_machine_identifier;
 	int16 pad;
 	void* m_simulation_world;
@@ -82,7 +80,6 @@ struct c_simulation_player
 	uint32 m_start_commit_ticks;
 	player_action m_actions;
 };
-#pragma pack(pop)
 ASSERT_STRUCT_SIZE(c_simulation_player, 0x88);
 
 /* prototypes */
@@ -92,7 +89,3 @@ void simulation_players_apply_patches(void);
 void simulation_player_collection_clear(struct s_player_collection* collection);
 
 bool __cdecl simulation_players_apply_update(struct simulation_player_update* player_update);
-
-void __cdecl simulation_player_joined_game(datum player_index);
-
-void __cdecl simulation_player_left_game(datum player_index);

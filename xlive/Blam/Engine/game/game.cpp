@@ -32,6 +32,7 @@
 #include "scenario/scenario_definitions.h"
 #include "shell/shell.h"
 #include "simulation/simulation.h"
+#include "simulation/simulation_update.h"
 #include "simulation/simulation_world.h"
 #include "structures/cluster_partitions.h"
 #include "sound/game_sound_deterministic.h"
@@ -428,7 +429,7 @@ void __cdecl game_update(int32 desired_ticks, real32* elapsed_game_dt)
 	}
 	else
 	{
-		simulation_get_globals()->world->queues_update_statistics();
+		simulation_get_world()->queues_update_statistics();
 	}
 
 	return;
