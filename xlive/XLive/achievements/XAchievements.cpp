@@ -3,18 +3,74 @@
 
 #include "H2MOD/Modules/Achievements/Achievements.h"
 
+/* constants */
+
+static char const* k_achievement_strings[] =
+{
+	"Cairo Station|Complete Cairo Station.",
+	"Outskirts|Complete Outskirts.",
+	"Metropolis|Complete Metropolis.",
+	"The Arbiter|Complete The Arbiter.",
+	"Oracle|Complete The Oracle.",
+	"Delta Halo|Complete Delta Halo.",
+	"Regret|Complete Regret.",
+	"Sacred Icon|Complete Sacred Icon.",
+	"Quarantine Zone|Complete Quarantine Zone.",
+	"Gravemind|Complete Gravemind.",
+	"Uprising|Complete Uprising.",
+	"High Charity|Complete High Charity.",
+	"The Great Journey|Complete The Great Journey.",
+	"Warrior|Complete the game on Normal.",
+	"Hero|Complete the game on Heroic.",
+	"Legend|Complete the game on Legendary.",
+	"King of the Scarab|Acquire the Scarab Gun.",
+	"Silent But Deadly|Kill 7 opponents from behind.",
+	"Demon|Complete any level without dying.",
+	"Go Ape Shit|Kill an enraged, berserk Brute by melee.",
+	"Stick It|Stick someone!",
+	"Counterpoint|Kill the sword carrier.",
+	"Carjacking|Steal an occupied vehicle.",
+	"Violent Cartographer|Play every default map.",
+	"Rainman|Play every variant with at least 3 people.",
+	"Double Kill|Kill 2 opponents within 4 seconds.",
+	"Triple Kill|Kill 3 opponents within 4 seconds.",
+	"Killtacular|Kill 4 opponents within 4 seconds.",
+	"Killing Spree|Kill 5 opponents in a row.",
+	"Running Riot|Kill 10 opponents in a row.",
+	"Sniper Kill|Get a sniper kill.",
+	"Roadkill|Run over and kill an opponent.",
+	"Bonecracker|Kill an opponent with a melee.",
+	"Assassin|Melee an opponent from behind.",
+	"Skewer Stopper|Kill sword carrier on Spree.",
+	"Vigilante|Stop another player's Killing Spree.",
+	"Air Traffic Controller|Blow up a Banshee.",
+	"Decorated Soldier|Get awarded at least 8 medals in non-team game.",
+	"Ninja|In a non-team game, kill 5 people by melee, from behind.",
+	"Flaming Ninja|Kill an opponent that has the Ninja achievement.",
+	"Hired Gun|Kill an opponent who has the Legend achievement."
+};
+
+/* globals */
+
 static DWORD achievementCount = 0;
 static DWORD achievementEnumeratorFlags = 0;
 static DWORD achievementEnumeratorIndex = 0;
 
 HANDLE g_dwFakeAchievementContent = INVALID_HANDLE_VALUE;
 
+/* public code */
 
 // #5278: XUserWriteAchievements
-DWORD WINAPI XUserWriteAchievements(DWORD dwNumAchievements, PXUSER_ACHIEVEMENT pAchievement, PXOVERLAPPED pOverlapped)
+DWORD WINAPI XUserWriteAchievements(
+	DWORD dwNumAchievements,
+	PXUSER_ACHIEVEMENT pAchievement,
+	PXOVERLAPPED pOverlapped)
 {
-	LOG_TRACE_XLIVE("XUserWriteAchievements  (count = {0:#x}, buffer = {1:p}, pOverlapped = {2:p})",
-		dwNumAchievements, (void*)pAchievement, (void*)pOverlapped);
+	LOG_TRACE_XLIVE(
+		"XUserWriteAchievements  (count = {0:#x}, buffer = {1:p}, pOverlapped = {2:p})",
+		dwNumAchievements,
+		(void*)pAchievement,
+		(void*)pOverlapped);
 
 	XUSER_SIGNIN_INFO* signedInUser = XUserGetSignInInfo(pAchievement->dwUserIndex);
 
@@ -28,187 +84,21 @@ DWORD WINAPI XUserWriteAchievements(DWORD dwNumAchievements, PXUSER_ACHIEVEMENT 
 
 			if (g_achievement_list[achievementID] == false)
 			{
-				g_achievement_list[achievementID] = true;
+				g_achievement_list[achievementID] = true;				
 
-				std::string AchievementData;
-
-				switch (achievementID)
+				if (VALID_INDEX(achievementID-1, 41))
 				{
-				case 1:
-					AchievementData.append("Cairo Station|Complete Cairo Station.");
-					break;
-
-				case 2:
-					AchievementData.append("Outskirts|Complete Outskirts.");
-					break;
-
-				case 3:
-					AchievementData.append("Metropolis|Complete Metropolis.");
-					break;
-
-				case 4:
-					AchievementData.append("The Arbiter|Complete The Arbiter.");
-					break;
-
-				case 5:
-					AchievementData.append("Oracle|Complete The Oracle.");
-					break;
-
-				case 6:
-					AchievementData.append("Delta Halo|Complete Delta Halo.");
-					break;
-
-				case 7:
-					AchievementData.append("Regret|Complete Regret.");
-					break;
-
-				case 8:
-					AchievementData.append("Sacred Icon|Complete Sacred Icon.");
-					break;
-
-				case 9:
-					AchievementData.append("Quarantine Zone|Complete Quarantine Zone.");
-					break;
-
-				case 10:
-					AchievementData.append("Gravemind|Complete Gravemind.");
-					break;
-
-				case 11:
-					AchievementData.append("Uprising|Complete Uprising.");
-					break;
-
-				case 12:
-					AchievementData.append("High Charity|Complete High Charity.");
-					break;
-
-				case 13:
-					AchievementData.append("The Great Journey|Complete The Great Journey.");
-					break;
-
-				case 14:
-					AchievementData.append("Warrior|Complete the game on Normal.");
-					break;
-
-				case 15:
-					AchievementData.append("Hero|Complete the game on Heroic.");
-					break;
-
-				case 16:
-					AchievementData.append("Legend|Complete the game on Legendary.");
-					break;
-
-				case 17:
-					AchievementData.append("King of the Scarab|Acquire the Scarab Gun.");
-					break;
-
-				case 18:
-					AchievementData.append("Silent But Deadly|Kill 7 opponents from behind.");
-					break;
-
-				case 19:
-					AchievementData.append("Demon|Complete any level without dying.");
-					break;
-
-				case 20:
-					AchievementData.append("Go Ape Shit|Kill an enraged, berserk Brute by melee.");
-					break;
-
-				case 21:
-					AchievementData.append("Stick It|Stick someone!");
-					break;
-
-				case 22:
-					AchievementData.append("Counterpoint|Kill the sword carrier.");
-					break;
-
-				case 23:
-					AchievementData.append("Carjacking|Steal an occupied vehicle.");
-					break;
-
-				case 24:
-					AchievementData.append("Violent Cartographer|Play every default map.");
-					break;
-
-				case 25:
-					AchievementData.append("Rainman|Play every variant with at least 3 people.");
-					break;
-
-				case 26:
-					AchievementData.append("Double Kill|Kill 2 opponents within 4 seconds.");
-					break;
-
-				case 27:
-					AchievementData.append("Triple Kill|Kill 3 opponents within 4 seconds.");
-					break;
-
-				case 28:
-					AchievementData.append("Killtacular|Kill 4 opponents within 4 seconds.");
-					break;
-
-				case 29:
-					AchievementData.append("Killing Spree|Kill 5 opponents in a row.");
-					break;
-
-				case 30:
-					AchievementData.append("Running Riot|Kill 10 opponents in a row.");
-					break;
-
-				case 31:
-					AchievementData.append("Sniper Kill|Get a sniper kill.");
-					break;
-
-				case 32:
-					AchievementData.append("Roadkill|Run over and kill an opponent.");
-					break;
-
-				case 33:
-					AchievementData.append("Bonecracker|Kill an opponent with a melee.");
-					break;
-
-				case 34:
-					AchievementData.append("Assassin|Melee an opponent from behind.");
-					break;
-
-				case 35:
-					AchievementData.append("Skewer Stopper|Kill sword carrier on Spree.");
-					break;
-
-				case 36:
-					AchievementData.append("Vigilante|Stop another player's Killing Spree.");
-					break;
-
-				case 37:
-					AchievementData.append("Air Traffic Controller|Blow up a Banshee.");
-					break;
-
-				case 38:
-					AchievementData.append("Decorated Soldier|Get awarded at least 8 medals in non-team game.");
-					break;
-
-				case 39:
-					AchievementData.append("Ninja|In a non-team game, kill 5 people by melee, from behind.");
-					break;
-
-				case 40:
-					AchievementData.append("Flaming Ninja|Kill an opponent that has the Ninja achievement.");
-					break;
-
-				case 41:
-					AchievementData.append("Hired Gun|Kill an opponent who has the Legend achievement.");
-					break;
-
-				default:
-					AchievementData.append("Unknown|We're honestly not sure wtf? :");
-					AchievementData.append(std::to_string(achievementID));
-					break;
+					AchievementMap[k_achievement_strings[achievementID - 1]] = false;
 				}
-
-				AchievementMap[AchievementData.c_str()] = false;
+				else
+				{
+					AchievementMap["Unknown"] = false;
+				}
 
 				std::thread(AchievementUnlock, signedInUser->xuid, achievementID, pOverlapped).detach();
 			}
-			else {
+			else
+			{
 				LOG_TRACE_GAME("Achievement {} was already unlocked", achievementID);
 			}
 		}
@@ -227,7 +117,15 @@ DWORD WINAPI XUserWriteAchievements(DWORD dwNumAchievements, PXUSER_ACHIEVEMENT 
 }
 
 // #5280: XUserCreateAchievementEnumerator
-DWORD WINAPI XUserCreateAchievementEnumerator(DWORD dwTitleId, DWORD dwUserIndex, XUID xuid, DWORD dwDetailFlags, DWORD dwStartingIndex, DWORD cItem, PDWORD pchBuffer, PHANDLE phEnum)
+DWORD WINAPI XUserCreateAchievementEnumerator(
+	DWORD dwTitleId,
+	DWORD dwUserIndex,
+	XUID xuid,
+	DWORD dwDetailFlags,
+	DWORD dwStartingIndex, 
+	DWORD cItem,
+	PDWORD pchBuffer,
+	PHANDLE phEnum)
 {
 	LOG_TRACE_XLIVE("XUserCreateAchievementEnumerator (dwStartingIndex = {0}, MaxEnumerator = {1})", dwStartingIndex, cItem);
 
@@ -238,12 +136,16 @@ DWORD WINAPI XUserCreateAchievementEnumerator(DWORD dwTitleId, DWORD dwUserIndex
 	if (pchBuffer) *pchBuffer = cItem * sizeof(XACHIEVEMENT_DETAILS);
 	if (phEnum) *phEnum = g_dwFakeAchievementContent = CreateMutex(NULL, NULL, NULL);
 
-	LOG_TRACE_XLIVE("- Handle = {}, pchBuffer = {}", (void*)g_dwFakeAchievementContent, *pchBuffer);
+	LOG_TRACE_XLIVE("- Handle = {}, pchBuffer = {}", (void*)g_dwFakeAchievementContent, pchBuffer ? *pchBuffer : 0);
 
 	return ERROR_SUCCESS;
 }
 
-int AchievementEnumerator(DWORD cbBuffer, CHAR* pvBuffer, PDWORD pcItemsReturned, XOVERLAPPED* pOverlapped)
+int AchievementEnumerator(
+	DWORD cbBuffer, 
+	CHAR* pvBuffer,
+	PDWORD pcItemsReturned,
+	XOVERLAPPED* pOverlapped)
 {
 	memset(pOverlapped, 0, sizeof(XOVERLAPPED));
 
@@ -278,10 +180,13 @@ int AchievementEnumerator(DWORD cbBuffer, CHAR* pvBuffer, PDWORD pcItemsReturned
 		aaa.dwFlags = achieved == true ? XACHIEVEMENT_DETAILS_ACHIEVED_ONLINE | XACHIEVEMENT_DETAILS_ACHIEVED : 0;
 
 		if (pOverlapped == NULL)
+		{
 			(*pcItemsReturned)++;
-
+		}
 		else
+		{
 			pOverlapped->InternalHigh++;
+		}
 
 		if (pvBuffer)
 		{
@@ -291,7 +196,9 @@ int AchievementEnumerator(DWORD cbBuffer, CHAR* pvBuffer, PDWORD pcItemsReturned
 	}
 
 	if (pOverlapped == NULL)
+	{
 		return ERROR_SUCCESS;
+	}
 	else
 	{
 		pOverlapped->InternalLow = ERROR_SUCCESS;
