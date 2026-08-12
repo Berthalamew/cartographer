@@ -342,7 +342,7 @@ static void tag_fixes_split_screen_hud(void)
 		{
 			for (int32 i = 0; i < hud->bitmap_widgets.count; ++i)
 			{
-				s_hud_bitmap_widget_definition* bitmap_widget = hud->bitmap_widgets[i];
+				s_hud_bitmap_widget_definition* bitmap_widget = TAG_BLOCK_GET_ELEMENT(&hud->bitmap_widgets, i, s_hud_bitmap_widget_definition);
 
 				// this is commented out because ammo clip bitmaps were broken in the port, the bitmaps need to be changed to properly fix them
 				// if the bitmaps aren't redone uncomment out the if statement and they'll be generally fixed.
@@ -367,7 +367,8 @@ static void tag_fixes_split_screen_hud(void)
 		{
 			for (int32 i = 0; i < hud->text_widgets.count; ++i)
 			{
-				s_hud_text_widget_definition* text_widget = hud->text_widgets[i];
+				s_hud_text_widget_definition* text_widget = TAG_BLOCK_GET_ELEMENT(&hud->text_widgets, i, s_hud_text_widget_definition);
+
 				text_widget->screen_offsets[_screen_split_type_half].x *= 2;
 				text_widget->screen_offsets[_screen_split_type_half].y *= 2;
 				text_widget->screen_offsets[_screen_split_type_quarter].x *= 2;
@@ -381,7 +382,8 @@ static void tag_fixes_split_screen_hud(void)
 		{
 			for (int32 i = 0; i < hud->screen_effect_widgets.count; ++i)
 			{
-				s_hud_screen_effect_widget_definition* effect_widget = hud->screen_effect_widgets[i];
+				s_hud_screen_effect_widget_definition* effect_widget = TAG_BLOCK_GET_ELEMENT(&hud->screen_effect_widgets, i, s_hud_screen_effect_widget_definition);
+
 				effect_widget->screen_offsets[_screen_split_type_half].x *= 2;
 				effect_widget->screen_offsets[_screen_split_type_half].y *= 2;
 				effect_widget->screen_offsets[_screen_split_type_quarter].x *= 2;

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "motion_sensor.h"
 
+#include "new_hud.h"
+
 #include "game/game_time.h"
 #include "game/players.h"
 #include "render/render.h"
@@ -139,7 +141,7 @@ void __cdecl motion_sensor_draw_screen(int32 local_render_user_index, int32 unus
 {
 	if (local_render_user_index != NONE)
 	{
-		switch (get_screen_split_type(local_render_user_index))
+		switch (new_hud_get_screen_split_type(local_render_user_index))
 		{
 		case _screen_split_type_half:
 		case _screen_split_type_quarter:

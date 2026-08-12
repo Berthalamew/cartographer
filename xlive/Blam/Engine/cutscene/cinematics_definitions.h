@@ -1,7 +1,6 @@
 #pragma once
 #include "math/color_math.h"
 #include "math/integer_math.h"
-#include "text/text.h"
 
 /* structures */
 
@@ -11,8 +10,8 @@ struct s_scenario_cutscene_title
 	string_id name;
 	rectangle2d text_bounds_on_screen;
 
-	e_text_justification justification;
-	e_text_font font;
+	int16 justification;	// e_text_justification
+	int16 font;				// e_text_font
 	pixel32 text_color;
 	pixel32 shadow_color;
 	real32 fade_in_time_seconds;

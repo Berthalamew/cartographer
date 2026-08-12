@@ -5,14 +5,13 @@
 #include "main.h"
 #include "main_screenshot.h"
 
-#include "camera/camera.h"
 #include "game/game.h"
 #include "game/game_time.h"
-#include "game/player_control.h"
 #include "rasterizer/rasterizer_globals.h"
 #include "rasterizer/rasterizer_text.h"
 #include "text/draw_string.h"
 #include "text/font_group.h"
+#include "render/render.h"
 #include "shell/shell.h"
 #include "shell/shell_windows.h"
 

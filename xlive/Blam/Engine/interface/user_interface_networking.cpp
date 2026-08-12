@@ -11,11 +11,9 @@
 #include "main/main_game.h"
 #include "networking/logic/life_cycle/life_cycle_handler_joining.h"
 #include "networking/logic/life_cycle_manager.h"
-#include "networking/logic/network_life_cycle.h"
 #include "networking/logic/network_session_interface.h"
 #include "networking/online/online_account_xbox.h"
 #include "networking/session/network_session.h"
-#include "networking/network_globals.h"
 
 /* globals */
 

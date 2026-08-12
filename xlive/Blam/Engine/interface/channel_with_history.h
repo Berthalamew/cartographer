@@ -26,18 +26,16 @@ public:
 
 	// c_channel_with_history virtual functions
 
-	virtual ~c_channel_with_history();
-	virtual void dispose_screens() override;
+	virtual ~c_channel_with_history(void);
+	virtual void dispose_screens(void) override;
 	virtual void register_incoming_screen(c_screen_widget* new_screen, c_screen_parameters* parameters) override;
-	virtual void  retreat_one_step() override;
-	virtual void construct_parameters_from_active_screen() override;
-	virtual void  load_screen_from_incoming_parameters() override;
+	virtual void  retreat_one_step(void) override;
+	virtual void construct_parameters_from_active_screen(void) override;
+	virtual void  load_screen_from_incoming_parameters(void) override;
 
 	// c_channel_with_history addons
 
 	virtual void retreat_steps(int16 number_of_steps);
 	virtual void try_retreat_to_menu(e_user_interface_screen_id menu_id);
-
-
 };
 ASSERT_STRUCT_SIZE(c_channel_with_history, 0x44);

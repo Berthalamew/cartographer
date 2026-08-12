@@ -19,7 +19,6 @@ enum
 
 /* enums */
 
-// Note : this should be used instead of the one inside tag definitions
 enum e_user_interface_screen_id
 {
 	_screen_test_1 = 0,

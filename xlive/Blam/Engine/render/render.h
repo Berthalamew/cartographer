@@ -1,7 +1,6 @@
 #pragma once
 
 #include "render_cameras.h"
-#include "render_layers.h"
 #include "render_visibility_collection.h"
 
 #include "input/controllers.h"
@@ -15,14 +14,6 @@ enum e_display_split_type : uint32
 	_display_split_type_none = 0,
 	_display_split_type_horizontal = 1,
 	_display_split_type_vertical = 2
-};
-
-enum e_screen_split_type : uint8
-{
-	_screen_split_type_full = 0,
-	_screen_split_type_half = 1,
-	_screen_split_type_quarter = 2,
-	k_split_screen_type_count
 };
 
 enum e_frame_type
@@ -158,7 +149,7 @@ uint32* global_effect_flag_get(void);
 // ### TODO: better function name
 bool frame_parameters_type_is_above_or_equal_to_7(void);
 
-void render_scene_geometry(e_collection_type collection_type, e_render_layer render_layer);
+void render_scene_geometry(e_collection_type collection_type, enum e_render_layer render_layer);
 
 // CLIENT ONLY
 // Get cluster index and leaf index from render position provided
@@ -166,8 +157,6 @@ void render_scene_geometry(e_collection_type collection_type, e_render_layer ren
 bool __cdecl render_structure_find_camera(real_point3d* point, int32* out_cluster_index, int32* out_leaf_index);
 
 void __cdecl render_light_suppressor_enable(void);
-
-e_screen_split_type get_screen_split_type(int32 render_user_index);
 
 void render_frame_present(struct bitmap_data* bitmap);
 

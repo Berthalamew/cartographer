@@ -1,18 +1,35 @@
 #pragma once
-#include "new_hud_definitions.h"
-
 #include "game/game_engine_territories.h"
 #include "math/color_math.h"
 
 /* enums */
 
-enum e_model_group_targets_flags : __int32
+enum e_model_group_targets_flags
 {
 	e_model_group_targets_flags_locked_by_human_tracking = 0x1,
 	e_model_group_targets_flags_locked_by_plasma_tracking = 0x2,
 	e_model_group_targets_flags_headshot = 0x4,
 	e_model_group_targets_flags_vulnerable = 0x8,
 	e_model_group_targets_flags_alwas_locked_by_plasma_tracking = 0x10,
+};
+
+enum e_screen_split_type
+{
+	_screen_split_type_full = 0,
+	_screen_split_type_half,
+	_screen_split_type_quarter,
+	k_split_screen_type_count
+};
+
+enum e_hud_anchor : int16
+{
+	_hud_anchor_health_and_shield = 0,
+	_hud_anchor_weapon_hud,
+	_hud_anchor_motion_sensor,
+	_hud_anchor_scoreboard,
+	_hud_anchor_crosshair,
+	_hud_anchor_lockon_target,
+	k_hud_anchor_count,
 };
 
 /* structures */
@@ -85,6 +102,8 @@ ASSERT_STRUCT_SIZE(s_new_hud_temporary_user_state, 0x288);
 /* public code */
 
 void new_hud_apply_patches(void);
+
+e_screen_split_type new_hud_get_screen_split_type(int32 render_user_index);
 
 void should_draw_hud_override_set(bool flag);
 s_new_hud_globals_player_info* __cdecl new_hud_engine_globals_get_player_data(int32 local_player_index);

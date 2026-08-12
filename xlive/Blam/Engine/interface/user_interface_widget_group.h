@@ -1,5 +1,4 @@
 #pragma once
-#include "tag_files/tag_groups.h"
 #include "tag_files/tag_reference.h"
 
 struct s_user_interface_tag_globals

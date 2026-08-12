@@ -85,19 +85,19 @@ enum
  *  the function should load/create all necessary data required to create the custom representation (fp, body, biped, variant, etc)
  *	then add the function into the k_game_globals_custom_representation_function_table constant
  */
-enum e_character_type : int8
+enum e_character_type
 {
 	_character_type_masterchief = 0,
-	_character_type_dervish = 1,
-	_character_type_spartan = 2,
-	_character_type_elite = 3,
+	_character_type_dervish,
+	_character_type_spartan,
+	_character_type_elite,
 
 	k_player_character_type_count_original,	// Original count of characters that shipped with the game
 
 	// cartographer added characters
 	_character_type_skeleton = 4,
-	_character_type_flood = 5,
-	_character_type_lmao = 6,
+	_character_type_flood,
+	_character_type_lmao,
 	k_player_character_type_count,
 
 	k_cartographer_custom_representation_count = k_player_character_type_count - k_player_character_type_count_original
@@ -105,7 +105,7 @@ enum e_character_type : int8
 
 enum e_player_color_index
 {
-	_player_color_white,
+	_player_color_white = 0,
 	_player_color_steel,
 	_player_color_red,
 	_player_color_orange,
@@ -132,18 +132,19 @@ enum e_player_color_index
 enum e_campaign_difficulty_level
 {
 	_campaign_difficulty_level_easy = 0,
-	_campaign_difficulty_level_normal = 1,
-	_campaign_difficulty_level_hard = 2,
-	_campaign_difficulty_level_impossible = 3,
+	_campaign_difficulty_level_normal,
+	_campaign_difficulty_level_hard,
+	_campaign_difficulty_level_impossible,
 	k_campaign_difficulty_levels_count,
 
 	k_campaign_difficulty_level_bits = 2,
 	k_campaign_difficulty_level_none = NONE,
 };
 
-enum e_game_globals_rasterizer_flags : int16
+enum e_game_globals_rasterizer_flags 
 {
-	_game_globals_rasterizer_flag_tint_edge_density = FLAG(0)
+	_game_globals_rasterizer_flag_tint_edge_density_bit = 0,
+	k_game_globals_rasterizer_flag_count
 };
 
 /* structures */
@@ -368,7 +369,7 @@ struct s_game_globals_rasterizer_data
 
 	// Explaination("active camouflage", "")
 
-	e_game_globals_rasterizer_flags flags;
+	int16 flags;					// e_game_globals_rasterizer_flags 
 	int16 pad2;
 	real32 refraction_amount_pixels;
 	real32 distance_falloff;

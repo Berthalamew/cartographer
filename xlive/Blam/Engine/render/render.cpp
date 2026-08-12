@@ -4,6 +4,7 @@
 #include "render_contrails.h"
 #include "render_debug.h"
 #include "render_first_person.h"
+#include "render_layers.h"
 #include "render_lights.h"
 #include "render_primitive.h"
 #include "render_sky.h"
@@ -218,23 +219,6 @@ void __cdecl render_light_suppressor_enable(void)
 	*render_light_suppressor_enabled_get() = !H2Config_light_suppressor_disable;
 
 	return;
-}
-
-e_screen_split_type get_screen_split_type(int32 render_user_index)
-{
-	switch(get_global_render_window_count())
-	{
-		case 2:
-			return _screen_split_type_half;
-		case 3:
-			if (render_user_index == 0)
-				return _screen_split_type_half; 
-			return _screen_split_type_quarter;
-		case 4:
-			return _screen_split_type_quarter;
-		default:
-			return _screen_split_type_full;
-	}
 }
 
 bool frame_parameters_type_is_above_or_equal_to_7(void)

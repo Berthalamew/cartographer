@@ -6,7 +6,7 @@
 
 #include "main/main_screenshot.h"
 #include "rasterizer/rasterizer_globals.h"
-
+#include "render/render.h"
 
 /* constants */
 
@@ -25,21 +25,21 @@ typedef void(__cdecl* rasterizer_dx9_get_render_target_surface_t)(e_rasterizer_t
 
 /* globals */
 
-rasterizer_dx9_set_target_t p_rasterizer_dx9_set_target;
-rasterizer_dx9_set_target_as_texture_t p_rasterizer_dx9_set_target_as_texture;
-rasterizer_dx9_set_render_target_internal_t p_rasterizer_dx9_set_render_target_internal;
+static rasterizer_dx9_set_target_t p_rasterizer_dx9_set_target;
+static rasterizer_dx9_set_target_as_texture_t p_rasterizer_dx9_set_target_as_texture;
+static rasterizer_dx9_set_render_target_internal_t p_rasterizer_dx9_set_render_target_internal;
 
-rasterizer_dx9_init_t p_rasterizer_dx9_primary_targets_initialize;
-rasterizer_dx9_init_t p_rasterizer_dx9_secondary_targets_initialize;
-rasterizer_dx9_dispose_t p_rasterizer_dx9_primary_targets_dispose;
-rasterizer_dx9_dispose_t p_rasterizer_dx9_secondary_targets_dispose;
-rasterizer_dx9_get_render_target_surface_t p_rasterizer_dx9_get_render_target_surface;
+static rasterizer_dx9_init_t p_rasterizer_dx9_primary_targets_initialize;
+static rasterizer_dx9_init_t p_rasterizer_dx9_secondary_targets_initialize;
+static rasterizer_dx9_dispose_t p_rasterizer_dx9_primary_targets_dispose;
+static rasterizer_dx9_dispose_t p_rasterizer_dx9_secondary_targets_dispose;
+static rasterizer_dx9_get_render_target_surface_t p_rasterizer_dx9_get_render_target_surface;
 
-IDirect3DTexture9* g_d3d_texture_render_z_as_target_z = NULL;
+static IDirect3DTexture9* g_d3d_texture_render_z_as_target_z = NULL;
 
-real32 g_sun_size = 0.2f;
+static real32 g_sun_size = 0.2f;
 
-bool g_d3d_target_use_depth = false;
+static bool g_d3d_target_use_depth = false;
 bool g_dx9_dont_draw_to_depth_target_if_mrt_is_used = false;
 
 /* prototypes */

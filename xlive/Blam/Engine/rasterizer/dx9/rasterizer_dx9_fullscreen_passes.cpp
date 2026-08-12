@@ -7,12 +7,13 @@
 #include "rasterizer_dx9_screen_effect.h"
 #include "rasterizer_dx9_shader_submit.h"
 
-#include "rasterizer/rasterizer_globals.h"
 #include "main/main_screenshot.h"
+#include "rasterizer/rasterizer_globals.h"
+#include "render/render.h"
 
 /* prototypes */
 
-real32 rasterizer_dx9_fullscreen_effect_calculate_position_z(real32 z_far, int32 a2);
+static real32 rasterizer_dx9_fullscreen_effect_calculate_position_z(real32 z_far, int32 a2);
 
 /* public code */
 
@@ -273,7 +274,9 @@ bool __cdecl rasterizer_fullscreen_effects_build_vertex_buffer_color_ctx_cb(
 
 /* private code */
 
-real32 rasterizer_dx9_fullscreen_effect_calculate_position_z(real32 z_far, int32 a2)
+static real32 rasterizer_dx9_fullscreen_effect_calculate_position_z(
+	real32 z_far,
+	int32 a2)
 {
 	const s_rasterizer_globals* rasterizer_globals = rasterizer_globals_get();
 

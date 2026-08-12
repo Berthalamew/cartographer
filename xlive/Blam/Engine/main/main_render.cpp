@@ -3,12 +3,14 @@
 
 #include "main_screenshot.h"
 
+#include "camera/observer.h"
 #include "cutscene/cinematics.h"
 #include "game/player_mapping.h"
 #include "game/players.h"
 #include "rasterizer/dx9/rasterizer_dx9_main.h"
 #include "rasterizer/dx9/rasterizer_dx9_errors.h"
 #include "rasterizer/rasterizer_main.h"
+#include "render/render.h"
 #include "render/render_cartographer_ingame_ui.h"
 
 #include "H2MOD/Modules/Shell/Config.h"
