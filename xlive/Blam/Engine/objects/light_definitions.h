@@ -1,5 +1,4 @@
 #pragma once
-#include "math/color_math.h"
 
 enum e_light_definition_flags : uint32
 {

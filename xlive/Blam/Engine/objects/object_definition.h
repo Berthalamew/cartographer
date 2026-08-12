@@ -2,7 +2,6 @@
 #include "tag_files/tag_block.h"
 
 #include "cache/predicted_resources.h"
-#include "math/color_math.h"
 #include "math/function_definitions.h"
 
 

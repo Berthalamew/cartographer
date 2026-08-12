@@ -22,7 +22,6 @@
 #include "interface/hud.h"
 #include "interface/terminal.h"
 #include "interface/user_interface.h"
-#include "math/color_math.h"
 #include "main/main_time.h"
 #include "objects/lights.h"
 #include "rasterizer/dx9/rasterizer_dx9.h"

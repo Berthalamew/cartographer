@@ -1,7 +1,6 @@
 #pragma once
 #include "bitmaps/bitmap_types.h"
 #include "cseries/language.h"
-#include "math/color_math.h"
 #include "text/text_group.h"
 
 /* constants */

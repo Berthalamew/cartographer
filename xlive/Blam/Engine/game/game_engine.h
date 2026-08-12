@@ -4,7 +4,6 @@
 #include "player_constants.h"
 
 #include "main/game_preferences.h"
-#include "math/color_math.h"
 #include "saved_games/game_variant.h"
 #include "tag_files/tag_block.h"
 

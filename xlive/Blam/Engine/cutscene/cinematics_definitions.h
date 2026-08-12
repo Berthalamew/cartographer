@@ -1,5 +1,4 @@
 #pragma once
-#include "math/color_math.h"
 #include "math/integer_math.h"
 
 /* structures */

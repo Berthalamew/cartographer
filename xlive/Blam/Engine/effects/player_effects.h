@@ -1,7 +1,6 @@
 #pragma once
 #include "camera/observer.h"
 #include "game/player_constants.h"
-#include "math/color_math.h"
 #include "math/periodic_functions.h"
 
 enum e_player_effect_user_global_flags : uint8

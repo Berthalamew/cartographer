@@ -92,7 +92,7 @@
 #include "cseries/cseries_system_memory.h"
 #include "cseries/cseries_windows.h"
 
-
+#include "math/color_math.h"
 #include "math/crypto_windows.h"
 #include "math/integer_math.h"
 #include "math/real_math.h"

@@ -2,7 +2,6 @@
 #include "shader_definitions.h"
 #include "shader_postprocess_definitions.h"
 
-#include "math/color_math.h"
 #include "tag_files/tag_block.h"
 
 /* constants */

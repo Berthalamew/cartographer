@@ -1,7 +1,6 @@
 #pragma once
 #include "rasterizer_globals.h"
 
-#include "math/color_math.h"
 
 /* structures */
 

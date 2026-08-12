@@ -2,7 +2,6 @@
 #include "shader_postprocess_definitions.h"
 
 #include "cache/predicted_resources.h"
-#include "math/color_math.h"
 #include "math/function_definitions.h"
 
 #define k_number_of_shader_animation_property_types 14

@@ -1,5 +1,4 @@
 #pragma once
-#include "math/color_math.h"
 #include "memory/hashtable.h"
 #include "rasterizer/rasterizer_vertex_shader_definitions.h"
 
