@@ -3,6 +3,7 @@
 
 #include "cseries/cseries_system_memory.h"
 #include "game/game_globals.h"
+#include "main/game_preferences.h"
 #include "memory/data.h"
 #include "networking/network_event.h"
 #include "scenario/scenario.h"

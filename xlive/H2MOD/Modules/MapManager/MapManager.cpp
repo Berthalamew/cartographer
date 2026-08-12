@@ -4,8 +4,8 @@
 #include "H2MOD/Modules/OnScreenDebug/OnscreenDebug.h"
 
 #include "cartographer/config/endpoints.h"
+#include "cseries/language.h"
 #include "main/map_repository.h"
-#include "main/game_preferences.h"
 #include "networking/network_event.h"
 #include "networking/logic/life_cycle_manager.h"
 #include "networking/messages/network_messages_cartographer.h"
@@ -297,7 +297,7 @@ void MapManager::ReloadAllMaps() {
 }
 
 bool MapManager::GetMapFilename(std::wstring& buffer) {
-	wchar_t map_file_location[256];
+	wchar_t map_file_location[k_maximum_filename_length];
 	c_network_session* session = NULL;
 
 	// we want this to work in-game too

@@ -2,7 +2,10 @@
 
 /* constants */
 
-#define MAXIMUM_EDITOR_COMMENTS 65536
+enum
+{
+	MAXIMUM_EDITOR_COMMENTS = 65536
+};
 
 /* enums */
 

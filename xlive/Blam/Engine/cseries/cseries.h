@@ -1,5 +1,4 @@
 #pragma once
-#include "language.h"
 
 /* constants */
 
@@ -298,7 +297,7 @@ char* csstrtok(char* s, const char* delimiters, bool skip_multiple_delimiters, s
 
 char* strchr(char* str, int32 ch);
 
-char const* get_language_display_name(e_language language);
+char const* get_language_display_name(enum e_language language);
 
 /* used for stubs, otherwise DO NOT USE */
 void cseries_stub_internal(...);

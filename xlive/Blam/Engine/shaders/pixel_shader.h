@@ -4,10 +4,13 @@
 
 /* constants */
 
-#define k_number_of_pixel_shader_fragments k_kilo
-#define k_number_of_pixel_shader_combiners k_kilo
-#define k_number_of_pixel_shader_permutations k_kilo
-#define k_number_of_pixel_shader_constants k_kilo
+enum
+{
+	k_number_of_pixel_shader_fragments = k_kilo,
+	k_number_of_pixel_shader_combiners = k_kilo,
+	k_number_of_pixel_shader_permutations = k_kilo,
+	k_number_of_pixel_shader_constants = k_kilo,
+};
 
 /* enums */
 
@@ -29,6 +32,13 @@ enum e_ps_parameter_type : int8
 };
 
 /* structures */
+
+struct s_tag_block_index
+{
+	uint16 start_index : 10;
+	uint16 count : 6;
+};
+ASSERT_STRUCT_SIZE(s_tag_block_index, 2);
 
 // max count: 32
 struct s_pixel_shader_constant_defaults
