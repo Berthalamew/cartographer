@@ -172,17 +172,6 @@ struct s_game_globals_collision_damage
 ASSERT_STRUCT_SIZE(s_game_globals_collision_damage, 72);
 
 // max count: 1
-struct s_sound_globals_definition
-{
-	tag_reference sound_classes;                    // sncl
-	tag_reference sound_effects;                    // sfx+
-	tag_reference sound_mix;                        // snmx
-	tag_reference sound_combat_dialogue_constants;  // spk!
-	datum sound_gesalt;                             // ugh!
-};
-ASSERT_STRUCT_SIZE(s_sound_globals_definition, 36);
-
-// max count: 1
 struct s_ai_globals_gravemind_definition
 {
 	real32 min_retreat_time_secs;
@@ -396,33 +385,6 @@ struct s_game_globals_tag_reference
 	tag_reference reference;
 };
 ASSERT_STRUCT_SIZE(s_game_globals_tag_reference, 8);
-
-// max count: 1
-struct s_game_globals_multiplayer_information
-{
-	tag_reference flag;         // item
-	tag_reference unit;         // unit
-	
-	// max count: 20
-	s_tag_block vehicles;		// s_game_globals_tag_reference   
-
-	tag_reference hill_shader;  // shad
-	tag_reference flag_shader;  // shad
-	tag_reference ball;         // item
-	
-	// max count: 60
-	s_tag_block sounds;			// s_game_globals_tag_reference     
-
-	tag_reference in_game_text; // unic
-	int32 pad[10];
-	s_tag_block general_events;	// struct: s_multiplayer_event_response_definition
-	s_tag_block slayer_events;	// struct: s_multiplayer_event_response_definition
-	s_tag_block ctf_events;		// struct: s_multiplayer_event_response_definition
-	s_tag_block oddball_events;	// struct: s_multiplayer_event_response_definition
-	s_tag_block unk_block;
-	s_tag_block king_events;	// struct: s_multiplayer_event_response_definition
-};
-ASSERT_STRUCT_SIZE(s_game_globals_multiplayer_information, 152);
 
 // max count: 1
 struct s_game_globals_player_information

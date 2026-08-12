@@ -2152,6 +2152,8 @@
     <ClInclude Include="Blam\Engine\memory\ring_buffer.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_update.h" />
     <ClInclude Include="Blam\Engine\game\player_training.h" />
+    <ClInclude Include="Blam\Engine\game\multiplayer_definitions.h" />
+    <ClInclude Include="Blam\Engine\interface\user_interface_errors.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resources\Resource.rc" />

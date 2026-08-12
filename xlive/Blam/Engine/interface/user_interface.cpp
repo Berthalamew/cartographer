@@ -7,6 +7,7 @@
 #include "gameshell_channel.h"
 #include "hardware_error_dialog_channel.h"
 #include "user_interface_channel.h"
+#include "user_interface_errors.h"
 #include "user_interface_main_menu_music.h"
 #include "user_interface_text_chat_receiver.h"
 #include "user_interface_text_chat_sender.h"

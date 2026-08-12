@@ -1,7 +1,11 @@
 #include "stdafx.h"
 #include "particle_emitter.h"
 
+#include "particle_system.h"
+#include "particle_system_definition.h"
+
 #include "camera/camera.h"
+#include "math/matrix_math.h"
 #include "render/render_cameras.h"
 
 data_array* get_particle_emitter_table()

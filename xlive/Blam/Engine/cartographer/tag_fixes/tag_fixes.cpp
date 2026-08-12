@@ -10,6 +10,7 @@
 #include "scenario/scenario_definitions.h"
 #include "shaders/shader_definitions.h"
 #include "sound/sound_classes.h"
+#include "sound/sound_definitions.h"
 #include "structures/structure_bsp_definitions.h"
 #include "tag_files/tag_loader/tag_injection.h"
 #include "units/biped_definitions.h"

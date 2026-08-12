@@ -1,8 +1,5 @@
 #pragma once
 
-#include "particle_system_definition.h"
-#include "memory/data.h"
-
 #define k_max_particle_systems 128
 
 enum e_particle_system_flags : int16
@@ -58,7 +55,7 @@ public:
 	int32 first_particle_index;
 	pixel32 m_color;
 
-	c_particle_system_definition* get_definition() const;
+	class c_particle_system_definition* get_definition(void) const;
 
 	bool get_ever_pulsed_or_frame_updated(void) const
 	{
@@ -88,7 +85,7 @@ public:
 };
 ASSERT_STRUCT_SIZE(c_particle_system, 0x54);
 
-data_array* get_particle_system_table();
+struct data_array* get_particle_system_table();
 
 void __cdecl particle_system_remove_from_effects_cache(datum effect_index, datum particle_system_index);
 

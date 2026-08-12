@@ -3,6 +3,7 @@
 
 #include "user_interface.h"
 #include "user_interface_controller.h"
+#include "user_interface_errors.h"
 #include "user_interface_guide.h"
 
 #include "game/game.h"

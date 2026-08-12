@@ -2,8 +2,12 @@
 #include "particle.h"
 
 #include "effects.h"
+#include "particle_system_definition.h"
+
+#include "math/matrix_math.h"
 #include "physics/collisions.h"
 
+/* public code */
 
 data_array* get_particle_table()
 {

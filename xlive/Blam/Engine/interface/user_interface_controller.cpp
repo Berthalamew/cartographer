@@ -2,6 +2,7 @@
 #include "user_interface_controller.h"
 
 #include "user_interface.h"
+#include "user_interface_errors.h"
 #include "user_interface_utilities.h"
 #include "user_interface_widget_window.h"
 #include "user_interface_guide.h"

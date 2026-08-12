@@ -7,6 +7,7 @@
 
 #include "game/preferences.h"
 #include "interface/user_interface_controller.h"
+#include "interface/user_interface_errors.h"
 #include "interface/user_interface_memory.h"
 #include "interface/user_interface_widget_text.h"
 #include "interface/user_interface_guide.h"
