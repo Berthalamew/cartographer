@@ -12,6 +12,6 @@ struct recorded_animation_definition
 	byte pad;
 	short length_of_animation_ticks;
 	short pad1[3];
-	data_reference recorded_animation_event_stream; // DataSize: 2097152
+	tag_data recorded_animation_event_stream; // DataSize: 2097152
 };
 ASSERT_STRUCT_SIZE(recorded_animation_definition, 52);

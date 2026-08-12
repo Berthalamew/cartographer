@@ -1,7 +1,13 @@
 #pragma once
-#include "data_reference.h"
 
 /* structures */
+
+struct tag_data
+{
+	int32 size;
+	int32 data;
+};
+ASSERT_STRUCT_SIZE(tag_data, 8);
 
 struct tag_reference
 {
@@ -13,7 +19,7 @@ ASSERT_STRUCT_SIZE(tag_reference, 8);
 /* public code */
 
 inline void* tag_data_get_address(
-	data_reference const* data)
+	tag_data const* data)
 {
 	ASSERT(data);
 

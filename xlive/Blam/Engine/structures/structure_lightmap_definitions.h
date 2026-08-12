@@ -1,7 +1,6 @@
 #pragma once
 #include "objects/object_identifier.h"
 #include "render/render_lights.h"
-#include "tag_files/data_reference.h"
 
 enum
 {
@@ -30,28 +29,28 @@ struct structure_precomputed_lighting_visiblity
 	* alignment_bit: 0
 	****************************************/
 	// DataSize(2664)
-	data_reference projections;
+	tag_data projections;
 	/****************************************
 	* definition_name: visibility_clusters_tag_data_definition
 	* flags: 0
 	* alignment_bit: 0
 	****************************************/
 	// DataSize(3328)
-	data_reference visibility_clusters;
+	tag_data visibility_clusters;
 	/****************************************
 	* definition_name: cluster_remap_table_tag_data_definition
 	* flags: 0
 	* alignment_bit: 0
 	****************************************/
 	// DataSize(512)
-	data_reference cluster_remap_table;
+	tag_data cluster_remap_table;
 	/****************************************
 	* definition_name: visibility_volumes_table_tag_data_definition
 	* flags: 0
 	* alignment_bit: 0
 	****************************************/
 	// DataSize(135168)
-	data_reference visibility_volumes;
+	tag_data visibility_volumes;
 };
 ASSERT_STRUCT_SIZE(structure_precomputed_lighting_visiblity, 40);
 

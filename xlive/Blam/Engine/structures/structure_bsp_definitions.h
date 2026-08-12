@@ -220,7 +220,7 @@ struct structure_cluster
 	* alignment_bit: 16
 	* **************************************/
 	// DataSize(1048576)
-	data_reference collision_mopp_code;
+	tag_data collision_mopp_code;
 };
 ASSERT_STRUCT_SIZE(structure_cluster, 176);
 
@@ -302,7 +302,7 @@ struct structure_bsp
 
 	tag_block<structure_surface_reference> surface_references;
 
-	data_reference cluster_data;
+	tag_data cluster_data;
 	tag_block<cluster_portal> cluster_portals;
 
 	tag_block<s_structure_fog_plane> fog_planes;
@@ -334,7 +334,7 @@ struct structure_bsp
 	* alignment_bit: 0
 	****************************************/
 	// DataSize(131072)
-	data_reference sound_pas_data;
+	tag_data sound_pas_data;
 
 	tag_block<structure_marker> markers;
 	tag_block<structure_runtime_decal> runtime_decals;

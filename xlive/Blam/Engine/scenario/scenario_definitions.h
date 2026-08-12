@@ -1,7 +1,6 @@
 #pragma once
 #include "game/game_allegiance.h"
 #include "math/periodic_functions.h"
-#include "tag_files/data_reference.h"
 
 /* constants */
 
@@ -524,7 +523,7 @@ struct s_here_but_for_the_grace_of_god_go_this_poor_soul
 	* byteswap_proc: 0x00531b20
 	****************************************/
 	// DataSize: 1048576
-	data_reference mopp_code;
+	tag_data mopp_code;
 	s_tag_block environment_object_identifiers;	// struct: c_object_identifier
 
 	int32 pad;
@@ -634,7 +633,7 @@ struct scenario
 	* flags: 4
 	* alignment_bit: 0
 	****************************************/    
-	data_reference editor_scenario_data;                // DataSize: 65536
+	tag_data editor_scenario_data;                // DataSize: 65536
 	
 	s_tag_block comments;					// struct: editor_comment_definition
 	s_tag_block dont_use_me_scenario_environment_object_block;	// struct: scenario_environment_object
@@ -686,8 +685,8 @@ struct scenario
 	s_tag_block ai_recording_references;	// struct: ai_recording_reference_definition
 	s_tag_block ai_conversations;			// struct: ai_conversation
 
-	data_reference script_syntax_data;		// DataSize: 737356
-	data_reference hs_string_constants;		// DataSize: 614400
+	tag_data script_syntax_data;		// DataSize: 737356
+	tag_data hs_string_constants;		// DataSize: 614400
 	s_tag_block hs_scripts;					// struct: hs_script
 	s_tag_block hs_globals;					// struct: hs_global_internal
 	s_tag_block hs_references;				// struct: hs_tag_reference

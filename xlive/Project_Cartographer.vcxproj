@@ -3087,7 +3087,6 @@
     <ClInclude Include="Blam\Engine\structures\structure_lightmap.h" />
     <ClInclude Include="Blam\Engine\structures\structure_lightmap_definitions.h" />
     <ClInclude Include="Blam\Engine\structures\structure_runtime_decals.h" />
-    <ClInclude Include="Blam\Engine\tag_files\data_reference.h" />
     <ClInclude Include="Blam\Engine\tag_files\files.h" />
     <ClInclude Include="Blam\Engine\tag_files\tag_block.h" />
     <ClInclude Include="Blam\Engine\tag_files\tag_files.h" />

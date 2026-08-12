@@ -1,6 +1,5 @@
 #pragma once
 #include "math/color_math.h"
-#include "tag_files/data_reference.h"
 #include "tag_files/tag_block.h"
 
 /* constants */
@@ -50,7 +49,7 @@ struct s_pixel_shader
 	* alignment_bit: 0
 	****************************************/
 	// DataSize(32768)
-	data_reference compiled_shader[3];
+	tag_data compiled_shader[3];
 };
 ASSERT_STRUCT_SIZE(s_pixel_shader, 44)
 

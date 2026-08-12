@@ -1,7 +1,6 @@
 #pragma once
 #include "geometry/geometry_block.h"
 #include "math/function_definitions.h"
-#include "tag_files/data_reference.h"
 #include "tag_files/tag_block.h"
 
 #define k_maximum_promotion_rules_per_sound 9
@@ -86,7 +85,7 @@ struct s_sound_encoded_dialogue_section
 	* alignment_bit: 0
 	****************************************/
 	// DataSize(301989888)
-	data_reference encoded_data;
+	tag_data encoded_data;
 
 	tag_block<s_sound_permutation_dialogue_info> sound_permutation_dialogue_info;
 };
@@ -216,7 +215,7 @@ struct s_sound_effect_definition
 	* alignment_bit: 4
 	****************************************/
 	// DataSize(1024)
-	data_reference hardware_format_data;
+	tag_data hardware_format_data;
 
 	tag_block<s_platform_sound_effect_collection> sound_effect_collection;
 };

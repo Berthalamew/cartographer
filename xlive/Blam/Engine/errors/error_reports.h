@@ -1,6 +1,5 @@
 #pragma once
 #include "math/color_math.h"
-#include "tag_files/data_reference.h"
 #include "tag_files/tag_block.h"
 
 
@@ -84,7 +83,7 @@ ASSERT_STRUCT_SIZE(error_report_quad, 144);
 // max count: MAXIMUM_COMMENTS_PER_ERROR_REPORT
 struct error_report_comment
 {
-	data_reference text;    // Data size: 8192
+	tag_data text;    // Data size: 8192
 	s_error_report_point point;
 	real_argb_color color;
 };
@@ -96,7 +95,7 @@ struct error_reports_block
 	e_error_report_type type;
 	e_error_report_flags flags;
 
-	data_reference text;    // Data size: 8192
+	tag_data text;    // Data size: 8192
 	char source_filename[k_tag_string_length];
 	int32 source_line_number;
 	tag_block<error_report_vertex> vertices;

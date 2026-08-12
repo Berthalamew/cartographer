@@ -1,6 +1,5 @@
 #pragma once
 #include "math/color_math.h"
-#include "tag_files/data_reference.h"
 
 /* enums */
 
@@ -59,6 +58,6 @@ struct meter_definition
 	* byteswap_proc: 0x00560bc0
 	****************************************/
 	// DataSize(65536)
-	data_reference encoded_stencil;
+	tag_data encoded_stencil;
 };
 ASSERT_STRUCT_SIZE(meter_definition, 144);

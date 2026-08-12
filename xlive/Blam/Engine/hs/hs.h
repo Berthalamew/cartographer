@@ -1,5 +1,4 @@
 #pragma once
-#include "tag_files/data_reference.h"
 
 /* constants */
 
@@ -193,7 +192,7 @@ ASSERT_STRUCT_SIZE(hs_tag_reference, 8);
 struct hs_source_file
 {
 	 char name[k_tag_string_length];
-	 data_reference source;		// DataSize: 262144
+	 tag_data source;		// DataSize: 262144
 };
 ASSERT_STRUCT_SIZE(hs_tag_reference, 8);
 

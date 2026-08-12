@@ -1,5 +1,4 @@
 #pragma once
-#include "tag_files/data_reference.h"
 #include "tag_files/tag_block.h"
 
 enum
@@ -282,9 +281,9 @@ struct bitmap_group
 	short color_plate_height_pixels;
 
 	// DataSize(1073741824)
-	data_reference color_plate_data;        // compressed_color_plate_data
+	tag_data color_plate_data;        // compressed_color_plate_data
 	// DataSize(1073741824)
-	data_reference bitmap_pixel_data;       // processed_pixel_data
+	tag_data bitmap_pixel_data;       // processed_pixel_data
 
 	// Explaination("Miscellaneous", "")
 	float blur_filter_size;             // Blurs the bitmap before generating mipmaps.

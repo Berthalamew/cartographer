@@ -6,7 +6,6 @@
 #include "cache/cache_files.h"
 #include "filesys/pc_file_system.h"
 #include "networking/network_event.h"
-#include "tag_files/data_reference.h"
 #include "tag_files/tag_block.h"
 #include "tag_files/tag_loader/tag_injection.h"
 #include "tag_files/tag_loader/tag_injection_define.h"
@@ -136,7 +135,7 @@ void c_xml_definition_loader::clear(void)
 
 tag_reference t_tag_reference;
 datum t_classless_tag_reference;
-data_reference t_data_reference;
+tag_data t_data_reference;
 string_id t_string_id;
 tag_block<> t_tag_block;
 
@@ -161,7 +160,7 @@ void c_xml_definition_loader::initialize_arrays_internal(c_xml_definition_loader
 
 		for (uint32 i = 0; i < definition->get_data_references_count(); i++)
 		{
-			file_seek_and_read(loader->m_file_handle, base_offset + definition->get_data_reference_offset(i), sizeof(data_reference), 1, &t_data_reference);
+			file_seek_and_read(loader->m_file_handle, base_offset + definition->get_data_reference_offset(i), sizeof(tag_data), 1, &t_data_reference);
 			if (t_data_reference.size != 0)
 				loader->m_data_reference_offset_count++;
 		}
@@ -306,7 +305,7 @@ void c_xml_definition_loader::load_tag_data_internal(c_xml_definition_loader* lo
 		{
 			uint32 calc_offset = definition->get_data_reference_offset(i) + definition->get_size() * block_index;
 
-			file_seek_and_read(loader->m_file_handle, file_offset + calc_offset, sizeof(data_reference), 1, &t_data_reference);
+			file_seek_and_read(loader->m_file_handle, file_offset + calc_offset, sizeof(tag_data), 1, &t_data_reference);
 			if (t_data_reference.size != 0)
 			{
 				int8* data_cache = (int8*)malloc(t_data_reference.size);
@@ -399,9 +398,9 @@ void c_xml_definition_loader::calculate_total_data_size(const c_xml_definition_b
 		uint32 calc_offset = base_offset + block_index * definition->get_size();
 		for (uint32 i = 0; i < definition->get_data_references_count(); i++)
 		{
-			data_reference reference;
+			tag_data reference;
 
-			file_seek_and_read(m_file_handle, calc_offset + definition->get_data_reference_offset(i), sizeof(data_reference), 1, &reference);
+			file_seek_and_read(m_file_handle, calc_offset + definition->get_data_reference_offset(i), sizeof(tag_data), 1, &reference);
 			if (reference.size != 0)
 			{
 				m_total_data_size += reference.size;
@@ -506,7 +505,7 @@ void c_xml_definition_loader::copy_tag_data(int8* out_buffer, uint32 base_offset
 	for (uint32 i = 0; i < m_data_reference_offset_count; i++)
 	{
 		s_memory_link* link = &m_data_reference_offsets[i];
-		data_reference* reference = (data_reference*)(out_buffer + link->memory_offset - m_data);
+		tag_data* reference = (tag_data*)(out_buffer + link->memory_offset - m_data);
 		uint32 resolved_offset = ((uint32)link->data - (uint32)m_data);
 		reference->data = (uint32)base_offset + resolved_offset;
 
