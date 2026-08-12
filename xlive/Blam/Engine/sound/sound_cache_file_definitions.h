@@ -3,7 +3,6 @@
 #include "math/function_definitions.h"
 #include "tag_files/data_reference.h"
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_reference.h"
 
 #define k_maximum_promotion_rules_per_sound 9
 #define MAXIMUM_CHUNKS_PER_PERMUTATION 32767

@@ -1,6 +1,15 @@
 #pragma once
 #include "data_reference.h"
 
+/* structures */
+
+struct tag_reference
+{
+	tag_group group;
+	datum index;
+};
+ASSERT_STRUCT_SIZE(tag_reference, 8);
+
 /* public code */
 
 inline void* tag_data_get_address(

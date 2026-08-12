@@ -3102,7 +3102,6 @@
     <ClInclude Include="Blam\Engine\tag_files\tag_loader\xml\xml_agent.h" />
     <ClInclude Include="Blam\Engine\tag_files\tag_loader\xml\xml_definition_block.h" />
     <ClInclude Include="Blam\Engine\tag_files\tag_loader\xml\xml_definition_loader.h" />
-    <ClInclude Include="Blam\Engine\tag_files\tag_reference.h" />
     <ClInclude Include="Blam\Engine\text\draw_string.h" />
     <ClInclude Include="Blam\Engine\text\font_cache.h" />
     <ClInclude Include="Blam\Engine\text\font_group.h" />

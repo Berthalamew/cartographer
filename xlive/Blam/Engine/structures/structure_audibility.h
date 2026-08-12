@@ -1,5 +1,4 @@
 #pragma once
-#include "tag_files/tag_reference.h"
 
 #define k_maximum_cluster_sound_palette_entries_per_structure 64
 #define k_maximum_machine_door_portal_associations 128

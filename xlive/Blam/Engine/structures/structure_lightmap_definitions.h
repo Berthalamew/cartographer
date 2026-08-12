@@ -2,7 +2,6 @@
 #include "objects/object_identifier.h"
 #include "render/render_lights.h"
 #include "tag_files/data_reference.h"
-#include "tag_files/tag_reference.h"
 
 enum
 {

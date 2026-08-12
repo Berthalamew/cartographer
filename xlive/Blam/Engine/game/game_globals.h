@@ -2,7 +2,6 @@
 #include "bitmaps/bitmap_types.h"
 #include "cseries/language.h"
 #include "math/color_math.h"
-#include "tag_files/tag_reference.h"
 #include "text/text_group.h"
 
 /* constants */

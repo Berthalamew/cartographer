@@ -3,7 +3,6 @@
 #include "math/function_definitions.h"
 
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_reference.h"
 
 /* constants */
 #define k_maximum_reflections_per_lens_flare 32

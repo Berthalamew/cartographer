@@ -1,6 +1,5 @@
 #pragma once
 #include "memory/data.h"
-#include "tag_files/tag_reference.h"
 #include "tag_files/tag_block.h"
 
 /* constants */

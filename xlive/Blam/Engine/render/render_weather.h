@@ -2,7 +2,6 @@
 #include "geometry/geometry_block.h"
 #include "math/color_math.h"
 #include "math/real_math.h"
-#include "tag_files/tag_reference.h"
 #include "tag_files/tag_block.h"
 
 /* constants */

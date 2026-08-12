@@ -2,7 +2,6 @@
 #include "new_hud.h"
 
 #include "math/function_definitions.h"
-#include "tag_files/tag_reference.h"
 #include "text/text.h"
 
 /* constants */

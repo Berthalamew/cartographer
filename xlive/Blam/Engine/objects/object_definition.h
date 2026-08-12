@@ -1,6 +1,5 @@
 #pragma once
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_reference.h"
 
 #include "cache/predicted_resources.h"
 #include "math/color_math.h"

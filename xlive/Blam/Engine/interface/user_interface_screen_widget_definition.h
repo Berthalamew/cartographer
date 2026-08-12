@@ -3,7 +3,6 @@
 
 #include "math/color_math.h"
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_reference.h"
 
 enum e_screen_widget_flags : int
 {

@@ -3,7 +3,7 @@
 
 /* enums */
 
-enum e_item_flags : uint16
+enum e_item_flags
 {
 	_item_in_unit_inventory_bit,
 	_item_hidden_in_unit_inventory_bit,

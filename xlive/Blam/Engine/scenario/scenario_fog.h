@@ -2,7 +2,6 @@
 #include "math/color_math.h"
 #include "render/render_cameras.h"
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_reference.h"
 
 #define MAXIMUM_ATMOSPHERIC_FOG_PALETTE_ENTRIES_PER_SCENARIO 127
 #define k_maximum_mixers_per_scenario_atmospheric_fog_palette_entry 2

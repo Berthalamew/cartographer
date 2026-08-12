@@ -5,7 +5,6 @@
 #include "particle_definition_interface.h"
 #include "particle_property.h"
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_reference.h"
 #include "shaders/shader_definitions.h"
 #include "shaders/shader_postprocess_definitions.h"
 

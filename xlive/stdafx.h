@@ -102,6 +102,8 @@
 #include "Util/Hooks/Hook.h"
 #include "Util/Memory.h"
 
+#include "tag_files/tag_group_access.h"
+
 #include <contrib/minizip/zip.h>
 
 #include "H2MOD/Modules/h2log/h2log.h"

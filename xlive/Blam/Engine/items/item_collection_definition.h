@@ -1,6 +1,5 @@
 #pragma once
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_reference.h"
 
 // max count: 32
 struct item_permutation_definition

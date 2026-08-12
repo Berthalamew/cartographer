@@ -2,7 +2,6 @@
 #include "animations/animation_channel.h"
 #include "objects/object_definition.h"
 #include "objects/objects.h"
-#include "tag_files/tag_reference.h"
 
 /* enums */
 

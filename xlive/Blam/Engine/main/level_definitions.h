@@ -1,7 +1,6 @@
 #pragma once
 #include "main/game_preferences.h"
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_reference.h"
 
 #define k_maximum_number_of_campaigns 4
 #define k_maximum_number_of_campaign_maps 20
