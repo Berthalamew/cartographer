@@ -125,7 +125,9 @@ void c_simulation_world::simulation_queue_enqueue(s_simulation_queue_element* el
 	}
 }
 
-void c_simulation_world::apply_simulation_queue(const c_simulation_queue* simulation_queue, const struct simulation_update* update)
+void c_simulation_world::apply_simulation_queue(
+	const c_simulation_queue* simulation_queue,
+	struct simulation_update const* update)
 {
 	ASSERT(simulation_queue != NULL);
 
@@ -134,6 +136,9 @@ void c_simulation_world::apply_simulation_queue(const c_simulation_queue* simula
 		const s_simulation_queue_element* element = simulation_queue->get_first_element();
 		int32 update_count = 0;
 		int32 total_size = 0;
+
+		// Added logic so we don't apply player updates if one of them fails
+		bool apply_player_updates = true;
 
 		while (element != NULL)
 		{
@@ -161,7 +166,11 @@ void c_simulation_world::apply_simulation_queue(const c_simulation_queue* simula
 				simulation_queue_player_event_apply(element);
 				break;
 			case _simulation_queue_element_type_player_update_event:
-				simulation_queue_player_update_apply(element);
+				if (apply_player_updates && !simulation_queue_player_update_apply(element))
+				{
+					simulation_fatal_error();
+					apply_player_updates = false;
+				}
 				break;
 			case _simulation_queue_element_type_gamestates_clear:
 				break;

@@ -41,4 +41,4 @@ void simulation_queue_player_event_insert(e_simulation_queue_player_event_type e
 void simulation_queue_player_event_apply(const s_simulation_queue_element* element);
 
 void simulation_queue_player_update_insert(const simulation_player_update* player_update);
-void simulation_queue_player_update_apply(const s_simulation_queue_element* element);
+bool simulation_queue_player_update_apply(const s_simulation_queue_element* element);

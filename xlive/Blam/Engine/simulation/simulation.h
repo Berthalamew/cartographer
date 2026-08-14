@@ -32,6 +32,8 @@ void __cdecl simulation_apply_before_game(const struct simulation_update* update
 
 void simulation_apply_after_game(const struct simulation_update* update);
 
+void simulation_fatal_error(void);
+
 void __cdecl simulation_build_update(struct simulation_update* update);
 
 void __cdecl simulation_update_aftermath(const struct simulation_update* update);

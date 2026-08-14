@@ -10,9 +10,11 @@
 
 #include "cartographer/discord/discord_interface.h"
 #include "game/game.h"
+#include "game/game_time.h"
 #include "game/players.h"
 #include "networking/logic/life_cycle_manager.h"
 #include "networking/session/network_session.h"
+#include "networking/network_event.h"
 #include "objects/objects.h"
 #include "shell/shell.h"
 #include "units/units.h"
@@ -356,6 +358,19 @@ void __cdecl simulation_apply_before_game(const struct simulation_update* update
 void simulation_apply_after_game(const struct simulation_update* update)
 {
 	// This never did anything
+	return;
+}
+
+void simulation_fatal_error(void)
+{
+	s_simulation_globals* simulation_globals = simulation_get_globals();
+
+	ASSERT(simulation_globals->initialized);
+
+	event(_event_error, "simulation:global: fatal error raised at time [%d]", game_time_get());
+
+	simulation_globals->simulation_fatal_error = true;
+
 	return;
 }
 

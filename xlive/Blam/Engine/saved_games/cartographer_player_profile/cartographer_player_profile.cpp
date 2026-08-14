@@ -93,8 +93,8 @@ s_saved_game_cartographer_player_profile* cartographer_player_profile_get_by_con
 s_saved_game_cartographer_player_profile* cartographer_player_profile_get_by_user_index(int32 user_index)
 {
 	int16 player_count = local_player_count();
-	int32 const* user_mapping = player_user_mapping_get();
-	int32 const* controller_mapping = player_controller_mapping_get();
+	datum const* user_mapping = player_user_mapping_get();
+	datum const* controller_mapping = player_controller_mapping_get();
 
 	if ((int16)user_index < player_count)
 	{

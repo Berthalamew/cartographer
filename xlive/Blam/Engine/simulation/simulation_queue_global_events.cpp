@@ -265,13 +265,20 @@ void simulation_queue_player_update_insert(const simulation_player_update* playe
 	return;
 }
 
-void simulation_queue_player_update_apply(const s_simulation_queue_element* element)
+// Function updated to return result if simulation_players_apply_update failed so we can stop applying player updates in the queue if one fails
+// Originally halo 2 stopped applying player updates if one of them failed so we're mimicking the behaviour for now
+// Unsure what the ramifications of this are for the moment when we added halo 3 simulation queue code
+bool simulation_queue_player_update_apply(
+	s_simulation_queue_element const* element)
 {
+	bool result = true;
+
 	simulation_player_update update;
 	csmemset(&update, 0, sizeof(simulation_player_update));
 
 	c_bitstream stream(element->data, element->data_size);
 	stream.begin_reading();
+
 	simulation_player_update_decode(&stream, &update);
 
 	if (stream.error_occurred())
@@ -281,10 +288,12 @@ void simulation_queue_player_update_apply(const s_simulation_queue_element* elem
 	else if (!simulation_players_apply_update(&update))
 	{
 		event(_event_error, "networking:simulation:player_update_apply: failed to apply player update");
+		result = false;
 	}
 
 	stream.finish_reading();
-	return;
+
+	return result;
 }
 
 /* private code */

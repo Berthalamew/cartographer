@@ -253,9 +253,9 @@ void player_user_weapon_interaction_reset(void);
 
 int16 local_player_count(void);
 
-int32* player_user_mapping_get(void);
+datum* player_user_mapping_get(void);
 
-int32* player_controller_mapping_get(void);
+datum* player_controller_mapping_get(void);
 
 void __cdecl players_update_before_game(const struct simulation_update* update);
 

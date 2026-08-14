@@ -611,12 +611,12 @@ int16 local_player_count(void)
 	return get_players_globals()->local_player_count;
 }
 
-int32* player_user_mapping_get(void)
+datum* player_user_mapping_get(void)
 {
 	return get_players_globals()->player_user_mapping;
 }
 
-int32* player_controller_mapping_get(void)
+datum* player_controller_mapping_get(void)
 {
 	return get_players_globals()->player_controller_mapping;
 }
