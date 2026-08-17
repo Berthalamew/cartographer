@@ -1,10 +1,20 @@
 #include "stdafx.h"
 #include "simulation_encoding.h"
 
+#include "simulation.h"
+#include "simulation_players.h"
+#include "simulation_update.h"
+#include "simulation_world.h"
+
 #include "memory/bitstream.h"
-#include "simulation/simulation_update.h"
+#include "networking/network_event.h"
 
 /* constants */
+
+enum
+{
+	k_simulation_update_estimated_size= 6144,
+};
 
 /* enums */
 
@@ -17,12 +27,11 @@ static bool __cdecl player_action_decode(c_bitstream* packet, struct player_acti
 static void __cdecl simulation_machine_update_encode(c_bitstream* packet, struct simulation_machine_update* machine_update);
 static bool __cdecl simulation_machine_update_decode(c_bitstream* packet, struct simulation_machine_update* machine_update);
 
-
-#include "simulation/simulation_players.h"
-
 /* public code */
 
-void __cdecl simulation_player_update_encode(c_bitstream* packet, const simulation_player_update* player_update)
+void __cdecl simulation_player_update_encode(
+	c_bitstream* packet,
+	simulation_player_update const* player_update)
 {
 	ASSERT(packet);
 	ASSERT(player_update);
@@ -32,7 +41,9 @@ void __cdecl simulation_player_update_encode(c_bitstream* packet, const simulati
 	return;
 }
 
-bool __cdecl simulation_player_update_decode(c_bitstream* packet, simulation_player_update* player_update)
+bool __cdecl simulation_player_update_decode(
+	c_bitstream* packet,
+	simulation_player_update* player_update)
 {
 	ASSERT(packet);
 	ASSERT(player_update);
@@ -41,31 +52,28 @@ bool __cdecl simulation_player_update_decode(c_bitstream* packet, simulation_pla
 }
 
 
-void __cdecl synchronous_update_encode(c_bitstream* packet, struct simulation_update* update)
+void __cdecl simulation_update_encode(
+	c_bitstream* packet,
+	struct simulation_update* update)
 {
 	//INVOKE(0x1E0998, 0x0, synchronous_update_encode_internal, packet, update);
+
+	const int32 starting_pos = packet->get_current_bit_position();
 
 	ASSERT(packet);
 	ASSERT(update);
 
 	packet->write_integer("update-number", update->update_number, SIZEOF_BITS(update->update_number));
-	packet->write_bool("simulation_in_progress", update->simulation_in_progress);//adding missing simulation_in_progress
+	packet->write_bool("simulation_in_progress", update->simulation_in_progress);		//adding missing simulation_in_progress
 	packet->write_integer("player-flags", update->player_action_mask, k_maximum_players);
 
-	
-	int8 player_index = 0;
-	player_action* action = update->player_actions;
-	do
+	for (int8 player_index = 0; player_index < k_maximum_players; ++player_index)
 	{
 		if (TEST_BIT(update->player_action_mask, player_index))
 		{
-			player_action_encode(packet, action);
+			player_action_encode(packet, &update->player_actions[player_index]);
 		}
-		++player_index;
-		++action;
-
-	} while (player_index < k_maximum_players);
-
+	}
 
 	// why is unit/actor control data never encoded?????
 	// h3 seems to use it , but h2 does not
@@ -80,28 +88,38 @@ void __cdecl synchronous_update_encode(c_bitstream* packet, struct simulation_up
 	ASSERT(update->player_update_count >= 0 && update->player_update_count <= k_maximum_simulation_player_updates);
 
 
-	if (update->player_update_count > 0)
+	for (int32 update_idx = 0; update_idx<update->player_update_count; ++update_idx)
 	{
-		int32 update_idx = 0;
-		simulation_player_update* player_update = update->player_updates;
-		do
-		{
-			simulation_player_update_encode(packet, player_update);
-			++update_idx;
-			++player_update;
-
-		} while (update_idx < update->player_update_count);
+		simulation_player_update_encode(packet, &update->player_updates[update_idx]);
 	}
+	
 	packet->write_bool("flush-gamestate", update->flush_gamestate);
 	packet->write_integer("verify-game-time", update->verify_game_time, SIZEOF_BITS(update->verify_game_time));
 	packet->write_integer("verify-random", update->verify_random_seed, SIZEOF_BITS(update->verify_random_seed));
 
-	// #todo
-	// c_simulation_queue::encode(simulation_bookkeeping_queue);
-	// c_simulation_queue::encode(game_simulation_queue);
+	const int32 pre_queues_encoded_size = (packet->get_current_bit_position()-starting_pos+ 7) / 8;
+	ASSERT(pre_queues_encoded_size > 0);
+
+	if (pre_queues_encoded_size > k_simulation_update_estimated_size)
+	{
+		event(
+			_event_fatal,
+			"networking:simulation:encoding: encoded simulation update (no queues) exceeding estimate [%d > %d]",
+			pre_queues_encoded_size,
+			k_simulation_update_estimated_size);
+	}
+
+
+	c_simulation_world* simulation_world = simulation_get_world();
+	simulation_world->queue_get(_simulation_queue_bookkeeping)->encode(packet);
+	simulation_world->queue_get(_simulation_queue)->encode(packet);
+
+	return;
 }
 
-bool __cdecl synchronous_update_decode(c_bitstream* packet, struct simulation_update* update)
+bool __cdecl simulation_update_decode(
+	c_bitstream* packet,
+	struct simulation_update* update)
 {
 	//return INVOKE(0x1E0AA2, 0x0, synchronous_update_decode_internal, packet, update);
 
@@ -113,19 +131,14 @@ bool __cdecl synchronous_update_decode(c_bitstream* packet, struct simulation_up
 	update->simulation_in_progress = packet->read_bool("simulation_in_progress"); 	//adding missing simulation_in_progress
 	update->player_action_mask = packet->read_integer("player-flags", k_maximum_players);
 
-	int8 player_index = 0;
-	player_action* action = update->player_actions;
-	do
+	
+	for (int8 player_index = 0; player_index < k_maximum_players; ++player_index)
 	{
 		if (TEST_BIT(update->player_action_mask, player_index))
 		{
-			result = result && player_action_decode(packet, action);
+			result = result && player_action_decode(packet, &update->player_actions[player_index]);
 		}
-		++action;
-		++player_index;
-
-	} while (player_index < k_maximum_players);
-
+	}
 
 	update->machine_update_valid = packet->read_bool("machine-update-exists");
 	if (update->machine_update_valid)
@@ -133,50 +146,42 @@ bool __cdecl synchronous_update_decode(c_bitstream* packet, struct simulation_up
 		result = result && simulation_machine_update_decode(packet, &update->machine_update);
 	}
 
-	int32 player_update_count = packet->read_integer("player-update-count", k_bits_required_for_simulation_player_updates_count);
-	update->player_update_count = player_update_count;
+	update->player_update_count = packet->read_integer("player-update-count", k_bits_required_for_simulation_player_updates_count);
 
-	if (player_update_count < 0 || player_update_count > k_maximum_simulation_player_updates)
+	if (VALID_INDEX(update->player_update_count, k_maximum_simulation_player_updates))
 	{
-		result = false;
+		for (int8 update_index = 0; update_index < update->player_update_count; ++update_index)
+		{
+			result = result && simulation_player_update_decode(packet, &update->player_updates[update_index]);
+		}
 	}
 	else
 	{
-		int32 update_itr = 0;
-		if (player_update_count > 0)
-		{
-			simulation_player_update* player_update = update->player_updates;
-			do
-			{
-				result = result && simulation_player_update_decode(packet, player_update);
-				++update_itr;
-				++player_update;
-
-			} while (update_itr < player_update_count);
-		}
+		result = false;
 	}
+
 	update->flush_gamestate = packet->read_bool("flush-gamestate");
 	update->verify_game_time = packet->read_integer("verify-game-time", SIZEOF_BITS(update->verify_game_time));
 	update->verify_random_seed = packet->read_integer("verify-random", SIZEOF_BITS(update->verify_random_seed));
 
+	c_simulation_world* simulation_world = simulation_get_world();
+	
+	// Validation
+	result = result && simulation_world->queue_get(_simulation_queue_bookkeeping)->decode(packet);
+	result = result && simulation_world->queue_get(_simulation_queue)->decode(packet);
+	result = result && !packet->error_occurred();
+	result = result && update->verify_game_time >= 0;
+	result = result && update->update_number >= 0;
 
-	//#todo
-	//c_simulation_queue::decode(simulation_bookkeeping_queue);
-	//c_simulation_queue::decode(game_simulation_queue);
-
-	result = result && !packet->error_occurred() && update->verify_game_time > 0 && update->update_number > 0;
-
+	// If something went wrong dispose of the queues
 	if (!result)
 	{
-		//#todo
-		//c_simulation_queue::dispose(simulation_bookkeeping_queue);
-		//c_simulation_queue::dispose(game_simulation_queue);
+		simulation_world->queue_get(_simulation_queue_bookkeeping)->dispose();
+		simulation_world->queue_get(_simulation_queue)->dispose();
 	}
 
 	return result;
 }
-
-
 
 /* private code */
 

@@ -193,7 +193,7 @@ void simulation_notify_going_active(void)
 	return;
 }
 
-void simulation_reset_immediate()
+void simulation_reset_immediate(void)
 {
 	s_simulation_globals* simulation_globals = simulation_get_globals();
 
@@ -201,13 +201,30 @@ void simulation_reset_immediate()
 	ASSERT(simulation_globals->world->exists());
 	ASSERT(!simulation_globals->world->is_authority());
 
+	if (simulation_globals->simulation_reset_in_progress)
+	{
+		event(_event_message, "networking:simulation: calling simulation_reset_immediate() with a simulation reset already in progress");
+	}
+
 	simulation_globals->simulation_reset_in_progress = true;
+
+	event(_event_message, "networking:simulation: resetting simulation world");
+
 	simulation_globals->world->reset_world();
-	simulation_queue_game_global_event_insert(_simulation_queue_game_global_event_main_reset_map);
-	// ### TODO figure out these
-	// simulation_gamestate_entities_build_clear_flags();
-	// simulation_queue_gamestates_delete_insert();
-	simulation_queue_game_global_event_insert(_simulation_queue_game_global_event_notify_reset_complete);
+
+	if (simulation_globals->world->runs_simulation())
+	{
+		simulation_queue_game_global_event_insert(_simulation_queue_game_global_event_main_reset_map);
+		// ### TODO figure out these
+		// simulation_gamestate_entities_build_clear_flags();
+		// simulation_queue_gamestates_delete_insert();
+		simulation_queue_game_global_event_insert(_simulation_queue_game_global_event_notify_reset_complete);
+	}
+	else
+	{
+		simulation_globals->simulation_reset_in_progress = false;
+	}
+
 	return;
 }
 
@@ -488,9 +505,8 @@ static void simulation_player_left_game_patch_calls(void)
 
 static void simulation_synchronous_game_patches(void)
 {
-	PatchCall(Memory::GetAddress(0x1AE002), synchronous_update_encode);
-	PatchCall(Memory::GetAddress(0x1ED08E), synchronous_update_encode);
-	PatchCall(Memory::GetAddress(0x1AE084), synchronous_update_decode);
-	PatchCall(Memory::GetAddress(0x1ED0A3), synchronous_update_decode);
-	return;
+	PatchCall(Memory::GetAddress(0x1AE002), simulation_update_encode);
+	PatchCall(Memory::GetAddress(0x1ED08E), simulation_update_encode);
+	PatchCall(Memory::GetAddress(0x1AE084), simulation_update_decode);
+	PatchCall(Memory::GetAddress(0x1ED0A3), simulation_update_decode);
 }

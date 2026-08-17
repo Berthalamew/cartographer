@@ -92,6 +92,11 @@ public:
 		return 8 * m_data_size_bytes - m_current_bit_position;
 	}
 
+	int32 get_current_bit_position(void) const
+	{
+		return m_current_bit_position;
+	}
+
 	int32 get_space_used_in_bits(
 		void) const
 	{
