@@ -10,6 +10,7 @@
 #include "creatures/creature_definitions.h"
 #include "filesys/pc_file_system.h"
 #include "game/game_globals.h"
+#include "main/game_preferences.h"
 #include "models/render_model_definitions.h"
 #include "networking/network_event.h"
 #include "physics/collision_model_definitions.h"

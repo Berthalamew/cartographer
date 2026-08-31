@@ -68,7 +68,7 @@ ASSERT_STRUCT_SIZE(s_player_collection, 0xA44);
 struct c_simulation_player
 {
 	int32 m_player_index;
-	int32 m_player_datum_index;
+	datum m_player_datum_index;
 	e_simulation_player_type m_player_type;
 	s_player_identifier m_player_identifier;
 	s_machine_identifier m_player_machine_identifier;

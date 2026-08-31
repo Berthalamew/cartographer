@@ -1,7 +1,5 @@
 #pragma once
-#include "main/game_preferences.h"
-#include "tag_files/data_reference.h"
-#include "tag_files/tag_block.h"
+#include "cseries/language.h"
 
 /* constants */
 
@@ -29,8 +27,8 @@ ASSERT_STRUCT_SIZE(s_multilingual_unicode_string_reference, 40);
 struct s_multilingual_unicode_string_list_group_header
 {
 	// MAX: k_maximum_multilingual_unicode_strings_per_string_list
-	tag_block<s_multilingual_unicode_string_reference> string_references;
-	data_reference string_data;
+	s_tag_block string_references;		// s_multilingual_unicode_string_reference
+	tag_data string_data;
 	s_unicode_string_list_reference strings[k_language_count];
 };
 ASSERT_STRUCT_SIZE(s_multilingual_unicode_string_list_group_header, 52);
