@@ -109,7 +109,9 @@ bool saved_games_append_file_type_to_path(const wchar_t* in_path, e_saved_game_f
 	return true;
 }
 
-void saved_games_get_display_name(uint32 enumerated_index, wchar_t* display_name)
+void saved_games_get_display_name(
+	uint32 enumerated_index,
+	wchar_t* display_name)
 {
 	ASSERT(display_name);
 

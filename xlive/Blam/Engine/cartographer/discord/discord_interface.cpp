@@ -300,8 +300,8 @@ void discord_interface_set_player_counts(void)
 
 	if (network_life_cycle_in_squad_session(&session))
 	{
-		g_discord_globals.activity.party.size.current_size = session->m_session_membership.player_count;
-		g_discord_globals.activity.party.size.max_size = session->m_session_parameters.max_party_players;
+		g_discord_globals.activity.party.size.current_size = session->get_session_membership(NULL, NULL)->player_count;
+		g_discord_globals.activity.party.size.max_size = session->get_session_parameters()->max_party_players;
 	}
 	else
 	{
@@ -515,23 +515,34 @@ static void discord_rich_presence_update(
 {
 	c_network_session* network_session = NULL;
 
-
 	if (network_life_cycle_in_squad_session(&network_session) &&
-		(network_session->m_session_host_peer_index != NONE &&
-			network_session->m_local_state != _network_session_state_peer_leaving))
+		network_session->host_peer_index() != NONE &&
+		network_session->leaving_session())
 	{
 		bool session_host = network_session->is_host();
 
 		XSESSION_INFO session;
-		const int32 observer_index = network_session->get_session_peer(network_session->m_session_host_peer_index)->observer_channel_index;
+		const int32 observer_index = network_session->get_session_peer(network_session->host_peer_index())->observer_channel_index;
 
 		s_transport_secure_identifier identifier;
-		network_session->get_secure_key(&identifier, &session.keyExchangeKey, NULL, NULL);
+		s_transport_secure_key key;
+		
+
+		network_session->get_secure_key(&identifier, &key, NULL, NULL);
 		session.sessionID = identifier.id;
+		session.keyExchangeKey = key.key;
 
-		session.hostAddress = 
-			(session_host ? network_session->m_session_virtual_couch.xsession_info.hostAddress : network_session->m_network_observer->m_observer_channels[observer_index].xnaddr);
-
+		if (session_host)
+		{
+			session.hostAddress = network_session->get_session_virtual_couch()->xsession_info.hostAddress;
+		}
+		else
+		{ 
+			s_transport_secure_address address;
+			
+			network_session->get_observer()->observer_channel_get_secure_address(network_session->observer_owner(), observer_index, &address);
+			session.hostAddress = address.addr;
+		}
 
 		s_transport_secure_identifier session_id;
 		network_session->get_transport_session_id(&session_id);

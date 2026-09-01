@@ -47,3 +47,24 @@ enum
 	_simulation_device_update_position_group_position_bit,
 	k_simulation_device_update_flag_count,
 };
+
+/* item update flags */
+
+/* projectile update flags */
+
+/* weapon update flags */
+
+/* breakable surface flags */
+
+enum
+{
+	_simulation_breakable_surface_group_update_bit = 0,
+	k_simulation_breakable_surface_group_update_flag_count,
+};
+
+/* vehicle update flags */
+
+enum
+{
+	k_simulation_vehicle_update_flag_count = k_simulation_object_update_flag_count,
+};

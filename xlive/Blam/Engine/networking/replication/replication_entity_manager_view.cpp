@@ -2,6 +2,7 @@
 #include "replication_entity_manager_view.h"
 
 #include "replication_entity.h"
+#include "replication_entity_manager.h"
 
 #include "memory/bitstream.h"
 #include "networking/network_event.h"
@@ -43,7 +44,7 @@ int32 c_replication_entity_manager_view::terminator_required_bits(
 void c_replication_entity_manager_view::write_to_packet(
 	void* request_identifier,
 	int32 request_type,
-	void* telemetry_data,
+	void const* telemetry_data,
 	int32 packet_sequence_number,
 	c_bitstream* packet,
 	int32 must_leave_space_bits)
@@ -150,6 +151,53 @@ void c_replication_entity_manager_view::create_entity(
 	return;
 }
 
+void c_replication_entity_manager_view::set_entity_dirty(
+	int32 entity_index,
+	uint32 update_mask)
+{
+	s_replication_entity_view_data* view_entity = get_entity(entity_index);
+	s_replication_entity_data const* entity = m_entity_manager->get_entity(entity_index);
+
+	if (view_entity->state == 3 && !TEST_BIT(entity->deletion_mask, m_view_index) && view_entity->update_mask==0)
+	{
+		ASSERT(m_statistics.updates_pending <= k_replication_entity_table_length);
+	}
+
+	view_entity->update_mask |= update_mask;
+
+	return;
+}
+
+void c_replication_entity_manager_view::mark_entity_for_deletion(
+	int32 entity_index)
+{
+	INVOKE_TYPE(0x1D2599, 0x0, void(__thiscall*)(c_replication_entity_manager_view*, int32), this, entity_index);
+
+	return;
+}
+
+bool c_replication_entity_manager_view::entity_is_active(
+	int32 entity_index) const
+{
+	int32 absolute_index = ENTITY_INDEX_TO_ABSOLUTE_INDEX(entity_index);
+	bool active = false;
+
+	if (VALID_INDEX(absolute_index, NUMBEROF(m_entity_data)) &&
+		m_entity_data[absolute_index].entity_index == entity_index)
+	{
+		ASSERT(m_entity_manager);
+		ASSERT(TEST_BIT(m_entity_manager->m_entity_data[absolute_index].flags, _replication_entity_allocated_flag));
+		ASSERT(m_entity_manager->m_entity_data[absolute_index].seed==ENTITY_INDEX_TO_SEED(entity_index));
+
+		active =
+			!m_entity_manager->is_entity_local(entity_index) ||
+			m_entity_data[absolute_index].state == 3 &&
+			!m_entity_manager->is_entity_being_deleted(entity_index);
+	}
+
+	return active;
+}
+
 void c_replication_entity_manager_view::stop_replication(
 	void)
 {
@@ -157,4 +205,48 @@ void c_replication_entity_manager_view::stop_replication(
 	m_replicating = false;
 
 	return;
+}
+
+
+/* private code */
+
+/*
+bool c_replication_entity_manager_view::write_creation_to_packet(
+	int32 request_identifier,
+	void const* telemetry_data,
+	class c_bitstream* packet,
+	int32 must_leave_space_bits)
+{
+
+	uint32 update_mask_written;
+	bool write_success;
+	int32 entity_index;
+	s_replication_entity_data const* entity;
+	int32 absolute_index;
+
+	bool wrote_creation = false;
+
+	ASSERT(packet);
+	ASSERT(m_outgoing_packet);
+	ASSERT(absolute_index>=0 && absolute_index<k_replication_entity_table_length);
+
+
+
+	ASSERT(entity_index != NONE);
+	ASSERT(m_entity_data[absolute_index].state==_replication_entity_view_state_ready);
+	ASSERT(entity->deletion_mask==0);
+
+	return wrote_creation;
+}
+*/
+
+s_replication_entity_view_data* c_replication_entity_manager_view::get_entity(int32 entity_index)
+{
+	int32 absolute_index = ENTITY_INDEX_TO_ABSOLUTE_INDEX(entity_index);
+
+	ASSERT(m_entity_data[absolute_index].entity_index==entity_index);
+	ASSERT(TEST_BIT(m_entity_manager->m_entity_data[absolute_index].flags, _replication_entity_allocated_flag));
+	ASSERT(m_entity_manager->m_entity_data[absolute_index].seed == ENTITY_INDEX_TO_SEED(entity_index));
+
+	return &m_entity_data[absolute_index];
 }

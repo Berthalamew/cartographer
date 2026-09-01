@@ -2,6 +2,7 @@
 #include "simulation_players.h"
 
 #include "simulation.h"
+#include "simulation_encoding.h"
 #include "simulation_view.h"
 #include "simulation_world.h"
 
@@ -15,8 +16,8 @@
 
 /* prototypes */
 
-void simulation_player_joined_game_patch_calls(void);
-void simulation_player_left_game_patch_calls(void);
+static void simulation_player_joined_game_patch_calls(void);
+static void simulation_player_left_game_patch_calls(void);
 
 /* public code */
 
@@ -26,27 +27,6 @@ void simulation_players_apply_patches(void)
 	simulation_player_left_game_patch_calls();
 	return;
 }
-
-void simulation_player_collection_clear(
-	s_player_collection* collection)
-{
-	ASSERT(collection);
-
-	csmemset(collection, 0, sizeof(*collection));
-
-	for (int32 player_index = 0; player_index<NUMBEROF(collection->players); ++player_index)
-	{
-		s_player_collection_player* collection_player = &collection->players[player_index];
-
-		collection_player->left_game = false;
-		collection_player->left_game_time = NONE;
-		collection_player->controller_index = k_no_controller;
-		collection_player->user_index = NONE;
-	}
-
-	return;
-}
-
 
 void c_simulation_player::set_active(
 	bool active)
@@ -73,8 +53,7 @@ void c_simulation_player::set_active(
 			}
 		}
 
-		// TODO
-		//ASSERT(m_world->player_is_in_game(m_player_datum_index, &m_player_identifier));
+		ASSERT(m_world->player_is_in_game(m_player_datum_index, &m_player_identifier));
 	}
 
 	m_active = active;
@@ -129,6 +108,26 @@ void c_simulation_player::handle_local_input(
 	return;
 }
 
+void simulation_player_collection_clear(
+	s_player_collection* collection)
+{
+	ASSERT(collection);
+
+	csmemset(collection, 0, sizeof(*collection));
+
+	for (int32 player_index = 0; player_index<NUMBEROF(collection->players); ++player_index)
+	{
+		s_player_collection_player* collection_player = &collection->players[player_index];
+
+		collection_player->left_game = false;
+		collection_player->left_game_time = NONE;
+		collection_player->controller_index = k_no_controller;
+		collection_player->user_index = NONE;
+	}
+
+	return;
+}
+
 bool __cdecl simulation_players_apply_update(simulation_player_update* player_update)
 {
 	return INVOKE(0x1E22E2, 0x1C930E, simulation_players_apply_update, player_update);
@@ -178,16 +177,20 @@ void __cdecl simulation_player_left_game(datum player_index)
 
 /* private code */
 
-void simulation_player_joined_game_patch_calls(void)
+static void simulation_player_joined_game_patch_calls(
+	void)
 {
 	PatchCall(Memory::GetAddress(0x56447, 0x5E93F), simulation_player_joined_game);
 	PatchCall(Memory::GetAddress(0x5647F, 0x5E977), simulation_player_joined_game);
 	PatchCall(Memory::GetAddress(0x57E85, 0x6037D), simulation_player_joined_game);
+	
 	return;
 }
 
-void simulation_player_left_game_patch_calls(void)
+static void simulation_player_left_game_patch_calls(
+	void)
 {
 	PatchCall(Memory::GetAddress(0x5633A, 0x5E832), simulation_player_left_game);
+	
 	return;
 }

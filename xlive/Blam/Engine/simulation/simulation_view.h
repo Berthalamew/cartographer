@@ -1,6 +1,5 @@
 #pragma once
 
-#include "machine_id.h"
 #include "game/game_results.h"
 #include "game/players.h"
 #include "memory/ring_buffer.h"
@@ -144,6 +143,12 @@ public:
 		return
 			m_view_type == _simulation_view_type_distributed_to_remote_authority ||
 			m_view_type == _simulation_view_type_distributed_to_remote_client;
+	}
+
+	class c_simulation_distributed_view* get_distributed_view(
+		void) const
+	{
+		return m_distributed_view;
 	}
 	
 	class c_simulation_world* get_world(

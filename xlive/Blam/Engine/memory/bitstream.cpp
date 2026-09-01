@@ -1,14 +1,30 @@
 #include "stdafx.h"
-
 #include "bitstream.h"
 
 #include "math/real_quantization.h"
 
-void c_bitstream::set_data(uint8* data, int32 data_size)
+/* public code */
+
+void c_bitstream::set_data(
+	uint8* data,
+	int32 data_size)
 {
 	m_data = data;
 	m_data_size_bytes = data_size;
 	reset(_bitstream_state_none);
+
+	return;
+}
+
+void c_bitstream::pop_position(
+	bool reset_to_pushed_state)
+{
+	ASSERT(reading() || writing());
+	ASSERT(m_position_stack_depth>0);
+
+	INVOKE_TYPE(0xD1181, 0x0, void(__thiscall*)(c_bitstream*, bool), this, reset_to_pushed_state);
+
+	return;
 }
 
 void c_bitstream::begin_reading()
@@ -67,6 +83,27 @@ void c_bitstream::reset(e_bitstream_state state)
 	}
 }
 
+void c_bitstream::write_point3d(
+	char const* debug_string,
+	long_point3d const* point,
+	int32 axis_encoding_size_in_bits)
+{
+	ASSERT(axis_encoding_size_in_bits>=0&&axis_encoding_size_in_bits<=SIZEOF_BITS(point->n[0]));
+
+	push_structure(debug_string, NONE, 0);
+
+	for (int32 axis= 0; axis<3; ++axis)
+	{
+		ASSERT(point->n[axis] < (1 << axis_encoding_size_in_bits));
+
+		write_value_internal(point->n[axis], axis_encoding_size_in_bits);
+	}
+
+	pop_structure(debug_string, NONE);
+
+	return;
+}
+
 void c_bitstream::write_string_wchar(const char* name, const void* string, int32 size_in_words)
 {
 	typedef void(__thiscall* write_string_wchar_t)(c_bitstream*, const char*, const void*, int32);
@@ -114,29 +151,41 @@ uint32 c_bitstream::read_value_internal(int32 size_in_bits)
 	return INVOKE_TYPE(0xD167B, 0x0, read_value_internal_t, this, size_in_bits);
 }
 
-void c_bitstream::write_raw_data(const char* name, const void* data, uint32 size_in_bits)
+void c_bitstream::write_bool(
+	char const* debug_string,
+	bool value)
 {
-	typedef void(__thiscall* write_raw_data_t)(c_bitstream*, const char*, const void*, uint32);
-	INVOKE_TYPE(0xD18CD, 0xCDE87, write_raw_data_t, this, name, data, size_in_bits);
+	INVOKE_TYPE(0xD1886, 0xCDE40, void(__thiscall*)(c_bitstream*, char const*, bool), this, debug_string, value);
+
+	return;
 }
 
-void c_bitstream::read_raw_data(const char* name, void* data, int size_in_bits)
+void c_bitstream::write_raw_data(
+	char const* debug_string, 
+	void const* raw_data,
+	int32 size_in_bits)
 {
-	typedef void(__thiscall* read_raw_data_t)(c_bitstream*, const char*, void*, int);
-	INVOKE_TYPE(0xD1F95, 0xCE54F, read_raw_data_t, this, name, data, size_in_bits);
+	INVOKE_TYPE(0xD18CD, 0xCDE87, void(__thiscall*)(c_bitstream*, char const*, void const*, int32), this, debug_string, raw_data, size_in_bits);
+
+	return;
 }
 
-void c_bitstream::write_bool(const char* name, bool value)
-{
-	typedef void(__thiscall* write_bool_t)(c_bitstream*, const char*, bool);
-	INVOKE_TYPE(0xD1886, 0xCDE40, write_bool_t, this, name, value);
-}
-
-bool c_bitstream::read_bool(const char* name)
+bool c_bitstream::read_bool(
+	char const* debug_string)
 {
 	ASSERT(reading());
-	typedef bool(__thiscall* read_bool_t)(c_bitstream*, const char*);
-	return INVOKE_TYPE(0xD1F47, 0xCE501, read_bool_t, this, name);
+
+	return INVOKE_TYPE(0xD1F47, 0xCE501, bool(__thiscall*)(c_bitstream*, char const*), this, debug_string);
+}
+
+void c_bitstream::read_raw_data(
+	char const* debug_string,
+	void* raw_data,
+	int32 size_in_bits)
+{
+	INVOKE_TYPE(0xD1F95, 0xCE54F, void(__thiscall*)(c_bitstream*, char const*, void const*, int32), this, debug_string, raw_data, size_in_bits);
+
+	return;
 }
 
 void c_bitstream::data_decode_address(const char* name, void* address)
@@ -186,10 +235,13 @@ int32 c_bitstream::data_decode_signed_integer(const char* name, uint32 size_in_b
 	return INVOKE_TYPE(0xD1EF2, 0xCE4AC, data_decode_signed_integer_t, this, name, size_in_bits);
 }
 
-void c_bitstream::data_encode_axes(const char* name, real_vector3d* forward, real_vector3d* up)
+void c_bitstream::write_axes(
+	char const* debug_string,
+	real_vector3d const* forward,
+	real_vector3d const* up)
 {
-	typedef void(__thiscall* data_encode_axes_t)(c_bitstream*, const char*, real_vector3d*, real_vector3d*);
-	INVOKE_TYPE(0xD1D41, 0xCE2FB, data_encode_axes_t, this, name, forward, up);
+	typedef void(__thiscall* data_encode_axes_t)(c_bitstream*, const char*, real_vector3d const*, real_vector3d const*);
+	INVOKE_TYPE(0xD1D41, 0xCE2FB, data_encode_axes_t, this, debug_string, forward, up);
 }
 
 void c_bitstream::read_axes(
@@ -202,10 +254,17 @@ void c_bitstream::read_axes(
 	return;
 }
 
-void c_bitstream::data_encode_vector(const char *name, real_vector3d *vector, float min_magnitude_value, float max_magnitude_value, int magnitude_size_in_bits)
+void c_bitstream::write_vector(
+	char const* debug_string,
+	real_vector3d const* value,
+	real32 min_magnitude, 
+	real32 max_magnitude,
+	int32 magnitude_size_in_bits)
 {
-	typedef void(__thiscall* data_encode_vector_t)(c_bitstream*, const char*, real_vector3d*, float , float , int);
-	INVOKE_TYPE(0xD1C4B, 0xCE205, data_encode_vector_t, this, name, vector, min_magnitude_value, max_magnitude_value, magnitude_size_in_bits);
+	typedef void(__thiscall* data_encode_vector_t)(c_bitstream*, char const*, real_vector3d const*, real32, real32, int32);
+	INVOKE_TYPE(0xD1C4B, 0xCE205, data_encode_vector_t, this, debug_string, value, min_magnitude, max_magnitude, magnitude_size_in_bits);
+
+	return;
 }
 
 void c_bitstream::read_vector(
@@ -250,7 +309,8 @@ bool c_bitstream::begin_consistency_check(
 	void)
 {
 	ASSERT(!writing());
-	reset(_bitstream_state_none);
+
+	reset(_bitstream_state_read_only_for_consistency);
 
 	// TODO: ifdef name
 #ifdef NDEBUG
@@ -336,4 +396,15 @@ void bitstream_serialization_apply_patches()
 	// read_axes
 	WriteValue(Memory::GetAddress(0xD2243, 0xCE7FD) + 1, (int8)19);
 	PatchCall(Memory::GetAddress(0xD2252, 0xCE80C), (void*)dequantize_unit_vector3d);
+}
+
+/* private code */
+
+void c_bitstream::write_value_internal(
+	uint32 value,
+	int32 size_in_bits)
+{
+	INVOKE_TYPE(0xD1482, 0x0, void(__thiscall*)(c_bitstream*, uint32, int32), this, value, size_in_bits);
+
+	return;
 }

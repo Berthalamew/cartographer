@@ -21,6 +21,9 @@ enum
 class c_simulation_type_collection
 {
 public:
+	void clear_types(void);
+	void finish_types(int32 entity_type_count, int32 event_type_count);
+
 	c_simulation_entity_definition* get_entity_definition(e_simulation_entity_type type) const;
 	c_simulation_event_definition* get_event_definition(e_simulation_event_type type) const;
 
@@ -28,6 +31,8 @@ public:
 
 	void register_entity_definition(e_simulation_entity_type type, c_simulation_entity_definition* definition);
 	void register_event_definition(e_simulation_event_type type, c_simulation_event_definition* definition);
+
+	char const* get_entity_type_name(e_simulation_entity_type entity_type) const;
 
 	static c_simulation_type_collection* get()
 	{

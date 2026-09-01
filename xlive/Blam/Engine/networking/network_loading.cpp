@@ -25,6 +25,8 @@ void __cdecl network_loading_create_thread(void)
 
 static void __cdecl network_load_update()
 {
-	simulation_update();
+	simulation_update_pregame();
 	network_send();
+
+	return;
 }

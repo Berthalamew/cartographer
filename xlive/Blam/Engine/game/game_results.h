@@ -1,10 +1,10 @@
 #pragma once
 #include "game_allegiance.h"
-#include "player_constants.h"
+#include "players.h"
+
 #include "networking/network_constants.h"
 #include "networking/network_game_definitions.h"
 #include "saved_games/game_variant.h"
-#include "simulation/machine_id.h"
 
 /* constants */
 
@@ -13,6 +13,14 @@ enum
 	k_game_results_event_cooldown = 3,
 	k_game_results_maximum_game_events = 1000
 };
+
+enum
+{
+	_game_results_machine_identifier_bytes = 6,
+	_game_results_machine_user_count = 4,
+	_game_results_machine_bandwidth_event_count = 0x5,
+};
+
 
 /* enums */
 
@@ -165,10 +173,9 @@ ASSERT_STRUCT_SIZE(s_integer_statistic, 2);
 struct s_game_results_player_data
 {
 	bool exists;
-	bool machine_exists;
-	int8 unk_02[2];
-	s_machine_identifier machine;
-	int16 pad;
+	int8 machine_index;
+	int8 pad[2];
+	s_player_identifier identifier;
 	s_player_configuration player_configuration;
 	int16 player_place;
 	int16 score;
@@ -186,9 +193,11 @@ struct s_game_results_player_data_update
 struct s_game_results_team_data
 {
 	bool exists;
-	int8 place;
+	int8 standing;
 	int16 score;
-	int8 pad[20];
+	int16 skill;
+	int32 experience;
+	s_clan_identifier clan;
 };
 ASSERT_STRUCT_SIZE(s_game_results_team_data, 24);
 
@@ -292,9 +301,10 @@ struct s_game_results_machine_data
 {
 	s_machine_identifier machine;
 	bool exists;
-	char pad;
+	bool connected_to_host;
 	bool host;
-	int8 data[2];
+	bool initial_host;
+	bool voluntary_quit;
 };
 ASSERT_STRUCT_SIZE(s_game_results_machine_data, 11);
 
@@ -318,14 +328,18 @@ struct s_game_results_statistics_update
 	s_game_results_team_statistics_update teams[k_maximum_players];
 };
 
+struct s_game_results_machine_bandwidth_event
+{
+	int16 bandwidth_events[5];
+};
+
 struct s_game_results
 {
-	uint8 game_end_reason;
 	bool initialized;
 	bool finalized;
 	bool unreliable;
 	bool is_matchmade_game;
-	int64 random_data;
+	int64 game_instance;
 	s_game_variant game_variant;
 	int32 map_id;
 	wchar_t scenario_path[MAX_PATH];
@@ -339,11 +353,17 @@ struct s_game_results
 	s_game_results_statistics statistics;
 	s_game_results_event game_events[k_game_results_maximum_game_events];
 	s_game_results_machine_data machines[k_network_maximum_machines_per_session];
-	int8 gap_DBC1[168];
+	s_game_results_machine_bandwidth_event machine_bandwidth_events[k_network_maximum_machines_per_session];
 };
 
-class c_game_results : s_game_results
+class c_game_results : public s_game_results
 {
+public:
+	int32 get_machine_index(s_machine_identifier const* machine_identifier) const;
+	int32 get_host_machine_index(void) const;
+	int32 get_local_machine_index(void) const;
+	int32 add_machine(s_machine_identifier const* machine_identifier);
+	bool validate(void) const;
 };
 ASSERT_STRUCT_SIZE(c_game_results, 0xDC68);
 
@@ -377,11 +397,18 @@ ASSERT_STRUCT_SIZE(s_game_results_incremental_update, 20156);
 
 /* prototypes */
 
+void game_results_initialize_for_new_map(void);
+void game_results_dispose_from_old_map(void);
 bool game_results_get_game_finalized(void);
+void game_results_clear(void);
+void game_results_finalize(void);
+void game_results_start_recording(void);
 void game_results_stop_recording(void);
 void game_results_set_recording_pause(bool pause);
 bool game_results_get_game_recording(void);
 bool game_results_get_game_updating(void);
+void __cdecl game_results_notify_player_indices_changed(void);
+void game_results_notify_active_teams_changed(void);
 void game_results_start_updating(void);
 void game_results_stop_updating(void);
 
@@ -395,7 +422,7 @@ int32 game_results_get_finalized_pvp_statistic(int32 player_index, int32 vs_play
 int32 game_results_get_finalized_player_score(int32 player_index);
 int32 game_results_get_finalized_player_place(int32 player_index);
 s_player_configuration* game_results_get_finalized_player_configuration(int32 player_index);
-int8* game_results_get_finalized_player_unknown_02(int32 player_index);
+s_player_identifier* game_results_get_finalized_player_identifier(int32 player_index);
 e_game_team game_results_get_finalized_player_team(int32 player_index);
 void game_results_get_finalized_player_profile_traits(int32 player_index, s_player_appearance* appearance);
 bool game_results_get_player_position(real_point3d* position, int32 player_index);

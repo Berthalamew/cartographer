@@ -11,27 +11,32 @@ void __cdecl saved_game_player_profile_set_default_variant(void* saved_game_vari
 	return;
 }
 
-void saved_game_player_profile_default_new(s_saved_game_player_profile* profile, int32 default_profile_type)
+void saved_game_player_profile_default_new(
+	s_saved_game_player_profile* profile,
+	int32 default_profile_type)
 {
 	s_gamepad_input_preferences input_preferences;
 
 	csmemset(profile, 0, sizeof(s_saved_game_player_profile));
+
 	profile->valid_maybe = true;
-	ustrncpy(profile->name, L"Guest", NUMBEROF(s_saved_game_player_profile::name));
-	profile->appearance.primary_color = _player_color_colbat;
-	profile->appearance.secondary_color = _player_color_white;
-	profile->appearance.tertiary_color = _player_color_white;
-	profile->appearance.quaternary_color = _player_color_white;
+	
+	ustrncpy(profile->name, L"Guest", NUMBEROF(profile->name));
+
+	profile->appearance.change_color_index[0] = _player_color_colbat;
+	profile->appearance.change_color_index[1] = _player_color_white;
+	profile->appearance.change_color_index[2] = _player_color_white;
+	profile->appearance.change_color_index[3] = _player_color_white;
 	profile->appearance.emblem_info.foreground_emblem = _emblem_foreground_seventh_column;
 	profile->appearance.emblem_info.background_emblem = _emblem_background_solid;
-	profile->unk |= 1;
+	SET_BIT(profile->unk, 0, true);
 	profile->input_preferences.controller_sensitivity = 3;
 	profile->input_preferences.mouse_sensitivity = 3;
 	profile->input_preferences.flags.clear();
 
-	if(default_profile_type)
+	if (default_profile_type)
 	{
-		if(default_profile_type == 1)
+		if (default_profile_type == 1)
 		{
 			profile->input_preferences.controller_button_layout = _button_preset_default;
 			profile->input_preferences.controller_thumbstick_layout = _joystick_preset_default;
@@ -44,12 +49,17 @@ void saved_game_player_profile_default_new(s_saved_game_player_profile* profile,
 		profile->input_preferences.controller_button_layout = _button_preset_default;
 		profile->input_preferences.controller_thumbstick_layout = _joystick_preset_default;
 	}
+
 	saved_game_player_profile_set_default_variant(&profile->variant);
 	input_abstraction_get_default_preferences(&input_preferences, _joystick_preset_default, _button_preset_default, _custom_keyboard_preset_right_hold, 0);
 	input_abstraction_set_controller_settings_from_preferences(&input_preferences, &profile->input_preferences);
+
+	return;
 }
 
-bool saved_game_player_profile_read_file(uint32 enumerated_file_index, s_saved_game_player_profile* profile)
+bool saved_game_player_profile_read_file(
+	uint32 enumerated_file_index,
+	s_saved_game_player_profile* profile)
 {
 	ASSERT(profile);
 
@@ -76,11 +86,13 @@ bool __cdecl saved_game_player_profile_read_post_verify_profile_traits(s_player_
 	return INVOKE(0x54f82, 0, saved_game_player_profile_read_post_verify_profile_traits, appearance);
 }
 
-bool saved_game_player_profile_load(uint32 enumerated_file_index, s_saved_game_player_profile* profile)
+bool saved_game_player_profile_load(
+	uint32 enumerated_file_index,
+	s_saved_game_player_profile* profile)
 {
 	ASSERT(profile);
 
-	if(enumerated_file_index == NONE)
+	if (enumerated_file_index == NONE)
 	{
 		saved_game_player_profile_default_new(profile, 0);
 		return true;
@@ -89,18 +101,4 @@ bool saved_game_player_profile_load(uint32 enumerated_file_index, s_saved_game_p
 	{
 		return saved_game_player_profile_read_file(enumerated_file_index, profile);
 	}
-}
-
-void player_profile_traits_initialize(s_player_appearance* appearance)
-{
-	appearance->primary_color = _player_color_white;
-	appearance->secondary_color = _player_color_white;
-	appearance->tertiary_color = _player_color_white;
-	appearance->quaternary_color = _player_color_white;
-	appearance->player_character_type = _character_type_masterchief;
-	appearance->emblem_info.foreground_emblem = _emblem_foreground_seventh_column;
-	appearance->emblem_info.background_emblem = _emblem_background_solid;
-	appearance->emblem_info.emblem_flags.clear();
-	appearance->gap_48 = 0;
-	appearance->gap_4C = 0;
 }

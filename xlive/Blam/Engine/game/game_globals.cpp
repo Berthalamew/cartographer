@@ -18,7 +18,7 @@
 struct s_game_globals_custom_representation_result
 {
 	bool success;
-	e_character_type fallback_character_type;
+	int8 /*e_character_type*/ fallback_character_type;
 	datum third_person_unit;
 	datum first_person_hands;
 	datum first_person_body;
@@ -87,7 +87,8 @@ s_ui_levels_definition* game_globals_get_ui_levels(void)
 	return NULL;
 }
 
-s_game_globals_player_representation* game_globals_get_representation(e_character_type type)
+s_game_globals_player_representation* game_globals_get_representation(
+	e_character_type type)
 {
 	return scenario_get_game_globals()->player_representation[type];
 }
@@ -242,7 +243,7 @@ static void add_new_representations(s_game_globals_custom_representation_result*
 	for (uint32 index = 0; index < k_cartographer_custom_representation_count; index++)
 	{
 		const s_game_globals_custom_representation_result* representation_result = &representations[index];
-		const e_character_type fallback_character = representation_result->fallback_character_type;
+		const e_character_type fallback_character = (e_character_type)representation_result->fallback_character_type;
 
 		s_game_globals_player_representation* new_representation = &new_blocks[index];
 

@@ -15,7 +15,7 @@ ASSERT_STRUCT_SIZE(s_simulation_view_player_telemetry_data, 36);
 
 struct s_simulation_view_telemetry_data
 {
-	void* provider;
+	class c_simulation_view_telemetry_provider* provider;
 	bool joining;
 	uint32 player_acknowledged_mask;
 	int32 number_of_players;
@@ -23,8 +23,14 @@ struct s_simulation_view_telemetry_data
 };
 ASSERT_STRUCT_SIZE(s_simulation_view_telemetry_data, 160);
 
+/* classes */
+
 class c_simulation_view_telemetry_provider
 {
+public:
+	bool entity_is_active(int32 entity_index) const;
+
+private:
 	int32 m_field_0;
 	class c_simulation_view* m_view;
 	s_simulation_view_telemetry_data m_telemetry_data;

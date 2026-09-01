@@ -1,18 +1,48 @@
 #include "stdafx.h"
 #include "transport_security.h"
 
+#include "transport.h"
 #include "transport_address.h"
 
 #include "shell/shell_windows.h"
-#include "simulation/machine_id.h"
 
 #include <Xlive/xnet/Sockets/XSocket.h>
+
+/* structures */
+
+struct s_transport_security_key
+{
+	bool active;
+	bool generated_locally;
+	int32 key_platform;
+	s_transport_secure_identifier key_id;
+	s_transport_secure_key key;
+};
+
+#pragma pack(push, 1)
+struct s_transport_security_globals
+{
+	bool initialized;
+	bool started;
+	bool local_address_valid;
+	s_transport_secure_address local_secure_address;
+	int8 gap[1];
+	transport_address local_insecure_address;
+	s_transport_unique_identifier local_unique_identifier;
+	int8 pad[2];
+	s_transport_security_key keys[8];
+};
+#pragma pack(pop)
+
+/* prototypes */
+
+static s_transport_security_globals* transport_security_globals_get(void);
 
 /* globals */
 
 static char g_transport_security_identifier_string[32];
 static char g_transport_security_managed_session_id_string[64];
-static char g_transport_security_unique_identifier_string[13];
+static char g_transport_security_unique_identifier_string[(2*sizeof(s_transport_unique_identifier))+1];
 
 /* public code */
 
@@ -25,7 +55,7 @@ bool transport_secure_address_compare(
 
 void transport_secure_address_extract_identifier(
 	s_transport_secure_address const* address,
-	s_machine_identifier* identifier)
+	s_transport_unique_identifier* identifier)
 {
 	csmemcpy(identifier, address->addr.abEnet, sizeof(*identifier));
 
@@ -183,4 +213,22 @@ bool __cdecl transport_secure_address_get(
 	transport_address* address)
 {
 	return INVOKE(0x1B5836, 0x0, transport_secure_address_get, secure_address, address);
+}
+
+s_transport_unique_identifier* transport_security_get_local_unique_identifier(
+	void)
+{
+	s_transport_security_globals* transport_security_globals = transport_security_globals_get();
+
+	ASSERT(transport_security_globals->initialized);
+
+	return &transport_security_globals->local_unique_identifier;
+}
+
+/* private code */
+
+static s_transport_security_globals* transport_security_globals_get(
+	void)
+{
+	return Memory::GetAddress<s_transport_security_globals*>(0x51C488, 0x0);
 }

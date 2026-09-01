@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "network_observer.h"
 
+#include "game/game_engine.h"
 #include "networking/network_memory.h"
 #include "networking/delivery/network_channel.h"
 #include "networking/messages/network_message_gateway.h"
@@ -162,9 +163,43 @@ void __cdecl initialize_network_observer_configuration()
 	g_network_observer_configuration->field_200 = 4096;
 }
 
-bool c_network_observer::initialize_observer(c_network_link* link, c_network_message_type_collection* message_types, c_network_message_gateway* message_gateway, s_network_observer_configuration* configuration)
+bool c_network_observer::initialize_observer(
+	c_network_link* link,
+	c_network_message_type_collection* message_types,
+	c_network_message_gateway* message_gateway,
+	s_network_observer_configuration* configuration)
 {
 	return INVOKE_TYPE(0x1BEC80, 0x1B8B5A, bool(__thiscall*)(c_network_observer*, c_network_link*, c_network_message_type_collection*, c_network_message_gateway*, s_network_observer_configuration*), this, link, message_types, message_gateway, configuration);
+}
+
+void c_network_observer::register_owner(
+	e_network_observer_owner owner_type,
+	class c_network_channel_owner* owner)
+{
+	ASSERT(owner);
+	ASSERT(owner_type>=0 && owner_type<k_network_observer_owner_count);
+
+
+	ASSERT(m_owners[owner_type].owner==NULL);
+
+	m_owners[owner_type].owner = owner;
+	m_owners[owner_type].managed_session_index = NONE;
+	m_owners[owner_type].field_8 = NONE;
+
+	return;
+}
+
+void c_network_observer::deregister_owner(
+	e_network_observer_owner owner_type,
+	c_network_channel_owner const* owner)
+{
+	ASSERT(owner);
+	ASSERT(owner_type>=0 && owner_type<k_network_observer_owner_count);
+	ASSERT(m_owners[owner_type].owner==owner);
+
+	m_owners[owner_type].owner = NULL;
+	
+	return;
 }
 
 void c_network_observer::send_message(
@@ -212,6 +247,30 @@ bool c_network_observer::observer_channel_backlogged(
 }
 
 
+void c_network_observer::populate_net_debug_data(
+	e_network_observer_owner owner_type,
+	int32 observer_index,
+	s_simulation_player_netdebug_data* data) const
+{
+	ASSERT(data);
+
+	ASSERT(observer_index>=0 && observer_index<k_network_maximum_observers);
+	ASSERT(owner_type>=0 && owner_type<k_network_observer_owner_count);
+
+	s_channel_observer const* observer = &m_observer_channels[observer_index];
+
+	ASSERT(observer->state>_observer_state_none && observer->state<k_observer_state_count);
+	ASSERT(TEST_BIT(observer->owner_flags, owner_type));
+
+	data->client_rtt_msec = (int16)observer->net_rtt;
+	data->client_packet_rate = (int16)(observer->stream_packet_rate * 10.f);
+	data->client_throughput = (int16)((observer->throughput_bps * 10.f) / 1024.f);
+	data->client_packet_loss_percentage = (int16)(observer->field_440.average_values_in_window() * 100.f);
+
+	return;
+}
+
+
 bool __cdecl is_network_observer_mode_managed()
 {
 	// or in other terms this checks if the network protocol is LIVE
@@ -238,6 +297,51 @@ void __declspec(naked) jmp_get_bandwidth_results()
 	CLASS_HOOK_JMP(c_network_observer__get_bandwidth_results, c_network_observer::get_bandwidth_results);
 }
 
+int32 c_network_observer::observer_channel_find_by_machine_identifier(
+	e_network_observer_owner owner_type,
+	s_transport_unique_identifier const* remote_identifier) const
+{
+	
+	int32 observer_index = NONE;
+	
+	for (int32 test_observer_index= 0; test_observer_index<NUMBEROF(m_observer_channels); ++test_observer_index)
+	{
+		c_network_observer::s_channel_observer const* observer = &m_observer_channels[test_observer_index];
+
+		if (observer->state!=_observer_state_none)
+		{
+			if (TEST_BIT(observer->owner_flags, owner_type))
+			{
+				s_transport_unique_identifier observer_identifier;
+
+				transport_secure_address_extract_identifier(&observer->remote_secure_address, &observer_identifier);
+
+				if (!csmemcmp(remote_identifier, &observer_identifier, sizeof(*remote_identifier)))
+				{
+					observer_index = test_observer_index;
+					break;
+				}
+			}
+		}
+	}
+
+	return observer_index;
+}
+
+void c_network_observer::observer_channel_get_secure_address(
+	e_network_observer_owner owner_type,
+	int32 observer_channel_index,
+	s_transport_secure_address* secure_address) const
+{
+	s_channel_observer const* observer = get_observer(owner_type, observer_channel_index);
+
+	ASSERT(secure_address);
+
+	*secure_address = observer->remote_secure_address;
+	
+	return;
+}
+
 CLASS_HOOK_DECLARE_LABEL(c_network_observer__channel_should_send_packet_hook, c_network_observer::channel_should_send_packet_hook);
 bool __thiscall c_network_observer::channel_should_send_packet_hook(
 	int32 network_channel_index,
@@ -255,10 +359,11 @@ bool __thiscall c_network_observer::channel_should_send_packet_hook(
 	auto p_channel_should_send_packet = Memory::GetAddress<channel_should_send_packet_t>(0x1BEE8D, 0x1B8D67);
 
 	int32 observer_index = NONE;
-	for (int32 i = 0; i < 16; i++)
+	
+	for (int32 i = 0; i < NUMBEROF(m_observer_channels); i++)
 	{
-		if (this->m_observer_channels[i].state != _observer_channel_state_none
-			&& this->m_observer_channels[i].channel_index == network_channel_index)
+		if (m_observer_channels[i].state != _observer_state_none &&
+			m_observer_channels[i].channel_index == network_channel_index)
 		{
 			observer_index = i;
 			break;
@@ -269,7 +374,7 @@ bool __thiscall c_network_observer::channel_should_send_packet_hook(
 		return false;
 
 	c_network_channel* network_channel = network_memory_get_channel(network_channel_index);
-	s_observer_channel* observer_channel = &this->m_observer_channels[observer_index];
+	s_channel_observer* observer_channel = &m_observer_channels[observer_index];
 
 	// we modify the network channel paramters to force the network tickrate
 	const real32 _temp_network_rate					= observer_channel->stream_packet_rate;
@@ -306,11 +411,11 @@ bool __thiscall c_network_observer::channel_should_send_packet_hook(
 #	endif // LIVE_NETWORK_PROTOCOL_FORCE_CONSTANT_NETWORK_PARAMETERS == true
 #endif // defined(LIVE_NETWORK_PROTOCOL_FORCE_CONSTANT_NETWORK_PARAMETERS)
 
-	bool ret = p_channel_should_send_packet(this, network_channel_index, a3, a4, a5, out_send_sequenced_packet, out_force_fill_packet, out_packet_size, out_voice_size, out_voice_chat_data_buffer_size, out_voice_chat_data_buffer);
+	bool result = p_channel_should_send_packet(this, network_channel_index, a3, a4, a5, out_send_sequenced_packet, out_force_fill_packet, out_packet_size, out_voice_size, out_voice_chat_data_buffer_size, out_voice_chat_data_buffer);
 
 	// then we reset the values back to normal
-	observer_channel->stream_packet_rate		= _temp_network_rate;
-	observer_channel->stream_bps		= _temp_network_bandwidth_per_stream;
+	observer_channel->stream_packet_rate	= _temp_network_rate;
+	observer_channel->stream_bps			= _temp_network_bandwidth_per_stream;
 	observer_channel->stream_window_size	= _temp_network_window_size;
 
 	// don't force packet filling when game simulation is attached
@@ -321,9 +426,11 @@ bool __thiscall c_network_observer::channel_should_send_packet_hook(
 	// unless original XNet transport layer had packet compression but even then it's rather dumb
 	// or maybe the UDP protocol has something like that, no idea
 	if (out_force_fill_packet)
+	{
 		*out_force_fill_packet = false;
+	}
 
-	return ret;
+	return result;
 }
 
 static void __declspec(naked) jmp_network_observer_channel_should_send_packet_hook()

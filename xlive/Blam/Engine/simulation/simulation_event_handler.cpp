@@ -7,16 +7,9 @@
 #include "math/random_math.h"
 
 #include "networking/network_memory.h"
-#include "networking/replication/replication_control_view.h"
+#include "networking/replication/replication_scheduler.h"
 #include "networking/replication/replication_event_manager.h"
 #include "simulation/game_interface/simulation_game_events.h"
-
-/* globals */
-
-bool g_use_network_queue_storage = true;
-
-typedef void(__thiscall* t_process_incoming_event)(c_simulation_event_handler* thisx, e_simulation_event_type simulation_event_type, int32* entity_reference_indices, int32 block_count, s_replication_allocation_block* block);
-t_process_incoming_event p_process_incoming_event;
 
 /* prototypes */
 
@@ -25,6 +18,13 @@ static __declspec(naked) void jmp_c_simulation_event_handler_process_incoming_ev
 {
 	CLASS_HOOK_JMP(c_simulation_event_handler__process_incoming_event, c_simulation_event_handler::process_incoming_event);
 }
+
+/* globals */
+
+bool g_use_network_queue_storage = true;
+
+typedef void(__thiscall* t_process_incoming_event)(c_simulation_event_handler* thisx, e_simulation_event_type simulation_event_type, int32* entity_reference_indices, int32 block_count, s_replication_allocation_block* block);
+t_process_incoming_event p_process_incoming_event;
 
 /* public code */
 
@@ -71,9 +71,24 @@ void c_simulation_event_handler::destroy(
 	return;
 }
 
-int32 c_simulation_event_handler::read_incoming_event(int32 a2, int32 a3, int32 a4, uint32* a5, int32 a6, int32 a7)
+e_network_read_result c_simulation_event_handler::read_incoming_event(
+	int32 event_type,
+	int32 const* entity_reference_indices,
+	int32 maximum_block_count,
+	int32* block_count,
+	struct s_replication_allocation_block* blocks,
+	class c_bitstream* packet)
 {
-	return INVOKE_TYPE(0x1D3D45, 0x1D8FD5, int32(__thiscall*)(int32, int32, int32, uint32*, int32, int32), a2, a3, a4, a5, a6, a7);
+	return INVOKE_TYPE(
+		0x1D3D45,
+		0x1D8FD5,
+		e_network_read_result(__thiscall*)(int32, int32 const*, int32, int32*, struct s_replication_allocation_block*, class c_bitstream*),
+		event_type,
+		entity_reference_indices, 
+		maximum_block_count,
+		block_count,
+		blocks,
+		packet);
 }
 
 void c_simulation_event_handler::process_incoming_event(e_simulation_event_type event_type, int32* entity_reference_indices, int32 block_count, s_replication_allocation_block* payload_block)

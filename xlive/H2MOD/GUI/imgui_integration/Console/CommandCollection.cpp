@@ -376,7 +376,6 @@ static int CommandCollection::IsSessionHostCmd(const std::vector<std::string>& t
 	std::string isHostStr;
 	isHostStr += "# Session host: ";
 	isHostStr += (session->is_host() ? "yes" : "no");
-	isHostStr += ", value=" + std::to_string(session->m_local_state);
 	outputCb(StringFlag_None, isHostStr.c_str());
 	return 0;
 }
@@ -535,13 +534,6 @@ static int CommandCollection::LogPlayersCmd(const std::vector<std::string>& toke
 			string.append(", Team=");
 			string.append(std::to_string(NetworkSession::GetPlayerTeam(player_index)).c_str());
 			
-			string.append(", Identifier=");
-
-			int64 id;
-			csmemcpy(&id, NetworkSession::GetPlayerId(player_index).identifier, sizeof(id));
-
-			string.append_print(", Identifier=%llX", id);
-
 			outputCb(StringFlag_None, string.get_string());
 		}
 	}
@@ -569,16 +561,15 @@ static int CommandCollection::LogPeersCmd(const std::vector<std::string>& tokens
 		return 0;
 	}
 
-	c_network_observer* observer = session->m_network_observer;
+	c_network_observer* observer = session->get_observer();
 
 	outputCb(StringFlag_None, "# %i peers: ", session->get_peer_count());
 
 	for (int32 peer_index = 0; peer_index < session->get_peer_count(); peer_index++)
 	{
-		const s_observer_channel* peer_observer_channel = &observer->m_observer_channels[session->m_session_peers[peer_index].observer_channel_index];
 
 		char name[XUSER_NAME_SIZE * 2];
-		wchar_string_to_utf8_string(session->m_session_membership.peers[peer_index].name, name, NUMBEROF(name));
+		wchar_string_to_utf8_string(session->get_session_membership(NULL, NULL)->peers[peer_index].name, name, NUMBEROF(name));
 
 		c_static_string<512> string;
 		string.set("# Peer index=");
@@ -586,11 +577,17 @@ static int CommandCollection::LogPeersCmd(const std::vector<std::string>& tokens
 		string.append(", Peer Name=");
 		string.append(name);
 		string.append(", Connection Status=");
-		string.append(std::to_string(peer_observer_channel->state).c_str());
-		string.append(", Peer map state: ");
-		string.append(std::to_string(session->m_session_membership.peers[peer_index].map_status).c_str());
+		string.append(std::to_string(
+			observer->get_state(
+				session->observer_owner(),
+				session->get_session_peer(peer_index)->observer_channel_index
+			)
+		).c_str());
 		
-		const datum player_index = session->m_session_membership.peers[peer_index].local_players_indexes[0];
+		string.append(", Peer map state: ");
+		string.append(std::to_string(session->get_session_membership(NULL, NULL)->peers[peer_index].map_status).c_str());
+		
+		const datum player_index = session->get_session_membership(NULL, NULL)->peers[peer_index].local_players_indexes[0];
 		player_datum const* player = player_get(player_index);
 		
 		if (player)
@@ -646,7 +643,7 @@ static int CommandCollection::SetMaxPlayersCmd(const std::vector<std::string>& t
 			break;
 		}
 
-		session->m_session_parameters.max_party_players = max_players;
+		session->get_session_parameters()->max_party_players = max_players;
 		outputCb(StringFlag_None, "# maximum players set: %i", max_players);
 	} while (0);
 
@@ -717,13 +714,34 @@ static int CommandCollection::invite(const std::vector<std::string>& tokens, Con
 	{
 		bool session_host = session->is_host();
 
-		XSESSION_INFO x_session_info;
-		csmemcpy(&x_session_info.sessionID, &session->m_session_id, sizeof(x_session_info.sessionID));
-		x_session_info.keyExchangeKey = session->m_session_key;
-		x_session_info.hostAddress = (session_host ? session->m_session_virtual_couch.xsession_info.hostAddress :
-			session->m_network_observer->m_observer_channels[session->get_session_peer(session->m_session_host_peer_index)->observer_channel_index].xnaddr);
+		XSESSION_INFO session_info;
 
-		uint8* session_bytes = (uint8*)&x_session_info;
+		s_transport_secure_identifier identifier;
+		s_transport_secure_key key;
+
+		session->get_secure_key(&identifier, &key, NULL, NULL);
+
+		session_info.sessionID = identifier.id;
+		session_info.keyExchangeKey = key.key;
+
+
+		if (session_host)
+		{
+			session_info.hostAddress = session->get_session_virtual_couch()->xsession_info.hostAddress;
+		}
+		else
+		{
+			s_transport_secure_address address;
+
+			session->get_observer()->observer_channel_get_secure_address(
+				session->observer_owner(),
+				session->get_session_peer(session->host_peer_index())->observer_channel_index,
+				&address
+			);
+			session_info.hostAddress = address.addr;
+		}
+
+		uint8* session_bytes = (uint8*)&session_info;
 		char connect_string[sizeof(XSESSION_INFO) * 2 + 1];
 
 		// Encode the data into hex string

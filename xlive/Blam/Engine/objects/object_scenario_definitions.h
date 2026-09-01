@@ -47,7 +47,7 @@ struct s_scenario_object_permutation
 {
 	string_id variant_name;
 	e_object_change_color_index active_change_colors;
-	pixel32 primary_color;
+	pixel32 change_color_index;
 	pixel32 secondary_color;
 	pixel32 tertiary_color;
 	pixel32 quaternary_color;

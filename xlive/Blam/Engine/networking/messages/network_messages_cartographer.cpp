@@ -101,19 +101,22 @@ void network_message_cartographer_send_request_map_filename(int32 map_download_i
 		XUserGetXUID(0, &data.player_id);
 		data.map_download_id = map_download_id;
 
-		c_network_observer* observer = session->m_network_observer;
-		s_session_peer* peer = session->get_session_peer(session->m_session_host_peer_index);
+		c_network_observer* observer = session->get_observer();
+		s_session_peer* peer = session->get_session_peer(session->host_peer_index());
 
 		if (peer->is_remote_peer)
 		{
-			observer->send_message(session->m_session_index, peer->observer_channel_index, false, _network_message_type_request_map_filename, sizeof(s_network_message_request_map_filename), &data);
+			observer->send_message(session->observer_owner(), peer->observer_channel_index, false, _network_message_type_request_map_filename, sizeof(s_network_message_request_map_filename), &data);
 
-			event(_event_status, "online:messages: %s session host peer index: %d, observer index %d, observer is remote peer: %d, session index: %d",
+			event(
+				_event_status,
+				"online:messages: %s session host peer index: %d, observer index %d, observer is remote peer: %d, session index: %d",
 				__FUNCTION__,
-				session->m_session_host_peer_index,
+				session->host_peer_index(),
 				peer->observer_channel_index,
 				peer->is_remote_peer,
-				session->m_session_index);
+				session->session_index()
+			);
 		}
 	}
 	return;
@@ -130,13 +133,14 @@ void network_message_cartographer_send_rank_change(int32 peer_index, int8 rank)
 	{
 		data.rank = rank;
 
-		c_network_observer* observer = session->m_network_observer;
+		c_network_observer* observer = session->get_observer();
 		s_session_peer* peer = session->get_session_peer(peer_index);
 
 		if (peer_index != NONE && !session->is_peer_local(peer_index))
 		{
-			if (peer->is_remote_peer) {
-				observer->send_message(session->m_session_index, peer->observer_channel_index, false, _network_message_type_rank_change, sizeof(s_network_message_rank_change), &data);
+			if (peer->is_remote_peer)
+			{
+				observer->send_message(session->observer_owner(), peer->observer_channel_index, false, _network_message_type_rank_change, sizeof(s_network_message_rank_change), &data);
 			}
 		}
 	}
@@ -152,13 +156,14 @@ void network_message_cartographer_send_anti_cheat(int32 peer_index)
 		&& session->is_host()
 		&& session->get_transport_session_id(&data.session_data.identifier))
 	{
-		c_network_observer* observer = session->m_network_observer;
+		c_network_observer* observer = session->get_observer();
 		s_session_peer* peer = session->get_session_peer(peer_index);
 
 		data.enabled = g_twizzler_status;
 		if (peer_index != NONE && !session->is_peer_local(peer_index)) {
-			if (peer->is_remote_peer) {
-				observer->send_message(session->m_session_index, peer->observer_channel_index, false, _network_message_type_anti_cheat, sizeof(s_network_message_anti_cheat), &data);
+			if (peer->is_remote_peer)
+			{
+				observer->send_message(session->observer_owner(), peer->observer_channel_index, false, _network_message_type_anti_cheat, sizeof(s_network_message_anti_cheat), &data);
 			}
 		}
 	}

@@ -42,7 +42,7 @@ char const* c_simulation_view::get_view_description(
 #ifdef SIMULATION_VIEW_DEBUG
 	csprintf(
 		m_view_description,
-		0x20u,
+		NUMBEROF(m_view_description),
 		"v%d/m%d/%s",
 		m_world_view_index,
 		m_remote_machine_index,
@@ -57,6 +57,7 @@ char const* c_simulation_view::get_death_reason_string(
 	uint32 death_reason) const
 {
 	const char* result = "<unknown>";
+
 	if (VALID_INDEX(death_reason, k_simulation_view_reason_count))
 	{
 		result = g_simulation_view_reason_strings[death_reason];
@@ -806,7 +807,6 @@ void c_game_results_replicator::send_game_results_update(
 {
 	s_game_results_incremental results;
 	s_network_message_distributed_game_results message;
-
 
 	ASSERT(game_results_get_game_recording());
 	ASSERT(m_sending_updates);

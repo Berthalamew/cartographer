@@ -1,7 +1,7 @@
 #pragma once
-#include "simulation_encoding.h"
 #include "simulation_players.h"
 #include "simulation_queue.h"
+#include "simulation_update.h"
 
 #include "units/unit_control.h"
 
@@ -59,7 +59,7 @@ struct s_simulation_globals
 	bool loading_saved_game;
 	class c_simulation_world* world;
 	class c_simulation_watcher* watcher;
-	class c_simulation_type_collection* simulation_type_collection;
+	class c_simulation_type_collection* type_collection;
 };
 ASSERT_STRUCT_SIZE(s_simulation_globals, 24);
 
@@ -73,11 +73,17 @@ struct s_simulation_queued_update
 
 void simulation_apply_patches(void);
 
-class c_simulation_world* simulation_get_world();
-s_simulation_globals* simulation_get_globals();
+s_simulation_globals* simulation_get_globals(void);
+
+void simulation_initialize(void);
+void simulation_dispose(void);
+void simulation_initialize_for_new_map(void);
+void simulation_dispose_from_old_map(void);
+
+class c_simulation_world* simulation_get_world(void);
 
 void simulation_reset(void);
-bool simulation_reset_in_progress();
+bool simulation_reset_in_progress(void);
 
 void __cdecl simulation_update(void);
 
@@ -91,7 +97,11 @@ void simulation_notify_reset_initiate(void);
 
 void simulation_notify_going_active(void);
 void simulation_reset_immediate(void);
+
 bool simulation_in_progress(void);
+
+void simulation_stop(void);
+
 void simulation_destroy_update(struct simulation_update* update);
 bool simulation_query_object_is_predicted(datum object_datum);
 class c_simulation_type_collection* simulation_get_type_collection();
@@ -103,6 +113,7 @@ void simulation_apply_after_game(const struct simulation_update* update);
 void simulation_build_update(struct simulation_update* update);
 
 void simulation_update_aftermath(const struct simulation_update* update);
+void simulation_prepare_to_send(void);
 
 class c_simulation_view* simulation_get_remote_view_by_channel(int32 network_channel_index);
 
@@ -114,7 +125,10 @@ void simulation_update_pregame(void);
 
 void __cdecl simulation_process_input(uint32 player_action_mask, const struct player_action* player_actions);
 
-bool __cdecl simulation_get_machine_active_in_game(s_machine_identifier* machine_identifier);
+bool simulation_get_machine_is_host(struct s_machine_identifier const* machine_identifier);
+bool simulation_get_machine_connectivity(struct s_machine_identifier const* machine_identifier);
+
+bool __cdecl simulation_get_machine_active_in_game(struct s_machine_identifier* machine_identifier);
 
 void simulation_build_machine_update(bool* machine_update_valid, struct simulation_machine_update* machine_update);
 
@@ -123,3 +137,9 @@ void simulation_build_player_updates(int32* player_update_count, int32 maximum_p
 void simulation_fatal_error(void);
 
 void __cdecl simulation_remove_view_from_world(class c_simulation_view* view);
+
+/* globals */
+
+#ifdef SIMULATION_VALIDATE_ENABLED
+extern bool g_simulation_entity_validate;
+#endif

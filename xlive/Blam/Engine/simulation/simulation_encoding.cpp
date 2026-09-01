@@ -3,11 +3,12 @@
 
 #include "simulation.h"
 
+#include "cseries/profile.h"
 #include "memory/bitstream.h"
 #include "networking/network_event.h"
+#include "scenario/scenario.h"
 #include "structures/structure_bsp_definitions.h"
 
-#include "memory/bitstream.h"
 
 /* constants */
 
@@ -23,6 +24,82 @@ enum
 /* prototypes */
 
 /* public code */
+
+void simulation_write_quantized_position(
+	c_bitstream* packet,
+	real_point3d const* position,
+	int32 axis_encoding_bit_count,
+	bool fixup_quantized_position_inside_bsp)
+{
+	long_point3d point_quantization;
+
+	real_rectangle3d* bounds = &global_structure_bsp_get()->world_bounds;
+	
+	quantize_real_point3d(position, bounds, axis_encoding_bit_count, &point_quantization);
+
+	if (fixup_quantized_position_inside_bsp)
+	{
+		real_point3d quantized_point;
+
+		dequantize_real_point3d(&point_quantization, bounds, axis_encoding_bit_count, &quantized_point);
+
+		if (scenario_leaf_index_from_point(&quantized_point)==NONE &&
+			scenario_leaf_index_from_point(position)!=NONE)
+		{
+			static long_point3d wiggle_table[14] =
+			{
+				{ { 0, 0, 1 } },
+				{ { 1, 1, 1 } },
+				{ { -1, 1, 1 } },
+				{ { 1, -1, 1 } },
+				{ { -1, -1, 1 } },
+				{ { 1, 1, -1 } },
+				{ { -1, 1, -1 } },
+				{ { 1, -1, -1 } },
+				{ { -1, -1, -1 } },
+				{ { 1, 0, 0 } },
+				{ { 0, 1, 0 } },
+				{ { -1, 0, 0 } },
+				{ { 0, -1, 0 } },
+				{ { 0, 0, -1 } }
+			};
+
+			for (int32 wiggle_index= 0; wiggle_index<NUMBEROF(wiggle_table); ++wiggle_index)
+			{
+				bool wiggle_point_quantization_is_valid = true;
+
+				long_point3d wiggled_point_quantization;
+
+				for (int32 axis=0; axis<NUMBEROF(point_quantization.n); ++axis)
+				{
+					wiggled_point_quantization.n[axis] = point_quantization.n[axis] + wiggle_table[wiggle_index].n[axis];
+
+					// Ivalid if outside bit range
+					if (wiggled_point_quantization.n[axis]<0 || wiggled_point_quantization.n[axis]>=(int32)FLAG(axis_encoding_bit_count))
+					{
+						wiggle_point_quantization_is_valid = false;
+						break;
+					}
+				}
+
+				if (wiggle_point_quantization_is_valid)
+				{
+					dequantize_real_point3d(&wiggled_point_quantization, bounds, axis_encoding_bit_count, &quantized_point);
+
+					if (scenario_leaf_index_from_point(&quantized_point))
+					{
+						point_quantization = wiggled_point_quantization;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	packet->write_point3d("point-quantization", &point_quantization, axis_encoding_bit_count);
+
+	return;
+}
 
 void simulation_read_quantized_position(
 	class c_bitstream* packet,

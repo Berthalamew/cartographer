@@ -81,7 +81,7 @@ static void vip_lock(e_game_life_cycle state)
 		if (state == _life_cycle_post_game)
 		{
 			server_console_clear_vip();
-			session->m_session_parameters.party_privacy = _network_game_privacy_open;
+			session->get_session_parameters()->party_privacy = _network_game_privacy_open;
 		}
 		if (state == _life_cycle_in_game)
 		{
@@ -92,7 +92,7 @@ static void vip_lock(e_game_life_cycle state)
 					server_console_add_vip(NetworkSession::GetPlayerName(i));
 				}
 			}
-			session->m_session_parameters.party_privacy = _network_game_privacy_invite;
+			session->get_session_parameters()->party_privacy = _network_game_privacy_invite;
 		}
 	}
 

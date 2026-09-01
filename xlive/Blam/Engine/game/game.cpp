@@ -20,6 +20,7 @@
 #include "math/random_math.h"
 #include "main/interpolator.h"
 #include "main/main.h"
+#include "main/main_game.h"
 #include "main/main_time.h"
 #include "objects/lights.h"
 #include "objects/objects.h"
@@ -126,9 +127,9 @@ void game_apply_pre_winmain_patches(void)
 	return;
 }
 
-s_game_systems* get_game_systems(void)
+s_game_system* get_game_systems(void)
 {
-	return Memory::GetAddress<s_game_systems*>(0x3A0468, 0x35D198);
+	return Memory::GetAddress<s_game_system*>(0x3A0468, 0x35D198);
 }
 
 bool map_initialized(void)
@@ -235,12 +236,6 @@ bool game_in_progress(void)
 	return result;
 }
 
-bool game_is_active(void)
-{
-	const game_globals_storage* g_main_game_globals = get_main_game_globals();
-	return g_main_game_globals && g_main_game_globals->map_active && g_main_game_globals->active_structure_bsp_index != NONE;
-}
-
 bool game_is_authoritative(void)
 {
 	return game_options_get()->game_simulation != _game_simulation_distributed_client;
@@ -285,7 +280,7 @@ void __cdecl game_initialize(void)
 
 	real_math_reset_precision();
 
-	s_game_systems* g_game_systems = get_game_systems();
+	s_game_system* g_game_systems = get_game_systems();
 	for (int32 i = 0; i < 70; ++i)
 	{
 		g_game_systems[i].initialize_proc();
@@ -303,7 +298,7 @@ void __cdecl game_initialize(void)
 void __cdecl game_dispose(void)
 {
 	set_main_game_globals(NULL);
-	s_game_systems* g_game_systems = get_game_systems();
+	s_game_system* g_game_systems = get_game_systems();
 	for (int32 system_index = k_game_system_count; system_index >= 0; --system_index)
 	{
 		ASSERT(g_game_systems[system_index].dispose_proc);
@@ -314,6 +309,38 @@ void __cdecl game_dispose(void)
 
 	// Reset time resolution to system default on game exit
 	timeEndPeriod(k_system_timer_resolution_ms);
+	return;
+}
+
+void game_dispose_from_old_map(
+	void)
+{
+	game_globals_storage* game_globals = get_main_game_globals();
+
+	ASSERT(main_game_loaded_map());
+	ASSERT(!game_globals->initializing);
+	ASSERT(game_globals->map_active);
+	ASSERT(game_globals->active_structure_bsp_index == NONE);
+
+	game_globals->game_in_progress = false;
+
+	s_game_system* g_game_systems = get_game_systems();
+	
+	for (int32 system_index = k_game_system_count; system_index >= 0; --system_index)
+	{
+		if (g_game_systems[system_index].dispose_from_old_map_proc)
+		{
+			g_game_systems[system_index].dispose_from_old_map_proc();
+		}
+	}
+
+	// TODO: add random seed debug code here
+
+	main_status("game_instance", NULL);
+	main_status("game_simulation", NULL);
+	
+	game_globals->map_active = false;
+
 	return;
 }
 
@@ -341,6 +368,7 @@ void __cdecl game_tick(void)
 	random_seed_allow_use();
 
 	simulation_apply_before_game(&update);
+
 	if (update.simulation_in_progress)
 	{
 		players_update_before_game(&update);
@@ -392,7 +420,7 @@ void __cdecl game_tick(void)
 		game_time_advance();
 	}
 
-	//main_status("game_tick", NULL);
+	main_status("game_tick", NULL);
 
 	return;
 }
@@ -435,9 +463,8 @@ void __cdecl game_initialize_for_new_map(
 	game_globals_storage* game_globals = get_main_game_globals();
 
 	ASSERT(options);
-	// TODO: implement 
-	//ASSERT(main_game_loaded_map());
-	//ASSERT(wcscmp(options->scenario_path, main_game_loaded_map_name()) == 0);
+	ASSERT(main_game_loaded_map());
+	ASSERT(wcscmp(options->scenario_path, main_game_loaded_map_name()) == 0);
 	ASSERT(!game_globals->initializing);
 	ASSERT(!game_globals->map_active);
 	ASSERT(!game_globals->game_in_progress);
@@ -448,7 +475,7 @@ void __cdecl game_initialize_for_new_map(
 	game_globals->initializing = true;
 	game_info_initialize_for_new_map(options);
 
-	s_game_systems* g_game_systems = get_game_systems();
+	s_game_system* g_game_systems = get_game_systems();
 	for (int32 i = 0; i < 70; i++)
 	{
 		if (g_game_systems[i].initialize_for_new_map_proc)
@@ -456,8 +483,10 @@ void __cdecl game_initialize_for_new_map(
 			g_game_systems[i].initialize_for_new_map_proc();
 		}
 	}
+
 	game_globals->initializing = false;
 	game_globals->map_active = true;
+	
 	return;
 }
 
@@ -496,6 +525,13 @@ void game_simulation_set(
 	main_status("game_simulation", "%s", k_game_playback_names[game_simulation]);
 
 	return;
+}
+
+bool game_is_available(
+	void)
+{
+	const game_globals_storage* g_main_game_globals = get_main_game_globals();
+	return g_main_game_globals && g_main_game_globals->map_active && g_main_game_globals->active_structure_bsp_index != NONE;
 }
 
 void game_globals_storage_print_debug_contents(

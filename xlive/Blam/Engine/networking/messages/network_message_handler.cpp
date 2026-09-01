@@ -331,11 +331,13 @@ void c_network_message_handler::handle_request_map_filename(const transport_addr
 					received_data->map_download_id
 				);
 
-				c_network_observer* observer = session->m_network_observer;
+				c_network_observer* observer = session->get_observer();
 				s_session_peer* peer = session->get_session_peer(sender_peer_index);
 
 				if (peer->is_remote_peer)
-					observer->send_message(session->m_session_index, peer->observer_channel_index, false, _network_message_type_custom_map_filename, sizeof(s_network_message_custom_map_filename), &data);
+				{
+					observer->send_message(session->observer_owner(), peer->observer_channel_index, false, _network_message_type_custom_map_filename, sizeof(s_network_message_custom_map_filename), &data);
+				}
 			}
 			else
 			{

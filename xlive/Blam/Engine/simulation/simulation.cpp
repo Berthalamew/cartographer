@@ -1,25 +1,40 @@
 #include "stdafx.h"
 #include "simulation.h"
 
-#include "simulation_queue_global_events.h"
+#include "simulation_encoding.h"
 #include "simulation_entity_database.h"
 #include "simulation_event_handler.h"
+#include "simulation_gamestate_entities.h"
+#include "simulation_queue_global_events.h"
+#include "simulation_type_collection.h"
 #include "simulation_watcher.h"
 #include "simulation_world.h"
 
 #include "cseries/profile.h"
 #include "game/game.h"
+#include "game/game_results.h"
 #include "game/players.h"
+#include "main/main_game.h"
 #include "math/random_math.h"
 #include "memory/bitstream.h"
 #include "networking/network_event.h"
+#include "networking/network_memory.h"
 #include "objects/objects.h"
-#include "units/units.h"
 #include "simulation/game_interface/simulation_game_action.h"
+#include "simulation/game_interface/simulation_game_interface.h"
+#include "units/units.h"
 
 /* prototypes */
 
 static void simulation_synchronous_game_patches(void);
+static void simulation_gameproc_patches_apply(void);
+static bool simulation_film_start_recording(void);
+
+/* globals */
+
+#ifdef SIMULATION_VALIDATE_ENABLED
+bool g_simulation_entity_validate = false;
+#endif
 
 /* public code */
 
@@ -32,31 +47,167 @@ void simulation_apply_patches(
 	simulation_game_action_apply_patches();
 
 	WriteJmpTo(Memory::GetAddress(0x1AE6D8, 0x1A8932), simulation_reset);
+	
+	simulation_gameproc_patches_apply();
 	simulation_synchronous_game_patches();
+
+	PatchCall(Memory::GetAddress(0x1B549D, 0x0), simulation_prepare_to_send);
+
 	return;
 }
 
-s_simulation_globals* simulation_get_globals()
+s_simulation_globals* simulation_get_globals(
+	void)
 {
 	return Memory::GetAddress<s_simulation_globals*>(0x5178D0, 0x520B60);
 }
 
-c_simulation_world* simulation_get_world()
+void simulation_initialize(
+	void)
+{
+	s_simulation_globals* simulation_globals = simulation_get_globals();
+
+	ASSERT(!simulation_globals->initialized);
+
+	simulation_gamestate_entities_initialize();
+
+	if (network_memory_simulation_initialize(&simulation_globals->world, &simulation_globals->watcher, &simulation_globals->type_collection))
+	{
+		int32 entity_type_count;
+		int32 event_type_count;
+
+		ASSERT(simulation_globals->world);
+		ASSERT(simulation_globals->watcher);
+		ASSERT(simulation_globals->type_collection);
+
+		simulation_globals->type_collection->clear_types();
+		simulation_game_register_types(simulation_globals->type_collection, &entity_type_count, &event_type_count);
+		simulation_globals->type_collection->finish_types(entity_type_count, event_type_count);
+
+		// TODO: status line code here
+
+		simulation_globals->initialized = true;
+	}
+
+	return;
+}
+
+void simulation_dispose(
+	void)
+{
+	s_simulation_globals* simulation_globals = simulation_get_globals();
+
+	simulation_gamestate_entities_dispose();
+
+	if (simulation_globals->initialized)
+	{
+		simulation_globals->world = NULL;
+		simulation_globals->watcher = NULL;
+		simulation_globals->type_collection = NULL;
+		simulation_globals->initialized = false;
+	}
+
+	return;
+}
+
+void simulation_initialize_for_new_map(
+	void)
+{
+	s_simulation_globals* simulation_globals = simulation_get_globals();
+
+	ASSERT(simulation_globals->initialized);
+
+	if (!main_game_reset_in_progress())
+	{
+		c_simulation_distributed_world* distributed_world = NULL;
+		
+		simulation_gamestate_entities_initialize_for_new_map();
+		simulation_globals->simulation_fatal_error = false;
+		simulation_globals->simulation_aborted = false;
+
+		simulation_film_start_recording();
+		
+		if (game_is_distributed() && !game_is_playback())
+		{
+			distributed_world = network_allocate_simulation_distributed_world();
+		}
+
+		ASSERT(simulation_globals->world);
+
+		simulation_globals->world->initialize_world(
+			simulation_globals->type_collection,
+			simulation_globals->watcher,
+			distributed_world);
+
+		ASSERT(simulation_globals->world->exists());
+		ASSERT(simulation_globals->watcher);
+
+		simulation_globals->watcher->initialize_watcher(simulation_globals->world);
+		simulation_globals->watcher->setup_connection();
+		game_results_initialize_for_new_map();
+		simulation_globals->simulation_in_initial_state = true;
+	}
+
+	return;
+}
+
+void simulation_dispose_from_old_map(
+	void)
+{
+	s_simulation_globals* simulation_globals = simulation_get_globals();
+
+	ASSERT(simulation_globals->initialized);
+
+	if (!main_game_reset_in_progress())
+	{
+		ASSERT(simulation_globals->watcher);
+
+		simulation_globals->watcher->destroy_watcher();
+
+		ASSERT(simulation_globals->world);
+		
+		simulation_globals->world->destroy_world();
+		
+		game_results_dispose_from_old_map();
+		simulation_gamestate_entities_dispose_from_old_map();
+		
+		/* TODO: saved films
+		if (simulation_globals->recording_film)
+		{
+			saved_film_manager_close();
+			simulation_globals->recording_film = false;
+			saved_film_manager_copy_film_to_debug_path();
+		}
+		*/
+
+		simulation_globals->simulation_reset_in_progress = false;
+	}
+
+	network_memory_verify();
+
+	return;
+}
+
+c_simulation_world* simulation_get_world(
+	void)
 {
 	return simulation_get_globals()->world;
 }
 
-bool simulation_engine_initialized()
+bool simulation_engine_initialized(
+	void)
 {
 	return simulation_get_globals()->initialized;
 }
 
-bool simulation_reset_in_progress()
+bool simulation_reset_in_progress(
+	void)
 {
 	return simulation_get_globals()->simulation_reset_in_progress;
 }
 
-void __cdecl simulation_update(void)
+void __cdecl simulation_update(
+	void)
 {
 	INVOKE(0x1AE7C5, 0x1A8A1F, simulation_update);
 	return;
@@ -87,7 +238,8 @@ bool simulation_aborted(
 	return simulation_globals->initialized && simulation_globals->simulation_aborted;
 }
 
-void simulation_notify_reset_complete(void)
+void simulation_notify_reset_complete(
+	void)
 {
 	s_simulation_globals* simulation_globals = simulation_get_globals();
 
@@ -161,10 +313,11 @@ void simulation_reset_immediate(
 
 	if (simulation_globals->world->runs_simulation())
 	{
+		s_simulation_queue_gamestate_clear_data gamestate_clear_data;
+
 		simulation_queue_game_global_event_insert(_simulation_queue_game_global_event_type_reset_map);
-		// ### TODO figure out these
-		// simulation_gamestate_entities_build_clear_flags();
-		// simulation_queue_gamestates_delete_insert();
+		simulation_gamestate_entities_build_clear_flags(&gamestate_clear_data);
+		simulation_queue_gamestates_delete_insert(&gamestate_clear_data);
 		simulation_queue_game_global_event_insert(_simulation_queue_game_global_event_type_simulation_reset_complete);
 	}
 	else
@@ -202,14 +355,16 @@ void __cdecl simulation_reset(
 bool simulation_in_progress(
 	void)
 {
+	s_simulation_globals* simulation_globals = simulation_get_globals();
+
 	bool result = false;
 
 	if (simulation_engine_initialized()
 		&& game_in_progress()
 		&& game_get_active_structure_bsp_index()!=NONE
-		&& !simulation_get_globals()->simulation_aborted)
+		&& !simulation_globals->simulation_aborted)
 	{
-		ASSERT(simulation_get_globals()->world);
+		ASSERT(simulation_globals->world);
 		if (simulation_get_world()->is_active())
 		{
 			result = true;
@@ -221,7 +376,7 @@ bool simulation_in_progress(
 
 bool simulation_query_object_is_predicted(datum object_index)
 {
-	return game_is_predicted() && object_get(object_index)->object.simulation_entity_index != NONE;
+	return game_is_predicted() && object_get(object_index)->object.gamestate_index != NONE;
 }
 
 void __cdecl simulation_process_input(uint32 player_action_mask, const player_action* player_actions)
@@ -445,6 +600,22 @@ void simulation_update_aftermath(
 	return;
 }
 
+void simulation_prepare_to_send(
+	void)
+{
+	s_simulation_globals* simulation_globals = simulation_get_globals();
+
+	ASSERT(simulation_globals->initialized);
+	ASSERT(simulation_globals->world);
+
+	if (!simulation_globals->simulation_aborted && simulation_globals->world->exists() && game_in_progress())
+	{
+		simulation_globals->world->process_pending_updates();
+	}
+
+	return;
+}
+
 c_simulation_view* simulation_get_remote_view_by_channel(
 	int32 network_channel_index)
 {
@@ -566,14 +737,56 @@ void simulation_update_pregame(
 	return;
 }
 
+void simulation_stop(
+	void)
+{
+	s_simulation_globals* simulation_globals = simulation_get_globals();
+
+	ASSERT(game_in_progress());
+
+	if (simulation_globals->initialized)
+	{
+		ASSERT(simulation_globals->world);
+
+		if (simulation_globals->world->attached_to_map() && !simulation_globals->simulation_reset_in_progress && !main_game_reset_in_progress())
+		{
+			simulation_globals->world->detach_from_map();
+		}
+	}
+
+	return;
+}
+
 void simulation_destroy_update(
 	struct simulation_update* update)
 {
-	ASSERT(update);
 	s_simulation_globals* simulation_globals = simulation_get_globals();
-	simulation_globals->world->destroy_world();
+
+	ASSERT(update);
+
+	simulation_globals->world->destroy_update(update);
 	
 	return;
+}
+
+bool simulation_get_machine_is_host(
+	s_machine_identifier const* machine_identifier)
+{
+	s_simulation_globals* simulation_globals = simulation_get_globals();
+
+	ASSERT(simulation_globals->watcher);
+
+	return simulation_globals->watcher->get_machine_is_host(machine_identifier);
+}
+
+bool simulation_get_machine_connectivity(
+	s_machine_identifier const* machine_identifier)
+{
+	s_simulation_globals* simulation_globals = simulation_get_globals();
+
+	ASSERT(simulation_globals->watcher);
+
+	return simulation_globals->watcher->get_machine_connectivity(machine_identifier);
 }
 
 bool __cdecl simulation_get_machine_active_in_game(s_machine_identifier* machine_identifier)
@@ -650,4 +863,24 @@ static void simulation_synchronous_game_patches(
 	PatchCall(Memory::GetAddress(0x1AE084), simulation_update_decode);
 	PatchCall(Memory::GetAddress(0x1ED0A3), simulation_update_decode);
 	return;
+}
+
+static void simulation_gameproc_patches_apply(
+	void)
+{
+	s_game_system* system = &get_game_systems()[24];
+	WritePointer((uintptr_t)&system->initialize_proc, simulation_initialize);
+	WritePointer((uintptr_t)&system->dispose_proc, simulation_dispose);
+	WritePointer((uintptr_t)&system->initialize_for_new_map_proc, simulation_initialize_for_new_map);
+	WritePointer((uintptr_t)&system->dispose_from_old_map_proc, simulation_dispose_from_old_map);
+
+	return;
+}
+
+static bool simulation_film_start_recording(
+	void)
+{
+	// TODO: film playback
+
+	return false;
 }

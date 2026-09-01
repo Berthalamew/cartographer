@@ -174,7 +174,7 @@ void objects_apply_patches(void)
 {
 	objects_apply_interpolation_patches();
 
-	s_game_systems* g_game_systems = get_game_systems();
+	s_game_system* g_game_systems = get_game_systems();
 	WritePointer((uintptr_t)&g_game_systems[28].initialize_for_new_map_proc, objects_initialize_for_new_map);
 	return;
 }
@@ -531,13 +531,13 @@ datum __cdecl object_new(object_placement_data* data)
 			object->object.damage_owner_target_model_abs_index = data->damage_owner.owner_team_index;
 			object->object.damage_owner_owner_index = data->damage_owner.owner_player_index;
 			object->object.damage_owner_object_index = data->damage_owner.owner_object_index;
-			object->object.model_variant_id = NONE;
+			object->object.variant_index = NONE;
 			object->object.cached_render_state_index = NONE;
 			object->object.structure_bsp_fake_lightprobe_index = NONE;
 			object->object.physics_flags.clear();
 			object->object.physics_flags.set(_object_physics_bit_8, TEST_BIT(data->flags, 3));
 			object->object.havok_datum = NONE;
-			object->object.simulation_entity_index = NONE;
+			object->object.gamestate_index = NONE;
 			object->object.simulation_flags.clear();
 			object->object.destroyed_constraints_flag = data->destroyed_constraints_flag;
 			object->object.loosened_constraints_flag = data->loosened_constraints_flag;
@@ -805,11 +805,22 @@ datum __cdecl object_new(object_placement_data* data)
 	return object_index;
 }
 
-void __cdecl object_delete(datum object_index)
+void __cdecl object_delete(
+	int32 object_index)
 {
 	INVOKE(0x136005, 0x124ED5, object_delete, object_index);
 	return;
 }
+
+void object_delete_immediately(
+	int32 object_index)
+{
+	object_pre_delete_recursive(object_index);
+	object_delete_recursive(object_index, true);
+
+	return;
+}
+
 
 real_point3d* __cdecl object_get_center_of_mass(datum object_index, real_point3d* point)
 {
@@ -895,7 +906,7 @@ datum object_get_damage_owner(datum object_index)
 
 int32 object_get_entity_index(datum object_idx)
 {
-	return object_get(object_idx)->object.simulation_entity_index;
+	return object_get(object_idx)->object.gamestate_index;
 }
 
 void object_get_region_information(
@@ -1104,6 +1115,39 @@ datum object_get_ultimate_parent(datum object_index)
 		object_index = object_get(object_index)->object.parent_object_index;
 	}
 	return result;
+}
+
+void object_attach_gamestate_entity(
+	int32 object_index,
+	int32 gamestate_index)
+{
+	object_datum* object = object_get(object_index);
+
+	ASSERT(gamestate_index!=NONE);
+	ASSERT(object->object.gamestate_index==NONE);
+
+	object->object.gamestate_index = gamestate_index;
+	// TODO: finish
+	//object_type_attach_gamestate_entity(gamestate_index);
+
+	return;
+}
+
+void object_detach_gamestate_entity(
+	int32 object_index,
+	int32 gamestate_index)
+{
+	object_datum* object = object_get(object_index);
+
+	ASSERT(gamestate_index!=NONE);
+	ASSERT(object->object.gamestate_index==gamestate_index);
+
+	// TODO: finish
+	//object_type_detach_gamestate_entity(gamestate_index);
+	object->object.gamestate_index = NONE;
+	object->object.simulation_flags.clear();
+
+	return;
 }
 
 #ifdef OBJECT_DEBUG
@@ -1496,7 +1540,7 @@ static void __cdecl update_object_region_information(datum object_datum, int32 r
 static void object_variant_index_update(datum object_index, string_id variant)
 {
 	object_datum* object = object_get(object_index);
-	object->object.model_variant_id = object_lookup_variant_index_from_name(object_index, variant);
+	object->object.variant_index = object_lookup_variant_index_from_name(object_index, variant);
 	return;
 }
 

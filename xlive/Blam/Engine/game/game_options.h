@@ -1,10 +1,10 @@
 #pragma once
-#include "game/player_constants.h"
+#include "players.h"
+
 #include "main/map_manager.h"
 #include "networking/network_constants.h"
 #include "networking/network_game_definitions.h"
 #include "saved_games/game_variant.h"
-#include "simulation/machine_id.h"
 
 /* structures */
 
@@ -41,7 +41,7 @@ struct s_game_options
 	bool session_host_is_dedicated;
 	bool scenario_custom;
 	int16 game_tick_rate;
-	int64 random_data;
+	int64 game_instance;
 	int32 verify_random_seed;
 	bool is_custom_map;
 	uint8 field_1D;

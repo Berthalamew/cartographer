@@ -2,6 +2,7 @@
 #include "game_engine.h"
 
 #include "saved_games/player_profile.h"
+#include "simulation/game_interface/simulation_game_action.h"
 
 /* public code */
 
@@ -25,11 +26,32 @@ c_game_engine** get_game_mode_engines()
 	return Memory::GetAddress<c_game_engine**>(0x4D8548, 0x4F3CE4);
 }
 
-c_game_engine* get_slayer_engine()
+void game_engine_game_ending(
+	void)
 {
-	return get_game_mode_engines()[_game_engine_type_slayer];
+	if (current_game_engine())
+	{
+		current_game_engine()->game_ending();
+
+		simulation_action_game_engine_globals_delete();
+		simulation_action_game_statborg_delete();
+
+		for (int16 player_absolute_index= 0; player_absolute_index<k_maximum_players; ++player_absolute_index)
+		{
+			simulation_action_game_engine_player_delete(player_absolute_index);
+		}
+	}
+
+	return;
 }
 
+bool __cdecl game_engine_is_team_ever_active(
+	e_game_team team_index)
+{
+	bool is_team_ever_active = INVOKE(0x6E858, 0x0, game_engine_is_team_ever_active, team_index);
+
+	return is_team_ever_active;
+}
 
 void __cdecl game_engine_apply_map_patches(void)
 {
@@ -74,4 +96,12 @@ void __cdecl game_engine_render(void)
 {
 	INVOKE(0x6A60F, 0x0, game_engine_render);
 	return;
+}
+
+bool game_engine_running(
+	void)
+{
+	bool result = current_game_engine() != NULL;
+
+	return result;
 }

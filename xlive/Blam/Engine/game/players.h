@@ -4,7 +4,6 @@
 #include "input/controllers.h"
 #include "memory/data.h"
 #include "networking/network_game_definitions.h"
-#include "simulation/machine_id.h"
 
 /* constants */
 
@@ -34,6 +33,13 @@ enum e_player_flags : int16
 	_player_is_tracked_target_bit,
 	_player_is_locked_target_bit,
 	k_player_flag_count,
+};
+
+/* structures */
+
+struct s_machine_identifier
+{
+	uint8 machine_identifier[6];
 };
 
 struct s_player_shot_info
@@ -205,13 +211,16 @@ void players_update_for_checkpoint(void);
 
 void players_joined_in_progress_allow_spawn(void);
 
-void clan_identifier_clear(struct s_clan_identifier* clan_id);
+bool player_identifier_is_guest(const s_player_identifier* identifier);
+
+void clan_identifier_clear(s_clan_identifier* clan_id);
 
 void player_appearance_initialize(struct s_player_appearance* player_appearance);
+bool player_appearance_valid(struct s_player_appearance const* player_appearance);
 
-char const* player_identifier_get_string(struct s_player_identifier const* player_id);
+char const* player_identifier_get_string(s_player_identifier const* player_id);
 
-char const* clan_identifier_get_string(struct s_clan_identifier const* clan_id);
+char const* clan_identifier_get_string(s_clan_identifier const* clan_id);
 
 void players_apply_patches(void);
 

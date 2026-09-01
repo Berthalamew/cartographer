@@ -8,6 +8,7 @@
 #include "memory/bitstream.h"
 #include "networking/network_event.h"
 #include "simulation/simulation.h"
+#include "simulation/simulation_encoding.h"
 
 /* prototypes */
 

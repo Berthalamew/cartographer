@@ -6,6 +6,7 @@
 
 #include "cache/cache_files.h"
 #include "simulation/game_interface/simulation_game_action.h"
+#include "simulation/game_interface/simulation_game_object_constants.h"
 
 
 /* prototypes */
@@ -133,7 +134,7 @@ void unit_add_grenade_type_to_inventory(datum unit_index, int16 grenade_type, in
 
 	// Originally the simulation did not update the grenade count when a grenade type was added to the unit's inventory
 	// We want this to be updated across the simulation
-	simulation_action_object_update(unit_index, FLAG(_simulation_action_update_grenade_count_bit));
+	simulation_action_object_update(unit_index, FLAG(_simulation_unit_update_grenade_counts_bit));
 	return;
 }
 

@@ -226,7 +226,7 @@ void player_configuration_validate_character_type(
 				if (player_starting_location->campaign_player_type != NONE)
 				{
 					configuration_data->team_index = _game_team_player;
-					configuration_data->appearance.player_character_type = (e_character_type)player_starting_location->campaign_player_type;
+					configuration_data->appearance.player_character_type.set_raw_value((int8)player_starting_location->campaign_player_type);
 					found = true;
 					break;
 				 }
@@ -289,11 +289,8 @@ void __cdecl players_validate_configuration(
 	// General character verification
 	if (configuration_data->appearance.player_character_type != NONE)
 	{
-		configuration_data->appearance.player_character_type = (e_character_type)PIN(
-			configuration_data->appearance.player_character_type,
-			_character_type_masterchief,
-			globals->player_representation.count-1
-		);
+		e_character_type type = (e_character_type)PIN(configuration_data->appearance.player_character_type, _character_type_masterchief, globals->player_representation.count-1);
+		configuration_data->appearance.player_character_type = type;
 	}
 
 	// Skill verification
@@ -428,7 +425,7 @@ void player_user_weapon_interaction_reset(void)
 
 void player_examine_nearby_weapon(datum weapon_datum, datum player_index, s_player_interaction_context* out_action_context)
 {
-	const player_datum* player = (const player_datum*)datum_get(player_data_get(), player_index);
+	const player_datum* player = player_get(player_index);
 
 	if (player->user_index != NONE)
 		if (!TEST_BIT(g_user_weapon_interactions_mask, player->user_index))
@@ -464,7 +461,7 @@ void __cdecl player_examine_nearby_control(datum control_datum, datum player_dat
 
 void __cdecl player_find_action_context(datum player_index, s_player_interaction_context* out_action_context)
 {
-	const player_datum* player = (const player_datum*)datum_get(player_data_get(), player_index);
+	const player_datum* player = player_get(player_index);
 
 	ASSERT(out_action_context);
 
@@ -627,6 +624,13 @@ void players_joined_in_progress_allow_spawn(
 	return;
 }
 
+bool player_identifier_is_guest(
+	const s_player_identifier *identifier)
+{
+	// Code returns false by default in h2v, h2x seems to have an extra field in identifier that's used for this
+	return false;
+}
+
 void clan_identifier_clear(
 	s_clan_identifier* clan_id)
 {
@@ -636,11 +640,29 @@ void clan_identifier_clear(
 }
 
 void player_appearance_initialize(
-	s_player_appearance* player_appearance)
+	struct s_player_appearance* player_appearance)
 {
 	csmemset(player_appearance, 0, sizeof(*player_appearance));
 
 	return;
+}
+
+bool player_appearance_valid(
+	struct s_player_appearance const* player_appearance)
+{
+	bool valid = true;
+
+	for (int32 cc_index = 0; cc_index<NUMBEROF(player_appearance->change_color_index); ++cc_index)
+	{
+		valid = valid && player_appearance->change_color_index[cc_index].in_range();
+	}
+
+	valid = valid && player_appearance->player_character_type.in_range();
+	valid = valid && VALID_INDEX(player_appearance->emblem_info.foreground_emblem, k_emblem_foreground_count);
+	valid = valid && VALID_INDEX(player_appearance->emblem_info.background_emblem, k_emblem_background_count);
+	valid = valid && player_appearance->emblem_info.emblem_flags.valid();
+
+	return valid;
 }
 
 char const* player_identifier_get_string(

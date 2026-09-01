@@ -81,10 +81,6 @@ enum e_network_session_type : uint32
 	k_network_session_type_count,
 };
 
-/* constants */
-
-extern const char* const k_network_protocols_text[];
-
 // THE FOLLOWING FUNCTIONS ARE NOW DEPRECATED, AND WILL BE REMOVED EVENTUALLY
 // WHEN PORTING IS FINISHED
 // USE/IMPLEMENT THE HELPER FUNCTIONS IN THE c_network_session CLASS !!!!!!
@@ -148,7 +144,6 @@ public:
 
 // END CARTOGRAPHER ADDITION
 
-#pragma pack(push, 1)
 struct s_session_peer
 {
 	bool peer_valid;
@@ -164,6 +159,7 @@ struct s_session_peer
 };
 ASSERT_STRUCT_SIZE(s_session_peer, 28);
 
+#pragma pack(push, 1)
 struct s_session_virtual_couch
 {
 	uint32 incremental_update_number;
@@ -171,15 +167,16 @@ struct s_session_virtual_couch
 	XSESSION_INFO xsession_info;
 	char pad[3];
 	uint32 xuid_count;
-	uint64 player_ids[k_maximum_players];
+	s_player_identifier player_ids[k_maximum_players];
 };
 ASSERT_STRUCT_SIZE(s_session_virtual_couch, 200);
+#pragma pack(pop)
 
 struct s_session_parameters
 {
 	uint32 parameters_update_number;
 	uint8 gap_4C64[4];
-	int32 session_mode;
+	e_network_session_mode session_mode;
 	uint32 gap_4C6C;
 	uint32 system_language_id;
 	bool dedicated_server;
@@ -330,18 +327,345 @@ ASSERT_STRUCT_SIZE(s_session_interface_globals, 0x638);
 class c_network_session
 {
 public:
+	bool initialize_session(
+		int32 session_index,
+		e_network_session_type session_type,
+		int32 session_transport_index,
+		class c_network_message_gateway* message_gateway,
+		class c_network_observer* observer,
+		class c_network_session_manager* session_manager,
+		class c_network_text_chat_manager* text_chat_manager);
+
+	s_session_membership const* get_session_membership(int32* out_local_peer_index, int32* out_session_host_peer_index) const;
+	s_session_membership const* get_session_membership_unsafe(int32* out_local_peer_index, int32* out_session_host_peer_index) const;
+	int32 get_session_membership_update_number(void) const;
+	int32 get_local_session_membership_update_number(void) const;
+
+
+	bool channel_is_authoritative(int32 network_channel_index) const;
+
+	// switch multiple players with a single membership update
+	void switch_players_to_teams(datum* player_indexes, int32 player_count, e_game_team* team_indexes);
+	bool get_secure_key(s_transport_secure_identifier* session_id, s_transport_secure_key* key, int32* out_session_key_index, e_transport_platform* platform) const;
+	bool get_transport_session_id(s_transport_secure_identifier* out_session_id) const;
+	uint32 time_get(void) const;
+
+	static char const* get_type_string(e_network_session_type session_type);
+	static char const* get_class_string(e_network_session_class session_class);
+	
+	char const* get_state_string(void) const;
+	char const* get_mode_string(void) const;
+
+	bool handle_leave_request(const struct transport_address* incoming_address);
+
+	bool handle_leave_internal(int32 peer_index);
+
+	s_session_parameters const* get_session_parameters(void) const;
+	s_session_parameters* get_session_parameters(void);
+
+	int32 session_index(
+		void) const
+	{
+		return m_session_index;
+	}
+
+	e_network_observer_owner observer_owner(
+		void) const
+	{
+		ASSERT(m_session_index>=0 && m_session_index<k_network_maximum_sessions);
+
+		return (e_network_observer_owner)m_session_index;
+	}
+
+	e_network_session_class session_class(
+		void) const
+	{
+		return m_session_class;
+	}
+
+	int32 managed_session_index(
+		void) const
+	{
+		ASSERT(m_session_index!=NONE);
+
+		return m_session_index;
+	}
+
+	int32 current_local_state(
+		void) const
+	{
+		ASSERT(m_local_state>=0 && m_local_state<k_network_session_state_count);
+
+		return m_local_state;
+	}
+
+	bool is_host(
+		void) const
+	{
+		bool result = false;
+		const e_network_session_state state = (e_network_session_state)current_local_state();
+
+		if (state == _network_session_state_host_established ||
+			state == _network_session_state_host_disband ||
+			state == _network_session_state_host_handoff ||
+			state == _network_session_state_host_reestablish)
+		{
+			result = true;
+			ASSERT(m_local_peer_index == m_session_host_peer_index);
+		}
+		else if (established())
+		{
+			ASSERT(m_local_peer_index != m_session_host_peer_index);
+		}
+
+		return result;
+	}
+
+	bool established(
+		void) const
+	{
+		bool result = false;
+
+		switch (current_local_state())
+		{
+		case _network_session_state_none:
+		case _network_session_state_peer_joining:
+		case _network_session_state_peer_join_abort:
+		case _network_session_state_election:
+		case _network_session_state_dead:
+			result = false;
+			break;
+		case _network_session_state_peer_established:
+		case _network_session_state_peer_leaving:
+		case _network_session_state_host_established:
+		case _network_session_state_host_disband:
+		case _network_session_state_host_handoff:
+		case _network_session_state_host_reestablish:
+			result = true;
+			break;
+		default:
+			unreachable();
+		}
+
+		return result;
+	}
+
+	bool peer_joining(
+		void) const
+	{
+		return current_local_state() == _network_session_state_peer_joining;
+	}
+
+	bool leaving_session(
+		void) const
+	{
+		bool leaving = false;
+
+		switch (m_local_state)
+		{
+		case _network_session_state_peer_join_abort:
+		case _network_session_state_peer_leaving:
+		case _network_session_state_host_disband:
+			leaving = true;
+			break;
+		case _network_session_state_host_handoff:
+		case _network_session_state_host_reestablish:
+			leaving = field_73A4;
+			break;
+		default:
+			break;
+		}
+
+		return leaving;
+	}
+	bool disconnected(
+		void) const
+	{
+		return current_local_state() == _network_session_state_none;
+	}
+
+	c_network_observer const* get_observer(
+		void) const
+	{
+		return m_network_observer;
+	}
+
+	c_network_observer* get_observer(
+		void)
+	{
+		return m_network_observer;
+	}
+
+	int32 host_peer_index(
+		void) const
+	{
+		return m_session_host_peer_index;
+	}
+
+	int32 local_peer_index(
+		void) const
+	{
+		return m_local_peer_index;
+	}
+
+	s_network_session_peer* get_peer_membership(int32 peer_index)
+	{
+		return &m_session_membership.peers[peer_index];
+	}
+
+	s_network_session_player* get_player_membership(datum player_index)
+	{
+		return &m_session_membership.players[DATUM_INDEX_TO_ABSOLUTE_INDEX(player_index)];
+	}
+
+	s_session_peer* get_session_peer(int32 peer_index)
+	{
+		return &m_session_peers[peer_index];
+	}
+
+	int32 get_peer_count(
+		void) const
+	{
+		return m_session_membership.peer_count;
+	}
+
+	int32 get_player_count(
+		void) const
+	{
+		return m_session_membership.player_count;
+	}
+
+	s_player_identifier get_player_id(datum player_index)
+	{
+		return get_player_membership(player_index)->identifier;
+	}
+
+	const wchar_t* get_player_name(datum player_index)
+	{
+		return get_player_membership(player_index)->configuration.player_name;
+	}
+
+	bool has_membership(
+		void) const
+	{
+		return m_session_membership.update_number != NONE;
+	}
+
+	bool leaving() const
+	{
+		bool result = false;
+
+		switch (current_local_state())
+		{
+		case _network_session_state_peer_join_abort:
+		case _network_session_state_peer_leaving:
+		case _network_session_state_host_disband:
+			result = true;
+			break;
+		case _network_session_state_host_handoff:
+		case _network_session_state_host_reestablish:
+			result = field_73A4;
+			break;
+		default:
+			break;
+		}
+
+		return result;
+	}
+
+	bool is_peer_local(int32 peer_index) const
+	{
+		return local_peer_index() == peer_index;
+	}
+
+	bool is_peer_session_host(int32 peer_index) const
+	{
+		return host_peer_index() == peer_index;
+	}
+
+	bool is_local_peer_session_leader() const
+	{
+		return m_session_membership.session_leader_peer_index == m_local_peer_index;
+	}
+
+	bool is_session_player_active(datum player_index) const
+	{
+		return TEST_BIT(m_session_membership.player_valid_flags, DATUM_INDEX_TO_ABSOLUTE_INDEX(player_index));
+	}
+
+	int32 get_peer_index_from_address(const struct transport_address* address)
+	{
+		return INVOKE_BY_TYPE(0x1C71DF, 0x19E9CF, int32(__thiscall*)(c_network_session*, const struct transport_address*), this, address);
+	}
+
+	void request_membership_update()
+	{
+		m_session_membership.update_number++;
+		m_local_membership_update_number++;
+	}
+
+	e_network_session_mode session_mode(
+		void) const
+	{
+		return m_session_parameters.session_mode;
+	}
+
+	void switch_player_team(datum player_index, e_game_team team_index)
+	{
+		if (is_host())
+		{
+			request_membership_update();
+			get_player_membership(player_index)->configuration.team_index = (int8)team_index;
+		}
+	}
+
+	int32 get_peer_index_by_observer_index(int32 observer_index) const
+	{
+		int32 peer_index = NONE;
+
+		for (int32 i = 0; i < k_network_maximum_machines_per_session; i++)
+		{
+			const s_session_peer* peer = &m_session_peers[i];
+			if (peer->peer_valid && peer->observer_channel_index == observer_index)
+			{
+				peer_index = i;
+				break;
+			}
+		}
+
+		return peer_index;
+	}
+
+	bool is_session_class_online() const
+	{
+		return m_session_class == _network_session_class_xbox_live;
+	}
+	
+	bool time_exists(
+		void) const
+	{
+		return m_time_exists;
+	}
+
+	s_session_virtual_couch const *get_session_virtual_couch(
+		void) const
+	{
+		return &m_session_virtual_couch;
+	}
+
+private:
 	void* vtbl;
 	void* m_network_message_gateway;
 	class c_network_observer* m_network_observer;
 	void* m_session_manager;
 	uint32 field_10;
-	e_network_observer_owner m_session_index;
-	int32 m_session_type;
+	int32 m_session_index;
+	e_network_session_type m_session_type;
 	e_network_session_class m_session_class;
 	s_transport_secure_identifier m_session_id;
 	wchar_t field_28[16];
 	bool m_field_48;
-	XNKEY m_session_key;
+	s_transport_secure_key m_session_key;
 	char pad[3];
 	int32 m_session_transport_index;
 	e_transport_platform m_session_transport_platform;
@@ -355,9 +679,9 @@ public:
 	s_session_virtual_couch m_session_transmitted_virtual_couch;
 
 	/* unused and unfinished leftover voting system */
-	s_session_vote m_session_voting_data; 
-	s_session_vote m_session_transmitted_voting_data; 
-	
+	s_session_vote m_session_voting_data;
+	s_session_vote m_session_transmitted_voting_data;
+
 	uint8 gap_4B84[64];
 	s_session_parameters m_session_parameters;
 	s_session_parameters m_session_transmitted_parameters;
@@ -365,7 +689,8 @@ public:
 	int32 m_local_peer_index;
 	s_session_peer m_session_peers[k_network_maximum_machines_per_session];
 	e_network_session_state m_local_state;
-	uint32 field_73A4;
+	bool field_73A4;
+	int8 pad1[3];
 	uint32 field_73A8;
 	uint32 field_73AC;
 	uint32 possible_new_peer_host_index;
@@ -399,7 +724,7 @@ public:
 	uint32 field_7924;
 	uint32 total_join_request_attempts;
 	uint32 last_time_join_request_sent;
-	uint32 local_membership_update_number;
+	uint32 m_local_membership_update_number;
 	uint32 field_7934;
 	uint32 field_7938;
 	int32 field_793C;
@@ -425,298 +750,14 @@ public:
 	uint32 m_time;
 	char field_7B7D[4];
 
-	bool initialize_session(
-		int32 session_index,
-		e_network_session_type session_type,
-		int32 session_transport_index,
-		class c_network_message_gateway* message_gateway,
-		class c_network_observer* observer,
-		class c_network_session_manager* session_manager,
-		class c_network_text_chat_manager* text_chat_manager);
-
-	bool channel_is_authoritative(int32 network_channel_index) const;
-
-	s_session_parameters const* get_session_parameters(void) const;
-	s_session_parameters* get_session_parameters(void);
-
-	e_network_session_state current_local_state() const
-	{
-		ASSERT(VALID_INDEX(m_local_state, k_network_session_state_count));
-		return m_local_state;
-	}
-
-	s_network_session_peer* get_peer_membership(int32 peer_index)
-	{
-		return &m_session_membership.peers[peer_index];
-	}
-
-	s_network_session_player* get_player_membership(datum player_index)
-	{
-		return &m_session_membership.players[DATUM_INDEX_TO_ABSOLUTE_INDEX(player_index)];
-	}
-
-	s_session_peer* get_session_peer(int32 peer_index)
-	{
-		return &m_session_peers[peer_index];
-	}
-
-	int32 get_peer_count() const
-	{
-		return m_session_membership.peer_count;
-	}
-
-	int32 get_player_count() const
-	{
-		return m_session_membership.player_count;
-	}
-
-	s_player_identifier get_player_id(datum player_index)
-	{
-		return get_player_membership(player_index)->identifier;
-	}
-
-	const wchar_t* get_player_name(datum player_index)
-	{
-		return get_player_membership(player_index)->configuration.player_name;
-	}
-
-	int32 get_local_peer_index() const
-	{
-		return m_local_peer_index;
-	}
-
-	const wchar_t* get_game_variant_name() const
-	{
-		return m_session_parameters.game_variant.variant_name;
-	}
-
-	int32 get_session_host_peer_index() const
-	{
-		return m_session_host_peer_index;
-	}
-
-	bool peer_index_local_peer(int32 peer_index) const
-	{
-		return get_local_peer_index() == peer_index;
-	}
-
-	bool disconnected(void) const
-	{
-		return current_local_state() == _network_session_state_none;
-	}
-
-	bool has_membership(void) const
-	{
-		return m_session_membership.update_number != NONE;
-	}
-
-	bool established(void)
-	{
-		bool result = false;
-		switch (current_local_state())
-		{
-		case _network_session_state_none:
-		case _network_session_state_peer_joining:
-		case _network_session_state_peer_join_abort:
-		case _network_session_state_election:
-		case _network_session_state_dead:
-			result = false;
-			break;
-		case _network_session_state_peer_established:
-		case _network_session_state_peer_leaving:
-		case _network_session_state_host_established:
-		case _network_session_state_host_disband:
-		case _network_session_state_host_handoff:
-		case _network_session_state_host_reestablish:
-			result = true;
-			break;
-		default:
-			unreachable();
-		}
-
-		return result;
-	}
-
-	bool leaving() const
-	{
-		bool result = false;
-
-		switch (current_local_state())
-		{
-		case _network_session_state_peer_join_abort:
-		case _network_session_state_peer_leaving:
-		case _network_session_state_host_disband:
-			result = true;
-			break;
-		case _network_session_state_host_handoff:
-		case _network_session_state_host_reestablish:
-			result = field_73A4;
-			break;
-		default:
-			break;
-		}
-
-		return result;
-	}
-
-	bool is_host(void) const
-	{
-		bool result = false;
-		const e_network_session_state state = current_local_state();
-
-		if (state == _network_session_state_host_established ||
-			state == _network_session_state_host_disband ||
-			state == _network_session_state_host_handoff ||
-			state == _network_session_state_host_reestablish)
-		{
-			result = true;
-			ASSERT(m_local_peer_index == m_session_host_peer_index);
-		}
-		else if (established())
-		{
-			ASSERT(m_local_peer_index != m_session_host_peer_index);
-		}
-
-		return result;
-	}
-
-	bool is_peer_local(int32 peer_index) const
-	{
-		return get_local_peer_index() == peer_index;
-	}
-
-	bool is_peer_session_host(int32 peer_index) const
-	{
-		return get_session_host_peer_index() == peer_index;
-	}
-
-	bool peer_joining() const
-	{
-		return current_local_state() == _network_session_state_peer_joining;
-	}
-
-	bool established() const
-	{
-		bool result = false;
-
-		switch (current_local_state())
-		{
-		case _network_session_state_none:
-		case _network_session_state_peer_joining:
-		case _network_session_state_peer_join_abort:
-		case _network_session_state_election:
-		case _network_session_state_dead:
-			result = false;
-			break;
-
-		case _network_session_state_peer_established:
-		case _network_session_state_peer_leaving:
-		case _network_session_state_host_established:
-		case _network_session_state_host_disband:
-		case _network_session_state_host_handoff:
-		case _network_session_state_host_reestablish:
-			result = true;
-			break;
-		
-		default:
-			unreachable();
-			break;
-		}
-
-		return result;
-	}
-
-	bool is_local_peer_session_leader() const
-	{
-		return m_session_membership.session_leader_peer_index == m_local_peer_index;
-	}
-
-	bool is_session_player_active(datum player_index) const
-	{
-		return TEST_BIT(m_session_membership.player_valid_flags, DATUM_INDEX_TO_ABSOLUTE_INDEX(player_index));
-	}
-
-	int32 get_peer_index_from_address(const struct transport_address* address)
-	{
-		return INVOKE_BY_TYPE(0x1C71DF, 0x19E9CF, int32(__thiscall*)(c_network_session*, const struct transport_address*), this, address);
-	}
-
-	void request_membership_update()
-	{
-		this->m_session_membership.update_number++;
-		this->local_membership_update_number++;
-	}
-
-	int32 session_mode() const
-	{
-		return m_session_parameters.session_mode;
-	}
-
-	void switch_player_team(datum player_index, e_game_team team_index)
-	{
-		if (is_host())
-		{
-			request_membership_update();
-			get_player_membership(player_index)->configuration.team_index = (int8)team_index;
-		}
-	}
-
-	// switch multiple players with a single membership update
-	void switch_players_to_teams(datum* player_indexes, int32 player_count, e_game_team* team_indexes);
-
-	int32 get_peer_index_by_observer_index(int32 observer_index) const
-	{
-		int32 peer_index = NONE;
-
-		for (int32 i = 0; i < k_network_maximum_machines_per_session; i++)
-		{
-			const s_session_peer* peer = &m_session_peers[i];
-			if (peer->peer_valid && peer->observer_channel_index == observer_index)
-			{
-				peer_index = i;
-				break;
-			}
-		}
-
-		return peer_index;
-	}
-
-	bool is_session_class_online() const
-	{
-		return m_session_class == _network_session_class_xbox_live;
-	}
-	
-	bool time_exists(
-		void) const
-	{
-		return m_time_exists;
-	}
-
-
-	bool get_secure_key(s_transport_secure_identifier* out_session_id, XNKEY* out_session_key, int32* out_session_key_index, e_transport_platform* transport_platform) const;
-	bool get_transport_session_id(s_transport_secure_identifier* out_session_id) const;
-	uint32 time_get(void) const;
-	
-	const char* describe_network_protocol_type() const
-	{
-		return VALID_INDEX(this->m_session_class, k_network_session_class_count) ? k_network_protocols_text[this->m_session_class] : "<unknown>";
-	}
-
-	bool handle_leave_request(const struct transport_address* incoming_address);
-
-	bool handle_leave_internal(int32 peer_index);
-
-private:
 	const char* get_peer_description(int32 peer_index) const;
 
 	int32 get_peer_from_incoming_address(const transport_address* incoming_address) const;
 	
 	int32 get_peer_from_secure_address(const s_transport_secure_address* secure_address) const;
 };
+
 ASSERT_STRUCT_SIZE(c_network_session, 31624);
-ASSERT_STRUCT_OFFSET(c_network_session, m_session_membership, 0x70);
-ASSERT_STRUCT_OFFSET(c_network_session, m_session_parameters, 0x4C60);
-#pragma pack(pop)
 
 /* prototypes */
 
@@ -726,7 +767,7 @@ void network_session_apply_patches();
 
 void network_session_membership_update_local_players_teams();
 
-e_network_session_class network_squad_session_get_session_class();
+e_network_session_class network_squad_session_get_session_class(void);
 bool network_session_interface_set_local_user_character_type(int32 user_index, e_character_type character_type);
 bool network_session_interface_get_local_user_identifier(int32 user_index, s_player_identifier* out_identifier);
 void network_session_interface_set_local_user_rank(int32 user_index, int8 rank);

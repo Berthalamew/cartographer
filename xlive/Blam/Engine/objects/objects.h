@@ -194,9 +194,9 @@ struct _object_datum
 	datum damage_owner_object_index;
 	datum cached_render_state_index;
 	int16 structure_bsp_fake_lightprobe_index;
-	int8 model_variant_id;					// hlmt variant tag_block index
+	int8 variant_index;			// hlmt variant tag_block index
 	int8 gap_D3;
-	int32 simulation_entity_index;
+	int32 gamestate_index;			// originally entity_index
 	c_flags_no_init<e_object_simulation_flags, uint8, k_object_simulation_flags_count> simulation_flags;
 	int8 gap_D9[3];
 	datum object_projectile_datum;
@@ -377,7 +377,9 @@ void __cdecl objects_move(void);
 
 datum __cdecl object_new(object_placement_data* data);
 
-void __cdecl object_delete(datum object_idx);
+void __cdecl object_delete(int32 object_index);
+
+void object_delete_immediately(int32 object_index);
 
 real_point3d* __cdecl object_get_center_of_mass(datum object_index, real_point3d* point);
 
@@ -444,6 +446,9 @@ bool __cdecl object_force_inside_bsp(datum object_index, const real_point3d* kno
 void* object_get_and_verify_type(datum object_index, int32 object_type_mask);
 
 datum object_get_ultimate_parent(datum object_index);
+
+void object_attach_gamestate_entity(int32 object_index, int32 gamestate_index);
+void object_detach_gamestate_entity(int32 object_index, int32 gamestate_index);
 
 #ifdef OBJECT_DEBUG
 void objects_information_get(objects_information* information);

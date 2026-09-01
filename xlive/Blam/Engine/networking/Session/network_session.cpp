@@ -12,12 +12,40 @@
 
 /* constants */
 
-const char* const k_network_protocols_text[] =
+
+static char const* g_session_type_strings[k_network_session_type_count] = { "none", "squad" };
+
+static char const* g_session_state_strings[k_network_session_state_count] = 
 {
-	"<disconnected>",
-	"System-Link",
-	"LIVE",
+	"none",
+	"peer-joining",
+	"peer-join-abort",
+	"peer-established",
+	"peer-leaving",
+	"host-established",
+	"host-disband",
+	"host-handoff",
+	"host-reestablish",
+	"election",
+	"dead"
 };
+
+static const char* g_session_class_strings[k_network_session_class_count] = { "offline", "system-link", "xbox-live" };
+
+static const char* g_session_mode_strings[k_network_session_mode_count] =
+{
+	"none",
+	"idle",
+	"setup",
+	"ready",
+	"in-game",
+	"post-game",
+	"migration-start",
+	"migration-joining",
+	"migration-waiting",
+	"migration-disbanding",
+};
+
 
 /* gloabls */
 
@@ -90,12 +118,12 @@ bool NetworkSession::GetMapFileLocation(wchar_t* buffer, size_t size)
 
 int32 NetworkSession::GetPeerCount()
 {
-	return GetActiveNetworkSession()->m_session_membership.peer_count;
+	return GetActiveNetworkSession()->get_session_membership(NULL, NULL)->peer_count;
 }
 
 int32 NetworkSession::GetLocalPeerIndex()
 {
-	return GetActiveNetworkSession()->get_local_peer_index();
+	return GetActiveNetworkSession()->local_peer_index();
 }
 
 int32 NetworkSession::GetPeerIndex(datum player_index)
@@ -142,7 +170,7 @@ void NetworkSession::EndGame()
 
 wchar_t* NetworkSession::GetGameVariantName()
 {
-	return GetActiveNetworkSession()->m_session_parameters.game_variant.variant_name;
+	return GetActiveNetworkSession()->get_session_parameters()->game_variant.variant_name;
 }
 
 void NetworkSession::LeaveSession()
@@ -175,35 +203,42 @@ s_session_interface_user* session_interface_get_local_user_properties(int32 user
 	return &s_session_interface_globals::get()->users[user_index];
 }
 
-e_network_session_class network_squad_session_get_session_class()
+e_network_session_class network_squad_session_get_session_class(
+	void)
 {
 	//return INVOKE(0x1B1643, 0x0, network_squad_session_get_session_class);
 
 	e_network_session_class out_class = _network_session_class_unknown;
 	c_network_session* session = NULL;
+	
 	if (network_life_cycle_in_squad_session(&session))
 	{
 		if (session->established())
 		{
-			out_class = session->m_session_class;
+			out_class = session->session_class();
 		}
 	}
+
 	return out_class;
 }
 
 
-bool network_session_interface_set_local_user_character_type(int32 user_index, e_character_type character_type)
+bool network_session_interface_set_local_user_character_type(
+	int32 user_index,
+	e_character_type character_type)
 {
+	bool result = false;
+
 	s_session_interface_user* user_properties = session_interface_get_local_user_properties(user_index);
 	
 	// Don't change the character type if the user doesn't exist
 	if (user_properties->user_exists)
 	{
 		user_properties->properties.appearance.player_character_type = character_type;
-		return true;
+		result = true;
 	}
 
-	return false;
+	return result;
 }
 
 bool network_session_interface_get_local_user_identifier(int32 user_index, s_player_identifier* out_identifier)
@@ -246,7 +281,7 @@ void network_session_membership_update_local_players_teams()
 	{
 		if (session->established() || session->peer_joining())
 		{
-			int32 local_peer_index = session->get_local_peer_index();
+			int32 local_peer_index = session->local_peer_index();
 
 			if (session->get_session_parameters()->game_variant.game_engine_flags.test(_game_engine_teams_bit))
 			{
@@ -278,7 +313,7 @@ void network_session_set_player_team(datum player_index, e_game_team team)
 			s_network_session_player* membership_player = session->get_player_membership(player_index);
 			membership_player->configuration.team_index = (int8)team;
 
-			if (session->peer_index_local_peer(membership_player->peer_index))
+			if (session->local_peer_index()==membership_player->peer_index)
 			{
 				user_interface_controller_set_desired_team_index((e_controller_index)membership_player->controller_index, (e_game_team)membership_player->configuration.team_index);
 				user_interface_controller_update_network_properties((e_controller_index)membership_player->controller_index);
@@ -307,7 +342,76 @@ bool c_network_session::initialize_session(
 		text_chat_manager);
 }
 
-bool c_network_session::channel_is_authoritative(int32 network_channel_index) const
+s_session_membership const* c_network_session::get_session_membership(
+	int32* out_local_peer_index,
+	int32* out_session_host_peer_index) const
+{
+	ASSERT(established());
+	ASSERT(m_session_membership.update_number!=NONE);
+	ASSERT(m_local_peer_index>=0 && m_local_peer_index<m_session_membership.peer_count);
+	ASSERT(m_session_host_peer_index>=0 && m_session_host_peer_index<m_session_membership.peer_count);
+
+	if (out_local_peer_index)
+	{
+		*out_local_peer_index = m_local_peer_index;
+	}
+
+	if (out_session_host_peer_index)
+	{
+		*out_session_host_peer_index = m_session_host_peer_index;
+	}
+	
+	return &m_session_membership;
+}
+
+s_session_membership const* c_network_session::get_session_membership_unsafe(
+	int32* out_local_peer_index,
+	int32* out_session_host_peer_index) const
+{
+	int32 local_peer_index = NONE;
+	int32 session_host_peer_index = NONE;
+	const s_session_membership* membership = NULL;
+
+	if (current_local_state() && m_session_membership.update_number != NONE)
+	{
+		ASSERT(m_local_peer_index>=0 && m_local_peer_index<m_session_membership.peer_count);
+		ASSERT(m_session_host_peer_index>=0 && m_session_host_peer_index<m_session_membership.peer_count);
+
+		local_peer_index = m_local_peer_index;
+		session_host_peer_index = m_session_host_peer_index;
+		membership = &m_session_membership;
+	}
+
+	if (out_local_peer_index)
+	{
+		*out_local_peer_index = local_peer_index;
+	}
+
+	if (out_session_host_peer_index)
+	{
+		*out_session_host_peer_index = session_host_peer_index;
+	}
+
+	return membership;
+}
+
+int32 c_network_session::get_session_membership_update_number(
+	void) const
+{
+	ASSERT(established());
+	ASSERT(m_session_membership.update_number!=NONE);
+
+	return m_session_membership.update_number;
+}
+
+int32 c_network_session::get_local_session_membership_update_number(
+	void) const
+{
+	return m_local_membership_update_number;
+}
+
+bool c_network_session::channel_is_authoritative(
+	int32 network_channel_index) const
 {
 	bool result = false;
 
@@ -339,20 +443,24 @@ void c_network_session::switch_players_to_teams(datum* player_indexes, int32 pla
 	}
 }
 
-bool c_network_session::get_secure_key(s_transport_secure_identifier* out_session_id, XNKEY* out_session_key, int32* out_session_key_index, e_transport_platform* transport_platform) const
+bool c_network_session::get_secure_key(
+	s_transport_secure_identifier* session_id, 
+	s_transport_secure_key* key,
+	int32* out_session_key_index,
+	e_transport_platform* platform) const
 {
 	bool result = false;
 
 	if (!disconnected() && m_field_48)
 	{
-		if (out_session_id != NULL)
+		if (session_id != NULL)
 		{
-			*out_session_id = m_session_id;
+			*session_id = m_session_id;
 		}
 
-		if (out_session_key != NULL)
+		if (key != NULL)
 		{
-			*out_session_key = m_session_key;
+			*key = m_session_key;
 		}
 
 		if (out_session_key_index != NULL)
@@ -360,9 +468,9 @@ bool c_network_session::get_secure_key(s_transport_secure_identifier* out_sessio
 			*out_session_key_index = m_session_transport_index;
 		}
 
-		if (transport_platform != NULL)
+		if (platform != NULL)
 		{
-			*transport_platform = m_session_transport_platform;
+			*platform = m_session_transport_platform;
 		}
 
 		result = true;
@@ -376,10 +484,48 @@ bool c_network_session::get_transport_session_id(s_transport_secure_identifier* 
 	return get_secure_key(out_session_id, NULL, NULL, NULL);
 }
 
-uint32 c_network_session::time_get(void) const
+uint32 c_network_session::time_get(
+	void) const
 {
 	ASSERT(m_time_exists);
+	
 	return m_time + network_time_get_exact();
+}
+
+char const* c_network_session::get_type_string(
+	e_network_session_type session_type)
+{
+	char const* class_string = session_type <= k_network_session_type_count ? g_session_type_strings[session_type] : "<unknown>";
+
+	return class_string;
+}
+
+char const* c_network_session::get_class_string(
+	e_network_session_class session_class)
+{
+	char const* class_string = session_class <= k_network_session_class_count ? g_session_class_strings[session_class] : "<unknown>";
+
+	return class_string;
+}
+
+char const* c_network_session::get_state_string(
+	void) const
+{
+	int32 current_state = current_local_state();
+
+	ASSERT(current_state>=0 && current_state<k_network_session_state_count);
+
+	return g_session_state_strings[current_state];
+}
+
+char const* c_network_session::get_mode_string(
+	void) const
+{
+	e_network_session_mode current_mode = session_mode();
+
+	ASSERT(current_mode>=0 && current_mode<k_network_session_mode_count);
+
+	return g_session_mode_strings[current_mode];
 }
 
 bool c_network_session::handle_leave_request(const transport_address* incoming_address)
@@ -429,10 +575,10 @@ s_session_parameters* c_network_session::get_session_parameters(
 	return &m_session_parameters;
 }
 
-
 /* private code */
 
-const char* c_network_session::get_peer_description(int32 peer_index) const
+const char* c_network_session::get_peer_description(
+	int32 peer_index) const
 {
 	char* result = g_network_session_peer_description[g_network_session_peer_description_index];
 	g_network_session_peer_description_index = (g_network_session_peer_description_index + 1) % 2;
@@ -440,16 +586,18 @@ const char* c_network_session::get_peer_description(int32 peer_index) const
 	if (established() && VALID_INDEX(peer_index, m_session_membership.peer_count) && m_session_membership.peers[peer_index].description[0] != '\0')
 	{
 		const char* mac_string = transport_secure_address_get_mac_string(&m_session_membership.peers[peer_index].secure_address);
-		csprintf(result, 35, "#%02d:%S:%s", peer_index, m_session_membership.peers[peer_index].description[0], mac_string);
+		csprintf(result, NUMBEROF(g_network_session_peer_description[0]), "#%02d:%S:%s", peer_index, m_session_membership.peers[peer_index].description, mac_string);
 	}
 	else
 	{
-		csprintf(result, 35, "#%02d", peer_index);
+		csprintf(result, NUMBEROF(g_network_session_peer_description[0]), "#%02d", peer_index);
 	}
+
 	return result;
 }
 
-int32 c_network_session::get_peer_from_incoming_address(const transport_address* incoming_address) const
+int32 c_network_session::get_peer_from_incoming_address(
+	const transport_address* incoming_address) const
 {
 	ASSERT(incoming_address);
 
@@ -462,10 +610,12 @@ int32 c_network_session::get_peer_from_incoming_address(const transport_address*
 			result = get_peer_from_secure_address(&secure_address);
 		}
 	}
+
 	return result;
 }
 
-int32 c_network_session::get_peer_from_secure_address(const s_transport_secure_address* secure_address) const
+int32 c_network_session::get_peer_from_secure_address(
+	const s_transport_secure_address* secure_address) const
 {
 	ASSERT(secure_address);
 	

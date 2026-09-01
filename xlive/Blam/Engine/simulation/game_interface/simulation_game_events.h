@@ -63,5 +63,5 @@ public:
 	virtual int32 write_description_to_string(int a2, int a3, uint32 a4, int a5, char* a6);
 	virtual bool encode(int32 payload_size, void* data, class c_bitstream* packet);
 	virtual bool decode(int32 payload_size, void* data, class c_bitstream* packet);
-	virtual bool perform(int32 entity_reference_count, int32* entity_references, uint32 payload_size, uint8* data);
+	virtual bool apply_game_event(int32 entity_reference_count, const int32* gamestate_indices, int32 payload_size, uint8* data);
 };

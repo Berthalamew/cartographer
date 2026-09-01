@@ -3,9 +3,11 @@
 #include "game_statborg.h"
 #include "player_constants.h"
 
+#include "game/player_constants.h"
 #include "main/game_preferences.h"
 #include "math/color_math.h"
 #include "saved_games/game_variant.h"
+#include "simulation/game_interface/simulation_game_entities.h"
 #include "tag_files/tag_block.h"
 #include "tag_files/tag_reference.h"
 
@@ -251,8 +253,8 @@ public:
 	virtual void unk_function_9(int arg1) = 0;
 	virtual void unk_function_players_2(int arg1, int arg2) = 0;
 	virtual void unk_function_11(int arg1) = 0;
-	virtual void unk_function_12() = 0;
-	virtual void unk_function_13() = 0;
+	virtual void game_ending(void) = 0;
+	virtual void game_starting(void) = 0;
 	virtual void unk_function_14(int arg1) = 0;
 
 	/* Render 3d objects (e.g hologram around hill in KotH) */
@@ -281,7 +283,7 @@ public:
 	virtual void unk_function_37(int arg1) = 0;
 	virtual int unk_function_38(int arg1, int arg2) = 0;
 	virtual bool should_garbage_collect(int arg1) = 0;
-	virtual void unk_function_40() = 0;
+	virtual e_simulation_entity_type get_game_engine_entity_type(void);
 	virtual void unk_function_41() = 0;
 	virtual void* unk_function_42(void* arg1) = 0;
 	virtual void* unk_function_43(char a1, size_t* a2, void* a3) = 0;
@@ -290,8 +292,8 @@ public:
 	virtual int unk_function_46(char a1, int a2, int a3) = 0;
 	virtual bool unk_function_47(char a1, int a2, int a3) = 0;
 	virtual void* unk_function_48(int a1, int a2, void* a3) = 0;
-	virtual void unk_function_49(int arg1, int arg2, int arg3, int arg4) = 0;
-	virtual bool unk_function_50(__int16 a1, __int16 a2, int a3, int a4) = 0;
+	virtual void build_player_update(int arg1, int arg2, int arg3, int arg4) = 0;
+	virtual bool apply_player_update(int16 player_absolute_index, uint32 update_mask, int32 state_data_size, void const* state_data) = 0;
 	virtual int unk_function_51(int arg1, int arg2, int arg3, int arg4, int arg5) = 0;
 private:
 };
@@ -329,9 +331,9 @@ struct s_game_engine_globals
 	int16 field_E;
 	uint16 field_10;
 	uint16 field_12[8];
-	uint32 field_24;
-	uint32 field_28;
-	int32 player_entity_index[k_maximum_players];
+	int32 game_engine_gamestate_index;					// Previously: game_engine_entity_index
+	int32 statborg_gamestate_index;						// Previously: statborg_entity_index
+	int32 player_gamestate_indices[k_maximum_players];	// Previously: entity_indices
 	int16 field_6C;
 	uint32 field_70;
 	uint32 gap_74[28];
@@ -401,6 +403,10 @@ s_game_engine_globals* game_engine_globals_get(void);
 
 c_game_engine** get_game_mode_engines(void);
 
+void game_engine_game_ending(void);
+
+bool __cdecl game_engine_is_team_ever_active(e_game_team team_index);
+
 s_simulation_player_netdebug_data* game_engine_get_netdebug_data(datum player_index);
 
 void __cdecl game_engine_apply_map_patches(void);
@@ -418,3 +424,5 @@ void __cdecl game_engine_update_after_game(void);
 void __cdecl game_engine_update(void);
 
 void __cdecl game_engine_render(void);
+
+bool game_engine_running(void);

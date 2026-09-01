@@ -50,6 +50,9 @@
 #include "main/main_screenshot.h"
 #include "main/main_time.h"
 #include "networking/logic/life_cycle_manager.h"
+#include "networking/replication/replication_entity_manager.h"
+#include "networking/replication/replication_event_manager_view.h"
+#include "networking/replication/replication_scheduler.h"
 #include "networking/session/network_session.h"
 #include "networking/transport/transport.h"
 #include "networking/network_event.h"
@@ -59,6 +62,7 @@
 #include "networking/network_configuration.h"
 #include "networking/network_loading.h"
 #include "physics/character_physics_mode_ground.h"
+#include "physics/breakable_surfaces.h"
 #include "units/bipeds.h"
 #include "rasterizer/rasterizer_lens_flares.h"
 #include "rasterizer/rasterizer_main.h"
@@ -84,9 +88,18 @@
 #include "shell/shell.h"
 #include "simulation/simulation.h"
 #include "simulation/simulation_players.h"
+#include "simulation/game_interface/simulation_game_damage.h"
 #include "simulation/game_interface/simulation_game_device_machines.h"
+#include "simulation/game_interface/simulation_game_engine_player.h"
+#include "simulation/game_interface/simulation_game_engine_slayer.h"
+#include "simulation/game_interface/simulation_game_generics.h"
+#include "simulation/game_interface/simulation_game_items.h"
 #include "simulation/game_interface/simulation_game_objects.h"
+#include "simulation/game_interface/simulation_game_projectiles.h"
+#include "simulation/game_interface/simulation_game_statborg.h"
 #include "simulation/game_interface/simulation_game_units.h"
+#include "simulation/game_interface/simulation_game_vehicles.h"
+#include "simulation/game_interface/simulation_game_weapons.h"
 #include "tag_files/files_windows.h"
 #include "tag_files/tag_loader/tag_injection.h"
 #include "text/font_cache.h"
@@ -187,7 +200,7 @@ void call_give_player_weapon(datum player_index, datum weapon_tag_definition_ind
 	{
 		object_placement_data new_weapon_placement;
 
-		object_placement_data_new(&new_weapon_placement, weapon_tag_definition_index, player->unit_index, 0);
+		object_placement_data_new(&new_weapon_placement, weapon_tag_definition_index, player->unit_index, NULL);
 
 		datum new_weapon_object_index = object_new(&new_weapon_placement);
 
@@ -551,7 +564,9 @@ static uint16 __cdecl get_enabled_team_flags(c_network_session* session)
 	if (!session->is_host())
 		return default_teams_enabled_flags;
 
-	if (CustomVariantHandler::ContainsGameVariant(session->get_game_variant_name(), _id_infection))
+	const wchar_t* variant_name = session->get_session_parameters()->game_variant.variant_name;
+
+	if (CustomVariantHandler::ContainsGameVariant(variant_name, _id_infection))
 	{
 		// infection overrides H2Config
 		// TODO get infection_teams through the interface
@@ -564,7 +579,7 @@ static uint16 __cdecl get_enabled_team_flags(c_network_session* session)
 				error(_error_log, " - perhaps current selected map - %ws doesn't support these teams?? overriding anyway", selected_map_file_name.c_str());
 		}
 	}
-	else if (StrStrIW(session->get_game_variant_name(), L"rvb") != NULL)
+	else if (StrStrIW(variant_name, L"rvb") != NULL)
 	{
 		// same with rvb, overrides H2Config
 		new_teams_enabled_flags = red_versus_blue_teams;
@@ -624,13 +639,31 @@ static void h2mod_apply_hooks(void)
 
 	ai_apply_patches();
 
+	breakable_surfaces_apply_patches();
+
 	cheats_apply_patches();
 	main_apply_patches();
 	main_time_apply_patches();
 	game_statborg_apply_patches();
+	
+	replication_entity_manager_apply_patches();
+	replication_event_manager_view_apply_patches();
+	replication_scheduler_apply_patches();
+
+	simulation_game_damage_apply_patches();
 	simulation_game_device_machines_apply_patches();
+	simulation_game_engine_player_apply_patches();
+	simulation_game_engine_slayer_apply_patches();
+	simulation_game_entities_apply_patches();
+	simulation_game_generics_apply_patches();
+	simulation_game_items_apply_patches();
 	simulation_game_objects_apply_patches();
+	simulation_game_projectiles_apply_patches();
+	simulation_game_statborg_apply_patches();
 	simulation_game_units_apply_patches();
+	simulation_game_vehicles_apply_patches();
+	simulation_game_weapons_apply_patches();
+
 	players_apply_patches();
 	objects_apply_patches();
 

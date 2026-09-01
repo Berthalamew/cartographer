@@ -3,6 +3,7 @@
 
 #include "simulation.h"
 #include "simulation_encoding.h"
+#include "simulation_gamestate_entities.h"
 #include "simulation_world.h"
 
 #include "main/main.h"
@@ -83,7 +84,8 @@ void simulation_queue_game_global_event_insert(e_simulation_queue_game_global_ev
 }
 
 // TODO: finish the rest of the logic in this function
-void simulation_queue_game_global_event_apply(const s_simulation_queue_element* element)
+void simulation_queue_game_global_event_apply(
+	const s_simulation_queue_element* element)
 {
 	ASSERT(element);
 	ASSERT(element->type == _simulation_queue_element_type_game_global_event);
@@ -264,23 +266,23 @@ void simulation_queue_player_update_insert(const simulation_player_update* playe
 	return;
 }
 
-void simulation_queue_player_update_apply(const s_simulation_queue_element* element)
+void simulation_queue_player_update_apply(
+	const s_simulation_queue_element* element)
 {
 	simulation_player_update update;
-	csmemset(&update, 0, sizeof(simulation_player_update));
 
 	c_bitstream stream(element->data, element->data_size);
+
+	csmemset(&update, 0, sizeof(simulation_player_update));
+
+
 	stream.begin_reading();
 	simulation_player_update_decode(&stream, &update);
 
 	if (!stream.error_occurred())
 	{
-		if (simulation_players_apply_update(&update))
+		if (!simulation_players_apply_update(&update))
 		{
-		}
-		else
-		{
-			simulation_get_globals()->simulation_fatal_error = true;
 			event(_event_error, "networking:simulation:player_update_apply: failed to apply player update");
 		}
 	}
@@ -289,8 +291,87 @@ void simulation_queue_player_update_apply(const s_simulation_queue_element* elem
 		event(_event_error, "networking:simulation:queue: failed to decode player update");
 	}
 	
-
 	stream.finish_reading();
+
+	return;
+}
+
+
+void simulation_queue_gamestates_delete_insert(
+	const s_simulation_queue_gamestate_clear_data* gamestate_clear_data)
+{
+	ASSERT(gamestate_clear_data);
+
+	if (!game_is_playback())
+	{
+		uint8 encoded_data[k_simulation_queue_element_data_size_max];
+
+		c_bitstream stream(encoded_data, sizeof(encoded_data));
+		
+		stream.begin_writing(k_bitstream_default_alignment);
+
+		const uint32* writeable_bits_direct = gamestate_clear_data->entities.get_bits_direct();
+		for (size_t i = 0; i < (k_maximum_objects_per_map / SIZEOF_BITS(*writeable_bits_direct)); ++i)
+		{
+			stream.write_integer("clear-data", writeable_bits_direct[i], SIZEOF_BITS(*writeable_bits_direct));
+		}
+
+		const int32 size = stream.get_space_used_in_bytes();
+		if (stream.error_occurred())
+		{
+			event(_event_error, "networking:simulation:queue: failed to insert gamestate clear");
+		}
+		else
+		{
+			s_simulation_queue_element* element = NULL;
+			c_simulation_world* world = simulation_get_world();
+			world->simulation_queue_allocate(_simulation_queue_element_type_gamestates_clear, size, &element);
+			if (element)
+			{
+				csmemcpy(element->data, encoded_data, size);
+				world->simulation_queue_enqueue(element);
+			}
+			else
+			{
+				event(
+					_event_fatal,
+					"networking:simulation:queue: failed to allocate element for gamestate clear insertion %d",
+					size
+				);
+			}
+		}
+	}
+
+	return;
+}
+
+void simulation_queue_gamestates_delete_apply(
+	const s_simulation_queue_element* element)
+{
+	ASSERT(element);
+	c_bitstream stream(element->data, element->data_size);
+	s_simulation_queue_gamestate_clear_data gamestate_clear_data;
+	gamestate_clear_data.entities.clear();
+
+	stream.begin_reading();
+	uint32* writeable_bits_direct = gamestate_clear_data.entities.get_writeable_bits_direct();
+	for (size_t i = 0; i < (k_maximum_objects_per_map / SIZEOF_BITS(*writeable_bits_direct)); ++i)
+	{
+		const uint32 result = stream.read_integer("clear-data", SIZEOF_BITS(*writeable_bits_direct));
+		writeable_bits_direct[i] = result;
+	}
+
+	if (stream.error_occurred())
+	{
+		event(_event_error, "networking:simulation:queue: failed to decode gamestate clear");
+	}
+	else
+	{
+		simulation_gamestate_entities_clear_by_flags(&gamestate_clear_data);
+	}
+	
+	stream.finish_reading();
+
 	return;
 }
 
@@ -299,6 +380,7 @@ void simulation_queue_player_update_apply(const s_simulation_queue_element* elem
 static bool game_is_synchronous_networking(void)
 {
 	const e_game_simulation type = game_simulation_get();
+
 	return IN_RANGE(type, _game_simulation_synchronous_client, _game_simulation_synchronous_server);
 }
 
@@ -308,12 +390,15 @@ static void simulation_queue_player_event_set_activation(int32 player_index, boo
 
 	if (TEST_BIT(player->flags, 0) != active)
 	{
-		SET_BIT(player->flags, 0, active);
+		SET_BIT(player->flags, _player_active_in_game_bit, active);
+
 		if (active)
 		{
 			game_engine_player_activated(player_index);
 		}
 	}
-	simulation_action_game_engine_player_update(player_index, FLAG(9));
+
+	simulation_action_game_engine_player_update(DATUM_INDEX_TO_ABSOLUTE_INDEX(player_index), FLAG(9));
+
 	return;
 }

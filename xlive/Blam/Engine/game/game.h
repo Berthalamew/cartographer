@@ -54,19 +54,19 @@ enum e_game_mode : int32
 
 /* structures */
 
-struct s_game_systems
+struct s_game_system
 {
 	t_initialize_proc initialize_proc;
 	t_dispose_proc dispose_proc;
 	t_initialize_for_new_map_proc initialize_for_new_map_proc;
 	t_dispose_from_old_map_proc dispose_from_old_map_proc;
-	void* unk4;
-	void* unk5;
+	void* initialize_for_new_structure_bsp_proc;
+	void* dispose_from_old_structure_bsp_proc;
 	void* unk6;
 	void* unk7;
 	t_activation_proc activation_proc;
 };
-ASSERT_STRUCT_SIZE(s_game_systems, 36);
+ASSERT_STRUCT_SIZE(s_game_system, 36);
 
 struct s_date_and_time
 {
@@ -82,7 +82,7 @@ struct s_date_and_time
 
 void game_apply_pre_winmain_patches(void);
 
-s_game_systems* get_game_systems(void);
+s_game_system* get_game_systems(void);
 
 bool map_initialized(void);
 struct s_game_options* game_options_get(void);
@@ -97,7 +97,6 @@ bool game_is_cooperative(void);
 
 void __cdecl game_shell_set_in_progress(void);
 bool game_in_progress(void);
-bool game_is_active(void);
 bool game_is_predicted(void);
 bool game_is_distributed(void);
 
@@ -119,6 +118,8 @@ void __cdecl game_initialize(void);
 
 void __cdecl game_dispose(void);
 
+void game_dispose_from_old_map(void);
+
 bool __cdecl main_events_pending(void);
 
 void __cdecl game_tick(void);
@@ -132,6 +133,8 @@ void __cdecl game_frame(real32 dt);
 int16 game_get_active_structure_bsp_index(void);
 
 void game_simulation_set(e_game_simulation game_simulation);
+
+bool game_is_available(void);
 
 void game_globals_storage_print_debug_contents(FILE* file);
 

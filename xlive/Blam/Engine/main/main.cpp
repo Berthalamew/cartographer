@@ -21,7 +21,6 @@
 #include "cseries/debug_memory.h"
 #include "cseries/profile.h"
 #include "cseries/stack_walk_windows.h"
-#include "cutscene/cinematics.h"
 #ifdef DEBUG_MENU_ENABLED
 #include "debug/menu/debug_menu_main.h"
 #endif
@@ -51,7 +50,7 @@
 
 /* structures */
 
-struct s_main_globals
+struct _main_globals
 {
 	bool startup_sequence;
 	bool halted_with_errors;
@@ -78,9 +77,10 @@ struct s_main_globals
 
 /* prototypes */
 
-static s_main_globals* main_globals_get(void);
+static _main_globals* main_globals_get(void);
 
 static void main_loop_initialize(void);
+static void main_loop_exit(void);
 
 static void main_save_map_private(void);
 
@@ -121,7 +121,7 @@ bool __cdecl cinematic_sound_sync_complete(void)
 
 void main_halt_and_display_errors(void)
 {
-	s_main_globals* main_globals = main_globals_get();
+	_main_globals* main_globals = main_globals_get();
 	main_globals->halted_with_errors = true;
 	main_game_change(NULL);
 	return;
@@ -129,27 +129,24 @@ void main_halt_and_display_errors(void)
 
 void main_loop(void)
 {
-	const s_main_globals* main_globals = main_globals_get();
+	const _main_globals* main_globals = main_globals_get();
 
 	main_loop_initialize();
+	
 	while (!main_globals->exit_game)
 	{
 		main_loop_body();
 	}
+	
+	main_loop_exit();
 
-	main_game_unload_and_prepare_for_next_game();
-	game_dispose();
-#ifdef TERMINAL_ENABLED
-	console_dispose();
-#endif
-	main_loading_dispose();
 	return;
 }
 
 void main_quit(
 	void)
 {
-	s_main_globals* main_globals = main_globals_get();
+	_main_globals* main_globals = main_globals_get();
 	main_globals->exit_game = true;
 	return;
 }
@@ -157,7 +154,7 @@ void main_quit(
 void main_reset_map(
 	void)
 {
-	s_main_globals* main_globals = main_globals_get();
+	_main_globals* main_globals = main_globals_get();
 	main_globals->reset_map = true;
 	return;
 }
@@ -165,7 +162,7 @@ void main_reset_map(
 void main_revert_map(
 	void)
 {
-	s_main_globals* main_globals = main_globals_get();
+	_main_globals* main_globals = main_globals_get();
 	main_globals->revert_map = true;
 	return;
 }
@@ -173,7 +170,7 @@ void main_revert_map(
 void main_revert_map_scripting(
 	void)
 {
-	s_main_globals* main_globals = main_globals_get();
+	_main_globals* main_globals = main_globals_get();
 	main_globals->revert_map = true;
 	main_globals->revert_by_scripting = true;
 	main_globals->revert_keep_playing_cinematic_outros = true;
@@ -183,7 +180,7 @@ void main_revert_map_scripting(
 void main_save_and_exit(
 	void)
 {
-	s_main_globals* main_globals = main_globals_get();
+	_main_globals* main_globals = main_globals_get();
 	main_globals->save_map_and_exit = true;
 	return;
 }
@@ -208,7 +205,7 @@ void __cdecl main_reset_map_immediate()
 
 void main_load_core()
 {
-	s_main_globals* main_globals = main_globals_get();
+	_main_globals* main_globals = main_globals_get();
 	csstrncpy(main_globals->core_file_name, "core", ARRAYSIZE(main_globals->core_file_name));
 	main_globals->load_core = true;
 	return;
@@ -216,7 +213,7 @@ void main_load_core()
 
 void main_load_core_name(const char* name)
 {
-	s_main_globals* main_globals = main_globals_get();
+	_main_globals* main_globals = main_globals_get();
 	csstrncpy(main_globals->core_file_name, name, ARRAYSIZE(main_globals->core_file_name));
 	main_globals->load_core = true;
 	return;
@@ -224,7 +221,7 @@ void main_load_core_name(const char* name)
 
 void main_save_core()
 {
-	s_main_globals* main_globals = main_globals_get();
+	_main_globals* main_globals = main_globals_get();
 	csstrncpy(main_globals->core_file_name, "core", ARRAYSIZE(main_globals->core_file_name));
 	main_globals->save_core = true;
 	return;
@@ -232,7 +229,7 @@ void main_save_core()
 
 void main_save_core_name(const char* name)
 {
-	s_main_globals* main_globals = main_globals_get();
+	_main_globals* main_globals = main_globals_get();
 	csstrncpy(main_globals->core_file_name, name, ARRAYSIZE(main_globals->core_file_name));
 	main_globals->save_core = true;
 	return;
@@ -240,6 +237,8 @@ void main_save_core_name(const char* name)
 
 void main_loop_body(void)
 {
+	//INVOKE(0x399CC, 0xBFDE, main_loop_body);
+
 	EventHandler::GameLoopEventExecute(EventExecutionType::execute_before);
 	if (!shell_is_dedicated_server())
 	{
@@ -247,9 +246,7 @@ void main_loop_body(void)
 		gXnIpMgr.GetLocalUserXn()->m_pckStats.PckDataSampleUpdate();	// update local user network stats
 	}
 	
-	//INVOKE(0x399CC, 0xBFDE, main_loop_body);
-
-	s_main_globals* main_globals = main_globals_get();
+	_main_globals* main_globals = main_globals_get();
 	
 	if (game_in_editor())
 	{
@@ -377,7 +374,9 @@ void main_loop_body(void)
 				player_control_update(world_dt, game_dt);
 				game_update(target_game_ticks, &game_dt);
 				network_send();
+				
 				halo_interpolator_update_delta();
+
 				game_frame(game_dt);
 				director_update(world_dt);
 				observer_update(world_dt);
@@ -532,14 +531,14 @@ void main_crash(const char* str)
 
 /* private code */
 
-static s_main_globals* main_globals_get(void)
+static _main_globals* main_globals_get(void)
 {
-	return Memory::GetAddress<s_main_globals*>(0x482208, 0x4A7080);
+	return Memory::GetAddress<_main_globals*>(0x482208, 0x4A7080);
 }
 
 static void main_loop_initialize(void)
 {
-	s_main_globals* main_globals = main_globals_get();
+	_main_globals* main_globals = main_globals_get();
 	main_globals->startup_sequence = true;
 
 	main_loading_initialize();
@@ -562,7 +561,22 @@ static void main_loop_initialize(void)
 	c_map_manager* g_map_manager = map_manager_get();
 	g_map_manager->load_data();
 	g_map_manager->start_map_synchronize();
+	
 	SYSTEM_DEBUG_MEMORY("after starting map manager synchronize()");
+
+	return;
+}
+
+static void main_loop_exit(
+	void)
+{
+	main_game_unload_and_prepare_for_next_game();
+	game_dispose();
+#ifdef TERMINAL_ENABLED
+	console_dispose();
+#endif
+	main_loading_dispose();
+
 	return;
 }
 

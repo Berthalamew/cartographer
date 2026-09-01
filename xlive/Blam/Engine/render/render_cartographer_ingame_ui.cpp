@@ -308,29 +308,21 @@ void render_netdebug_text(void)
 	)
 	{
 		c_network_session* session = NULL;
-		if (network_life_cycle_in_squad_session(&session))
+		if (network_life_cycle_in_squad_session(&session) &&
+			session->is_session_class_online() &&
+			session->session_mode() == _network_session_mode_in_game)
 		{
 			s_simulation_player_netdebug_data netdebug_data_default{};
 			s_simulation_player_netdebug_data* netdebug_data = &netdebug_data_default;
-			s_observer_channel* observer_channel = NULL;
 			int32 observer_channel_index;
-
-			bool available = session->is_session_class_online()
-				&& session->session_mode() == _network_session_mode_in_game;
-			if (!available)
-				return;
 
 			if (!session->is_host())
 			{
-				observer_channel_index = session->m_session_peers[session->get_session_host_peer_index()].observer_channel_index;
+				observer_channel_index = session->get_session_peer(session->host_peer_index())->observer_channel_index;
 				if (observer_channel_index != NONE)
-				{
-					observer_channel = &session->m_network_observer->m_observer_channels[observer_channel_index];
-
-					netdebug_data->client_rtt_msec = (int16)observer_channel->net_rtt;
-					netdebug_data->client_packet_rate = (int16)(observer_channel->stream_packet_rate * 10.f);
-					netdebug_data->client_throughput = (int16)((observer_channel->throughput_bps * 10.f) / 1024.f);
-					netdebug_data->client_packet_loss_percentage = (int16)(observer_channel->field_440.average_values_in_window() * 100.f);
+				{ 
+					c_network_observer* observer = session->get_observer();
+					observer->populate_net_debug_data(session->observer_owner(), observer_channel_index, netdebug_data);
 
 					// NOT UPDATED IN REAL-TIME
 					//s_network_session_peer* membership_peer = session->get_peer_membership(session->get_local_peer_index());

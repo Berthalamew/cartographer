@@ -43,11 +43,11 @@ int32 __cdecl network_life_cycle_session_get_global_map_precache_status_hook(int
 	if (c_game_life_cycle_manager::get()->get_active_session(&session)
 		&& session->established())
 	{
-		s_session_membership* membership = &session->m_session_membership;
+		const s_session_membership* membership = session->get_session_membership(NULL, NULL);
 
 		if (out_host_map_status)
 		{
-			*out_host_map_status = membership->peers[session->m_session_host_peer_index].map_status;
+			*out_host_map_status = membership->peers[session->host_peer_index()].map_status;
 		}
 
 		result_map_status = _network_session_map_status_loaded;
@@ -60,11 +60,15 @@ int32 __cdecl network_life_cycle_session_get_global_map_precache_status_hook(int
 
 			// now we only check our peer and session host peer, instead of all the peers
 			// but make sure the game won't start if we have just 1 player that doesn't have the map
-			if (session->m_local_peer_index == i)
+			if (session->local_peer_index() == i)
+			{
 				local_peer_map_status = membership->peers[i].map_status;
-
-			if (session->m_session_host_peer_index == i)
+			}
+			
+			if (session->host_peer_index() == i)
+			{
 				host_peer_map_status = membership->peers[i].map_status;
+			}
 
 			switch (membership->peers[i].map_status)
 			{
@@ -144,11 +148,13 @@ int32 __cdecl network_life_cycle_session_get_global_map_precache_status_hook(int
 
 bool __stdcall game_life_cycle_get_map_load_status(void* thisx, c_network_session* session, uint32* out_peers_unable_to_load_map_mask)
 {
-	s_session_membership* membership = &session->m_session_membership;
+	const s_session_membership* membership = session->get_session_membership(NULL, NULL);
 
 	uint32 peers_map_not_loaded_mask = 0;
 	if (membership->peer_count > 0)
+	{
 		peers_map_not_loaded_mask = FLAG(membership->peer_count) - 1; // set all flags
+	}
 
 	int32 peers_that_can_load_map = 0;
 	bool local_or_host_peer_cannot_load_map = false;
@@ -185,7 +191,7 @@ bool __stdcall game_life_cycle_get_map_load_status(void* thisx, c_network_sessio
 		*out_peers_unable_to_load_map_mask = peers_map_not_loaded_mask;
 
 	// subtract 1 from peers_that_can_load_map to remove the host/local peer
-	return !local_or_host_peer_cannot_load_map && peers_that_can_load_map - (session->m_session_parameters.dedicated_server ? 1 : 0) > 0;
+	return !local_or_host_peer_cannot_load_map && peers_that_can_load_map - (session->get_session_parameters()->dedicated_server ? 1 : 0) > 0;
 }
 
 #pragma endregion

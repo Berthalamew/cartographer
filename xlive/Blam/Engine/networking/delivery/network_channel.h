@@ -1,28 +1,29 @@
 #pragma once
 #include "networking/transport/transport_address.h"
+#include "networking/network_constants.h"
 
 /* enums */
 
 enum e_network_channel_closure_reason
 {
 	_network_channel_reason_none = 0,
-	_network_channel_reason_link_destroyed = 1,
-	_network_channel_reason_link_refused_listen = 2,
-	_network_channel_reason_channel_deleted = 3,
-	_network_channel_reason_connect_timeout = 4,
-	_network_channel_reason_connect_refused = 5,
-	_network_channel_reason_connect_reinitiate = 6,
-	_network_channel_reason_establish_timeout = 7,
-	_network_channel_reason_address_change = 8,
-	_network_channel_reason_destination_unreachable = 9,
-	_network_channel_reason_remote_closure = 10,
-	_network_channel_reason_connection_overflow = 11,
-	_network_channel_reason_message_overflow = 12,
-	_network_channel_reason_security_lost = 13,
-	_network_channel_reason_observer_released = 14,
-	_network_channel_reason_observer_refused = 15,
-	_network_channel_reason_observer_timeout = 16,
-	_network_channel_reason_observer_reset = 17,
+	_network_channel_reason_link_destroyed,
+	_network_channel_reason_link_refused_listen,
+	_network_channel_reason_channel_deleted,
+	_network_channel_reason_connect_timeout,
+	_network_channel_reason_connect_refused,
+	_network_channel_reason_connect_reinitiate,
+	_network_channel_reason_establish_timeout,
+	_network_channel_reason_address_change,
+	_network_channel_reason_destination_unreachable,
+	_network_channel_reason_remote_closure,
+	_network_channel_reason_connection_overflow,
+	_network_channel_reason_message_overflow,
+	_network_channel_reason_security_lost,
+	_network_channel_reason_observer_released,
+	_network_channel_reason_observer_refused,
+	_network_channel_reason_observer_timeout,
+	_network_channel_reason_observer_reset,
 
 	k_network_channel_reason_count
 };
@@ -53,8 +54,13 @@ public:
 	virtual bool connection_lost(e_network_channel_closure_reason* channel_closure_reason) = 0;
 	virtual bool has_data_to_transmit(bool* data_requires_acknowledgement) = 0;
 	virtual int32 space_required_bits(int32 packet_size_bits, int32 packet_remaining_bits) = 0;
-	virtual bool write_data_to_packet(int32 a1, class c_bitstream* bitstream_1, class c_bitstream* bitstream_2, int32 a4, int32 a5) = 0;
-	virtual bool read_from_packet(int32* packet_sequence_number, class c_bitstream* packet, int32 unused) = 0;
+	virtual bool write_to_packet(
+		int32 packet_sequence_number,
+		class c_bitstream* encrypted_packet_portion,
+		class c_bitstream* cleartext_packet_portion,
+		int32 reserved_space_bits,
+		int32 must_leave_space_bits) = 0;
+	virtual e_network_read_result read_from_packet(int32* packet_sequence_number, class c_bitstream* packet) = 0;
 	virtual void notify_packet_acknowledged(int32 outgoing_packet_sequence_number) = 0;
 	virtual void notify_packet_retired(int32 outgoing_packet_sequence_number, bool delivered) = 0;
 };

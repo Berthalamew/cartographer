@@ -116,6 +116,7 @@ public:
 
 	void build_update(struct simulation_update* update);
 	static void destroy_update(struct simulation_update* update);
+	void process_pending_updates(void);
 	void distribute_update(const struct simulation_update* update);
 
 	void advance_update(const struct simulation_update* update);
@@ -155,8 +156,11 @@ public:
 	void change_state_dead(void);
 	void change_state_handoff(void);
 	void change_state_leaving(void);
+
 	void create_player(datum player_index);
 	void delete_player(datum player_index);
+
+	bool player_is_in_game(int32 player_index, struct s_player_identifier const* player_identifier) const;
 
 	int32 synchronous_authority_get_maximum_updates(void);
 
@@ -345,6 +349,46 @@ public:
 	{
 		ASSERT(exists());
 		return m_time_running;
+	}
+
+	c_replication_entity_manager* get_entity_manager(
+		void)
+	{
+		ASSERT(exists());
+		ASSERT(is_distributed());
+		ASSERT(m_distributed_world);
+
+		return &m_distributed_world->m_entity_manager;
+	}
+
+	c_replication_event_manager* get_event_manager(
+		void)
+	{
+		ASSERT(exists());
+		ASSERT(is_distributed());
+		ASSERT(m_distributed_world);
+
+		return &m_distributed_world->m_event_manager;
+	}
+
+	c_simulation_entity_database* get_entity_database(
+		void)
+	{
+		ASSERT(exists());
+		ASSERT(is_distributed());
+		ASSERT(m_distributed_world);
+
+		return &m_distributed_world->m_entity_database;
+	}
+
+	c_simulation_event_handler* get_event_handler(
+		void)
+	{
+		ASSERT(exists());
+		ASSERT(is_distributed());
+		ASSERT(m_distributed_world);
+
+		return &m_distributed_world->m_event_handler;
 	}
 
 	void queues_update_statistics(void) const

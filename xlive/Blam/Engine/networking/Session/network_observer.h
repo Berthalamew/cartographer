@@ -5,6 +5,7 @@
 
 #include "networking/messages/network_message_type_collection.h"
 #include "networking/transport/transport_address.h"
+#include "networking/transport/transport_security.h"
 #include "networking/transport/transport_qos.h"
 #include "networking/network_statistics.h"
 
@@ -32,8 +33,8 @@
 
 enum
 {
-	k_network_channel_count = 16,
-	k_network_channel_count_for_campaign = 4,
+	k_network_maximum_observers = 16,
+	k_network_maximum_observers_for_campaign = 4,
 	k_network_preferences_size = 108,		// network heap size
 	k_network_heap_size = 10485760,			// default: 1048576
 
@@ -48,12 +49,19 @@ enum
 
 /* enums */
 
-enum e_observer_channel_state : int32
+enum e_observer_state
 {
-	_observer_channel_state_none = 0,
-	_observer_channel_state_pending_transport_layer = 3, // waiting for xnet connection to be established
-	_observer_channel_state_pending_game_layer = 4, // xnet layer connected, waiting for game to establish
-	_observer_channel_state_connected = 7
+	_observer_state_none= 0,
+	_observer_state_dead,
+	_observer_state_idle,
+	_observer_state_securing,
+	_observer_state_waiting,
+	_observer_state_connect_ready,
+	_observer_state_connecting,
+	_observer_state_connected,
+	_observer_state_reconnecting,
+	_observer_state_disconnected,
+	k_observer_state_count,
 };
 
 enum e_network_observer_owner
@@ -68,125 +76,214 @@ enum e_network_observer_owner
 
 /* structures */
 
-struct s_observer_channel
-{
-	int32 state;
-	int32 field_4;
-	uint8 observer_flags;
-	uint8 owner_flags;
-	uint16 field_A;
-	int32 channel_index;
-	int32 field_10;
-	XNADDR xnaddr;
-	int32 field_38;
-	int32 session_index;
-	int32 field_40;
-	int32 field_44;
-	int32 field_48;
-	int32 field_4C;
-	int32 field_50;
-	int32 field_54;
-	int32 field_58;
-	transport_address address;
-	datum qos_attempt_index;
-	s_qos_attempt_data qos_attempt;
-	int32 field_94;
-	int32 field_98;
-	int32 field_9C;
-	uint8 gap_A0[8];
-	c_network_time_statistics field_A8;
-	c_network_window_statistics field_180;
-	c_network_time_statistics field_290;
-	c_network_time_statistics field_368;
-	c_network_window_statistics field_440;
-	c_network_window_statistics field_550;
-	int32 field_660;
-	int32 field_664;
-	int32 field_668;
-	int32 field_66C;
-	int32 field_670;
-	int32 field_674;
-	int32 field_678;
-	int32 field_67C;
-	int32 field_680;
-	int32 field_684;
-	int32 field_688;
-	uint8 gap_68C[4];
-	int64 field_690;
-	int32 unmanaged_stream_bandwidth;
-	real32 net_rate_unmanaged_stream;
-	int32 unmanaged_stream_window_size;
-	bool managed_stream;
-	uint8 field_6A5;
-	bool simulation_attached;
-	bool simulation_authority;
-	bool simulation_not_authority;
-	uint8 gap_6A9[3];
-	int32 stream_bps;
-	int32 stream_window_size;
-	real32 stream_packet_rate;
-	bool field_6B8;
-	int8 field_6B9;
-	int8 field_6BA;
-	int32 field_6BC;
-	int32 field_6C0;
-	int32 field_6C4;
-	int32 net_rtt;
-	int32 field_6CC;
-	int32 field_6D0;
-	int32 field_6D4;
-	bool field_6D8;
-	int32 field_6DC;
-	int32 field_6E0;
-	int32 field_6E4;
-	int32 field_6E8;
-	real32 field_6EC;
-	int32 field_6F0;
-	int32 field_6F4;
-	int32 field_6F8;
-	int32 field_6FC;
-	int32 field_700;
-	int32 field_704;
-	int32 field_708;
-	bool field_70C;
-	int32 field_710;
-	int32 field_714;
-	real32 field_718;
-	int32 field_71C;
-	int32 field_720;
-	uint8 field_724;
-	int8 field_725;
-	int8 field_726;
-	int8 field_727;
-	int32 field_728;
-	int32 throughput_bps;
-	int32 field_730;
-	int32 field_734;
-	LONGLONG field_738;
-};
-ASSERT_STRUCT_SIZE(s_observer_channel, 0x740);
-
 class c_network_observer
 {
 public:
+	static void apply_patches();
+	static void reset_network_observer_bandwidth_preferences();
+
+	bool initialize_observer(
+		class c_network_link* link,
+		class c_network_message_type_collection* message_types,
+		class c_network_message_gateway* message_gateway,
+		struct s_network_observer_configuration* configuration);
+
+	void register_owner(e_network_observer_owner owner_type, class c_network_channel_owner* owner);
+
+	void deregister_owner(e_network_observer_owner owner_type, class c_network_channel_owner const* owner);
+
+	bool __thiscall channel_should_send_packet_hook(
+		int32 network_channel_index,
+		bool a4,
+		bool a5,
+		int32 a6,
+		int32* out_send_sequenced_packet,
+		bool* out_force_fill_packet,
+		int32* out_packet_size,
+		int32* out_voice_size,
+		int32 out_voice_chat_data_buffer_size,
+		uint8* out_voice_chat_data_buffer);
+
+	bool get_bandwidth_results(int32* out_throughput, real32* out_satiation, int32* a4);
+
+	int32 observer_channel_find_by_machine_identifier(e_network_observer_owner owner_type, s_transport_unique_identifier const* remote_identifier) const;
+
+	void observer_channel_get_secure_address(e_network_observer_owner owner_type, int32 observer_channel_index, s_transport_secure_address* secure_address) const;
+
+	void send_message(e_network_observer_owner session_index, int32 observer_index, bool send_out_of_band, int32 type, int32 size, const void* data);
+	void observer_channel_set_waiting_on_backlog(e_network_observer_owner owner_type, int32 observer_index, e_network_message_type message_type);
+	bool observer_channel_backlogged(e_network_observer_owner owner_type, int32 observer_index, e_network_message_type message_type) const;
+
+	// Added function
+	void populate_net_debug_data(e_network_observer_owner owner_type, int32 observer_index, struct s_simulation_player_netdebug_data* data) const;
+
+	bool observer_channel_connected(
+		e_network_observer_owner owner_type,
+		int32 observer_index) const
+	{
+		return get_observer(owner_type, observer_index)->state==_observer_state_connected;
+	}
+
+	e_observer_state get_observer_channel_state(
+		int32 observer_index) const
+	{
+		return m_observer_channels[observer_index].state;
+	}
+
+	int32 observer_channel_find_by_network_channel(
+		int32 session_index,
+		int32 network_channel_index)
+	{
+		int32 observer_index = NONE;
+
+		for (int32 i = 0; i < k_network_maximum_observers; i++)
+		{
+			s_channel_observer* observer_channel = &m_observer_channels[i];
+			if (observer_channel->state != _observer_state_none
+				&& observer_channel->channel_index == network_channel_index
+				&& TEST_BIT(observer_channel->owner_flags, session_index))
+			{
+				observer_index = i;
+				break;
+			}
+		}
+
+		return observer_index;
+	}
+
+	/* added functions */
+
+	e_observer_state get_state(
+		e_network_observer_owner owner_type,
+		int32 observer_index)
+	{
+		s_channel_observer* observer = &m_observer_channels[observer_index];
+
+		ASSERT(observer_index>=0 && observer_index<k_network_maximum_observers);
+		ASSERT(owner_type>=0 && owner_type<k_network_observer_owner_count);
+
+
+		ASSERT(observer->state>_observer_state_none && observer->state<k_observer_state_count);
+		ASSERT(TEST_BIT(observer->owner_flags, owner_type));
+
+		return observer->state;
+	}
+
+private:
+	struct s_observer_owner
+	{
+		c_network_channel_owner* owner;
+		int32 managed_session_index;
+		int32 field_8;
+		s_transport_secure_identifier id;
+		s_transport_secure_key key;
+	};
+
+	struct s_channel_observer
+	{
+		e_observer_state state;
+		int32 field_4;
+		uint8 observer_flags;
+		uint8 owner_flags;
+		uint16 field_A;
+		int32 channel_index;
+		int32 field_10;
+		s_transport_secure_address remote_secure_address;
+		int32 field_38;
+		int32 session_index;
+		int32 field_40;
+		int32 field_44;
+		int32 field_48;
+		int32 field_4C;
+		int32 field_50;
+		int32 field_54;
+		int32 field_58;
+		transport_address address;
+		datum qos_attempt_index;
+		s_qos_attempt_data qos_attempt;
+		int32 field_94;
+		int32 field_98;
+		int32 field_9C;
+		uint8 gap_A0[8];
+		c_network_time_statistics field_A8;
+		c_network_window_statistics field_180;
+		c_network_time_statistics field_290;
+		c_network_time_statistics field_368;
+		c_network_window_statistics field_440;
+		c_network_window_statistics field_550;
+		int32 field_660;
+		int32 field_664;
+		int32 field_668;
+		int32 field_66C;
+		int32 field_670;
+		int32 field_674;
+		int32 field_678;
+		int32 field_67C;
+		int32 field_680;
+		int32 field_684;
+		int32 field_688;
+		uint8 gap_68C[4];
+		int64 field_690;
+		int32 unmanaged_stream_bandwidth;
+		real32 net_rate_unmanaged_stream;
+		int32 unmanaged_stream_window_size;
+		bool managed_stream;
+		uint8 field_6A5;
+		bool simulation_attached;
+		bool simulation_authority;
+		bool simulation_not_authority;
+		uint8 gap_6A9[3];
+		int32 stream_bps;
+		int32 stream_window_size;
+		real32 stream_packet_rate;
+		bool field_6B8;
+		int8 field_6B9;
+		int8 field_6BA;
+		int32 field_6BC;
+		int32 field_6C0;
+		int32 field_6C4;
+		int32 net_rtt;
+		int32 field_6CC;
+		int32 field_6D0;
+		int32 field_6D4;
+		bool field_6D8;
+		int32 field_6DC;
+		int32 field_6E0;
+		int32 field_6E4;
+		int32 field_6E8;
+		real32 field_6EC;
+		int32 field_6F0;
+		int32 field_6F4;
+		int32 field_6F8;
+		int32 field_6FC;
+		int32 field_700;
+		int32 field_704;
+		int32 field_708;
+		bool field_70C;
+		int32 field_710;
+		int32 field_714;
+		real32 field_718;
+		int32 field_71C;
+		int32 field_720;
+		uint8 field_724;
+		int8 field_725;
+		int8 field_726;
+		int8 field_727;
+		int32 field_728;
+		int32 throughput_bps;
+		int32 field_730;
+		int32 field_734;
+		LONGLONG field_738;
+	};
+	ASSERT_STRUCT_SIZE(s_channel_observer, 0x740);
+
 	void* vtbl;
 	void* m_network_link;
 	void* m_network_message_gateway;
 	void* m_message_types;
 	struct s_network_observer_configuration* m_configuration;
-	int32 *field_14;
-	uint8 gap_18[8];
-	XNKID session_id;
-	uint8 gap28[32];
-	uint8 field_48;
-	XNKEY xnkey;
-	int32 field_5C;
-	uint8 gap_60[4];
-	int32 field_64;
-	uint8 gap_68[12];
-	int32 field_74;
-	uint8 gap_78[8];
-	s_observer_channel m_observer_channels[k_network_channel_count];
+	s_observer_owner m_owners[k_network_observer_owner_count];
+	s_channel_observer m_observer_channels[k_network_maximum_observers];
 	bool network_observer_enabled;
 	int8 field_7481;
 	int32 field_7484;
@@ -222,51 +319,38 @@ public:
 	int32 field_75C0;
 	int32 field_75C4;
 
-	static void apply_patches();
-	static void reset_network_observer_bandwidth_preferences();
-
-	bool initialize_observer(class c_network_link* link, class c_network_message_type_collection* message_types, class c_network_message_gateway* message_gateway, struct s_network_observer_configuration* configuration);
-	bool __thiscall channel_should_send_packet_hook(
-		int32 network_channel_index,
-		bool a4,
-		bool a5,
-		int32 a6,
-		int32* out_send_sequenced_packet,
-		bool* out_force_fill_packet,
-		int32* out_packet_size,
-		int32* out_voice_size,
-		int32 out_voice_chat_data_buffer_size,
-		uint8* out_voice_chat_data_buffer);
-
-	bool __thiscall get_bandwidth_results(int32 *out_throughput, real32 *out_satiation, int32 *a4);
-	int32 get_observer_channel_state(int32 observer_index) { return m_observer_channels[observer_index].state; };
-	void send_message(e_network_observer_owner session_index, int32 observer_index, bool send_out_of_band, int32 type, int32 size, const void* data);
-	void observer_channel_set_waiting_on_backlog(e_network_observer_owner owner_type, int32 observer_index, e_network_message_type message_type);
-	bool observer_channel_backlogged(e_network_observer_owner owner_type, int32 observer_index, e_network_message_type message_type) const;
-
-	int32 observer_channel_find_by_network_channel(
-		int32 session_index,
-		int32 network_channel_index)
+	s_channel_observer const* get_observer(
+		e_network_observer_owner owner_type,
+		int32 observer_index) const
 	{
-		int32 observer_index = NONE;
+		c_network_observer::s_channel_observer const* observer = &m_observer_channels[observer_index];
 
-		for (int32 i = 0; i < k_network_channel_count; i++)
-		{
-			s_observer_channel* observer_channel = &m_observer_channels[i];
-			if (observer_channel->state != _observer_channel_state_none
-				&& observer_channel->channel_index == network_channel_index
-				&& TEST_BIT(observer_channel->owner_flags, session_index))
-			{
-				observer_index = i;
-				break;
-			}
-		}
+		ASSERT(observer_index>=0 && observer_index<k_network_maximum_observers);
+		ASSERT(owner_type>=0 && owner_type<k_network_observer_owner_count);
 
-		return observer_index;
+
+		ASSERT(observer->state>_observer_state_none && observer->state<k_observer_state_count);
+		ASSERT(TEST_BIT(observer->owner_flags, owner_type));
+
+		return observer;
+
 	}
 
+	s_channel_observer* get_observer(
+		e_network_observer_owner owner_type,
+		int32 observer_index)
+	{
+		s_channel_observer* observer = &m_observer_channels[observer_index];
 
-private:
+		ASSERT(observer_index>=0 && observer_index<k_network_maximum_observers);
+		ASSERT(owner_type>=0 && owner_type<k_network_observer_owner_count);
+
+
+		ASSERT(observer->state>_observer_state_none && observer->state<k_observer_state_count);
+		ASSERT(TEST_BIT(observer->owner_flags, owner_type));
+
+		return observer;
+	}
 };
 ASSERT_STRUCT_SIZE(c_network_observer, 0x75C8);
 

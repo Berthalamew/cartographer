@@ -163,7 +163,6 @@ struct _weapon_datum
 	int16 recoil_recovery_time;
 	int16 shots_until_demotion;
 	int16 alternate_shots_loaded;
-	int16 _pad_36;
 	weapon_barrel barrels[k_weapon_barrel_count];
 	weapon_trigger triggers[k_weapon_trigger_count];
 	weapon_magazine magazines[MAXIMUM_NUMBER_OF_MAGAZINES_PER_WEAPON];

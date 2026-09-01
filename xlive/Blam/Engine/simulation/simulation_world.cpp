@@ -2,6 +2,8 @@
 #include "simulation_world.h"
 
 #include "simulation.h"
+#include "simulation_encoding.h"
+#include "simulation_entity_database.h"
 #include "simulation_gamestate_entities.h"
 #include "simulation_queue_events.h"
 #include "simulation_queue_entities.h"
@@ -32,8 +34,6 @@ typedef void(__thiscall* t_c_simulation_world__destroy_world)(c_simulation_world
 static t_c_simulation_world__initialize_world p_c_simulation_world__initialize_world;
 static t_c_simulation_world__destroy_world p_c_simulation_world__destroy_world;
 
-// TODO verify if these buffers get saturated quickly
-// if that's the case, increse the buffer size
 static c_simulation_queue g_simulation_queues[k_simulation_queue_count];
 
 /* public code */
@@ -177,6 +177,7 @@ void c_simulation_world::reset_world(
 		m_distributed_world->m_event_manager.reset();
 		m_distributed_world->m_entity_database.reset();
 		m_distributed_world->m_event_handler.reset();
+		simulation_gamestate_entities_notify_simulation_world_reset();
 		delete_all_actors();
 	}
 
@@ -213,7 +214,7 @@ void c_simulation_world::destroy_world(
 		ASSERT(m_synchronous_gamestate_write_buffer == NULL);
 	}
 
-
+	// Make sure we're not running when we trying to destroy the world
 	ASSERT(!time_running());
 
 
@@ -406,6 +407,7 @@ void c_simulation_world::build_update(
 
 		update->bookkeeping_simulation_queue.initialize();
 		update->game_simulation_queue.initialize();
+
 		attach_simulation_queues_to_update(update);
 
 		uint8 data[0x20000];
@@ -440,6 +442,21 @@ void c_simulation_world::destroy_update(
 
 	update->bookkeeping_simulation_queue.dispose();
 	update->game_simulation_queue.dispose();
+
+	return;
+}
+
+void c_simulation_world::process_pending_updates(
+	void)
+{
+	ASSERT(exists());
+
+	if (is_distributed() && is_authority())
+	{
+		ASSERT(m_distributed_world);
+
+		m_distributed_world->m_entity_database.process_pending_updates();
+	}
 
 	return;
 }
@@ -1004,7 +1021,8 @@ void c_simulation_world::change_state_leaving(
 	return;
 }
 
-void c_simulation_world::create_player(datum player_index)
+void c_simulation_world::create_player(
+	datum player_index)
 {
 	event(_event_verbose, "simulation:players: create player 0x%08X", player_index);
 	typedef void(__thiscall* create_player_t)(c_simulation_world*, datum);
@@ -1012,11 +1030,44 @@ void c_simulation_world::create_player(datum player_index)
 	return;
 }
 
-void c_simulation_world::delete_player(datum player_index)
+void c_simulation_world::delete_player(
+	datum player_index)
 {
 	typedef void(__thiscall* delete_player_t)(c_simulation_world*, datum);
 	INVOKE_TYPE(0x1DC124, 0x1C35D8, delete_player_t, this, player_index);
 	return;
+}
+
+bool c_simulation_world::player_is_in_game(
+	int32 player_index,
+	struct s_player_identifier const* player_identifier) const
+{
+	int32 player_absolute_index = DATUM_INDEX_TO_ABSOLUTE_INDEX(player_index);
+	bool player_in_game = false;
+
+	ASSERT(exists());
+
+	if (VALID_INDEX(player_absolute_index, NUMBEROF(m_players)))
+	{
+		c_simulation_player const* player = &m_players[player_absolute_index];
+		
+		if (player->exists())
+		{
+			s_player_identifier world_player_identifier;
+
+			player->get_identifier(&world_player_identifier);
+
+			if (!csmemcmp(player_identifier, &world_player_identifier, sizeof(*player_identifier)))
+			{
+				if (m_watcher->get_player_is_in_game(player_absolute_index, player_identifier))
+				{
+					player_in_game = true;
+				}
+			}
+		}
+	}
+
+	return player_in_game;
 }
 
 int32 c_simulation_world::synchronous_authority_get_maximum_updates(
@@ -1634,7 +1685,7 @@ void c_simulation_world::apply_simulation_queue(
 
 	if (simulation_queue->queued_count() > 0)
 	{
-		const s_simulation_queue_element* element = simulation_queue->get_first_element();
+		s_simulation_queue_element* element = simulation_queue->get_first_element();
 		int32 update_count = 0;
 		int32 total_size = 0;
 

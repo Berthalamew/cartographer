@@ -33,7 +33,7 @@ enum e_saved_game_profile_input_preference_flags : uint32
  *  the function should load/create all necessary data required to create the custom representation (fp, body, biped, variant, etc)
  *	then add the function into the k_game_globals_custom_representation_function_table constant
  */
-enum e_character_type : int8
+enum e_character_type
 {
 	_character_type_masterchief = 0,
 	_character_type_dervish = 1,
@@ -51,7 +51,7 @@ enum e_character_type : int8
 	k_cartographer_custom_representation_count = k_player_character_type_count - k_player_character_type_count_original
 };
 
-enum e_player_color : int8
+enum e_player_color_index
 {
 	_player_color_white,
 	_player_color_steel,
@@ -71,18 +71,18 @@ enum e_player_color : int8
 	_player_color_crimson,
 	_player_color_brown,
 	_player_color_tan,
-	k_player_color_count
+	k_player_color_count,
+
+	_player_color_none = NONE,
+	_player_color_index_min_value = NONE,
 };
 
 /* structures */
 
 struct s_player_appearance
 {
-	e_player_color primary_color;
-	e_player_color secondary_color;
-	e_player_color tertiary_color;
-	e_player_color quaternary_color;
-	e_character_type player_character_type;
+	c_enum<enum e_player_color_index, int8, _player_color_index_min_value, k_player_color_count> change_color_index[4];
+	c_enum<enum e_character_type, int8, NONE, k_player_character_type_count> player_character_type;
 	s_emblem_info emblem_info;
 	int32 gap_48;
 	int32 gap_4C;
@@ -162,5 +162,3 @@ bool saved_game_player_profile_read_file(uint32 enumerated_file_index, s_saved_g
 bool __cdecl saved_game_player_profile_read_post_verify_profile_traits(s_player_appearance* profile);
 
 bool saved_game_player_profile_load(uint32 enumerated_file_index, s_saved_game_player_profile* profile);
-
-void player_profile_traits_initialize(s_player_appearance* appearance);

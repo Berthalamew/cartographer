@@ -253,13 +253,15 @@ void c_simulation_queue::clear(
 {
 	if (initialized())
 	{
-		while (get_head() != NULL)
+		while (m_head)
 		{
 			s_simulation_queue_element* element_to_dequeue = NULL;
+
 			deque(&element_to_dequeue);
+
 			ASSERT(element_to_dequeue);
+			
 			deallocate(element_to_dequeue);
-			// ### TODO clear allocated but not queued too??
 		}
 
 		ASSERT(m_queued_count == 0);
@@ -392,16 +394,9 @@ void c_simulation_queue::encode(
 	bitstream->write_integer("queue-count", m_queued_count, 12);
 	bitstream->write_integer("queue-count", m_size, 17);
 
-	s_simulation_queue_element* element = NULL;
-	if (m_initialized && m_queued_count>0)
-	{
-		ASSERT(m_head);
+	s_simulation_queue_element* element = get_first_element();
 
-		//network_heap_verify_block(m_head);
-		element = m_head;
-	}
-
-	for (int32 element_index = 0; element; ++element_index)
+	for (int32 element_index = 0; element!=NULL; ++element_index)
 	{
 		ASSERT(element_index < m_queued_count);
 		ASSERT(element->type!=_simulation_queue_element_type_none);
@@ -412,17 +407,7 @@ void c_simulation_queue::encode(
 		bitstream->write_integer("size", element->data_size, 10);
 		bitstream->write_raw_data("data", element->data, SIZEOF_BITS(element->data_size));
 
-		s_simulation_queue_element* next = NULL;
-		if (m_initialized)
-		{
-			ASSERT(queued_count() > 0);
-			next = element->next;
-			if (element->next)
-			{
-				//network_heap_verify_block(element->next);
-			}
-		}
-		element = next;
+		element = get_next_element(element);
 	}
 
 	return;

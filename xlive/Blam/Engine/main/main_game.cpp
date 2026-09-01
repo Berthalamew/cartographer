@@ -4,15 +4,21 @@
 #include "main.h"
 
 #include "cache/cache_files.h"
+#include "cache/pc_geometry_cache.h"
 #include "cache/pc_texture_cache.h"
+#include "cache/xbox_sound_cache.h"
 #include "game/game.h"
+#include "game/game_engine.h"
 #include "game/game_globals.h"
 #include "game/game_options.h"
 #include "interface/damaged_media.h"
 #include "interface/user_interface.h"
+#include "main/main_screenshot.h"
 #include "networking/network_event.h"
 #include "saved_games/game_state.h"
 #include "saved_games/game_variant.h"
+#include "scenario/scenario.h"
+#include "simulation/simulation.h"
 
 #include <XLive/XAM/xam.h>
 
@@ -33,7 +39,7 @@ enum e_game_loaded_status
 
 struct s_main_game_globals
 {
-	int32 game_loaded_status;
+	e_game_loaded_status game_loaded_status;
 	wchar_t game_loaded_scenario_path[MAX_PATH];
 	bool map_reset_in_progress;
 	bool map_advance_pending;
@@ -60,6 +66,8 @@ s_main_game_globals_debug g_main_game_globals_debug;
 
 static s_main_game_globals* main_game_globals_get(void);
 
+static void map_profile(char const* string);
+
 // Setup default values for the options structure depending on the game mode set
 static void main_game_launch_setup_game_mode_details(void);
 
@@ -72,7 +80,11 @@ static void main_game_launch_set_multiplayer_details(void);
 // Set default details for the mainmenu
 static void main_game_launch_set_ui_shell_details(void);
 
+
+static void main_game_internal_map_unload_begin(void);
+static void main_game_internal_map_unload_complete(void);
 static void main_game_internal_pregame_load(void);
+static void main_game_internal_pregame_unload(void);
 
 static void main_game_load_panic(void);
 
@@ -91,6 +103,9 @@ static const s_variant_description_map k_launch_multiplayer_variants[k_variant_c
 	{ "territories", _game_variant_description_territories }
 };
 
+static FILE* g_map_profile_stream;
+static uint32 g_map_profile_start_time;
+
 static bool g_main_menu_launch_delay_xlive_ui = true;
 
 int32 g_main_game_launch_user_count = 1;
@@ -98,12 +113,18 @@ s_game_options g_main_game_launch_options;
 
 bool debug_load_panic_to_main_menu;
 
+
+static uintptr_t p_main_game_unload_and_prepare_for_next_game;
+
 /* public code */
 
 void main_game_apply_patches(void)
 {
 	PatchCall(Memory::GetAddress(0x9844), main_game_load_panic);
 	PatchCall(Memory::GetAddress(0x39675), main_game_load_panic);
+
+	DETOUR_ATTACH(p_main_game_unload_and_prepare_for_next_game, Memory::GetAddress(0x8A7E), main_game_unload_and_prepare_for_next_game);
+
 	return;
 }
 
@@ -113,15 +134,25 @@ void main_game_initialize(void)
 	return;
 }
 
-bool __cdecl main_game_loaded_map(void)
+bool main_game_loaded_pregame(void)
+{
+	return main_game_globals_get()->game_loaded_status == _game_loaded_status_pregame;
+}
+
+bool main_game_loaded_map(
+	void)
 {
 	return main_game_globals_get()->game_loaded_status == _game_loaded_status_map_loaded;
 }
 
-bool __cdecl main_game_loaded_pregame(void)
+wchar_t const* main_game_loaded_map_name(
+	void)
 {
-	return main_game_globals_get()->game_loaded_status == _game_loaded_status_pregame;
+	ASSERT(main_game_loaded_map());
+
+	return main_game_globals_get()->game_loaded_scenario_path;
 }
+
 
 void __cdecl main_game_launch_default(void)
 {
@@ -135,9 +166,45 @@ void __cdecl main_game_reset_map(void)
 	return;
 }
 
-void __cdecl main_game_unload_and_prepare_for_next_game(void)
+void main_game_unload_and_prepare_for_next_game(
+	void)
 {
-	INVOKE(0x8A7E, 0x0, main_game_unload_and_prepare_for_next_game);
+	//INVOKE(0x8A7E, 0x0, main_game_unload_and_prepare_for_next_game);
+	
+	s_main_game_globals* main_game_globals = main_game_globals_get();
+
+	movie_stop();
+
+	if (game_in_progress())
+	{
+		game_engine_game_ending();
+		simulation_stop();
+		scenario_switch_bsp(NONE);
+		game_dispose_from_old_map();
+	}
+
+	switch (main_game_globals->game_loaded_status)
+	{
+	case _game_loaded_status_none:
+		break;
+	case _game_loaded_status_map_loaded:
+	case _game_loaded_status_map_reloading:
+		
+		map_profile("before main_game_internal_map_unload_begin");
+		main_game_internal_map_unload_begin();
+		map_profile("after main_game_internal_map_unload_begin");
+		
+		main_game_internal_map_unload_complete();
+		break;
+	case _game_loaded_status_pregame:
+		main_game_internal_pregame_unload();
+		break;
+	default:
+		unreachable();
+	}
+
+	ASSERT(main_game_globals->game_loaded_status==_game_loaded_status_none);
+
 	return;
 }
 
@@ -149,15 +216,19 @@ bool __cdecl main_game_change_update(void)
 void main_game_launch_set_map_name(const char* map_name)
 {
 	MultiByteToWideChar(CP_UTF8, 0, map_name, -1, g_main_game_launch_options.scenario_path, 260);
+	
 	return;
 }
 
 void main_game_load_from_core()
 {
 	main_game_load_from_core_name("core");
+	
+	return;
 }
 
-void main_game_load_from_core_name(const char* core_name)
+void main_game_load_from_core_name(
+	const char* core_name)
 {
 	s_game_options game_options;
 	if (game_state_get_game_options_from_core(core_name, &game_options))
@@ -170,15 +241,20 @@ void main_game_load_from_core_name(const char* core_name)
 	{
 		event(_event_message, "Failed to get game options from core (so I can't load it!)");
 	}
+
+	return;
 }
 
-void main_game_load_post_game_launch()
+void main_game_load_post_game_launch(
+	void)
 {
 	if (g_main_game_globals_debug.load_core_on_game_launch)
 	{
 		main_load_core_name(g_main_game_globals_debug.core_name);
 		g_main_game_globals_debug.load_core_on_game_launch = false;
 	}
+
+	return;
 }
 
 bool main_game_reset_in_progress(
@@ -426,9 +502,23 @@ bool map_memory_configuration_is_campaign_offline(e_map_memory_configuration con
 
 /* private code */
 
-static s_main_game_globals* main_game_globals_get(void)
+static s_main_game_globals* main_game_globals_get(
+	void)
 {
 	return Memory::GetAddress<s_main_game_globals*>(0x46DAE4, 0x49E29C);
+}
+
+static void map_profile(
+	char const* string)
+{
+	if (g_map_profile_stream)
+	{
+		real32 time = (real32)(GetTickCount() - g_map_profile_start_time) / 1000.f;
+
+		fprintf(g_map_profile_stream, "%8.3f: %s\n", time, string);
+	}
+
+	return;
 }
 
 static void main_game_launch_setup_game_mode_details(void)
@@ -496,19 +586,77 @@ static void main_game_launch_set_ui_shell_details(void)
 	return;
 }
 
-static void main_game_internal_pregame_load(void)
+static void main_game_internal_map_unload_begin(
+	void)
 {
 	s_main_game_globals* main_game_globals = main_game_globals_get();
-	ASSERT(main_game_globals->game_loaded_status == _game_loaded_status_none);
+
+	ASSERT(main_game_globals->game_loaded_status==_game_loaded_status_map_loaded);
+
+	sound_cache_close();
+	map_profile("after sound_cache_close");
+
+	texture_cache_close();
+	map_profile("after texture_cache_close");
+
+	geometry_cache_close();
+	map_profile("after geometry_cache_close");
+
+	scenario_language_pack_unload();
+	map_profile("after unloading language pack");
+
+	main_game_globals->game_loaded_status=_game_loaded_status_map_unloading;
+	ustrncpy_debug(main_game_globals->game_loaded_scenario_path, L"", NUMBEROF(main_game_globals->game_loaded_scenario_path));
+
+	return;
+}
+
+static void main_game_internal_map_unload_complete(
+	void)
+{
+	s_main_game_globals* main_game_globals = main_game_globals_get();
+
+	ASSERT(main_game_globals->game_loaded_status==_game_loaded_status_map_unloading);
+
+	texture_cache_unk();
+
+	main_game_globals->game_loaded_status = _game_loaded_status_none;
+
+	return;
+}
+
+static void main_game_internal_pregame_load(
+	void)
+{
+	s_main_game_globals* main_game_globals = main_game_globals_get();
+
+	ASSERT(main_game_globals->game_loaded_status==_game_loaded_status_none);
 
 	texture_cache_open_pregame();
+
+	main_game_globals->game_loaded_status = _game_loaded_status_pregame;
+
+	return;
+}
+
+static void main_game_internal_pregame_unload(
+	void)
+{
+	s_main_game_globals* main_game_globals = main_game_globals_get();
+
+	ASSERT(main_game_globals->game_loaded_status==_game_loaded_status_pregame);
+
+	texture_cache_close_pregame();
+
 	main_game_globals->game_loaded_status = _game_loaded_status_none;
+
 	return;
 }
 
 static void main_game_load_panic(void)
 {
 	main_game_unload_and_prepare_for_next_game();
+
 	ASSERT(!main_game_loaded_map() && !main_game_loaded_pregame());
 
 	static bool x_recursion_lock = false;

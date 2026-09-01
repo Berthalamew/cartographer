@@ -8,6 +8,10 @@
 class c_simulation_watcher : c_network_channel_owner
 {
 public:
+	void initialize_watcher(class c_simulation_world* world);
+	void destroy_watcher(void);
+	void setup_connection(void);
+
 	bool need_to_generate_updates(void);
 
 	void generate_player_updates(int32* player_update_count, int32 maximum_player_update_count, struct simulation_player_update* player_updates);
@@ -16,8 +20,13 @@ public:
 
 	void maintain_connection(void);
 
+	void reset_tracking_arrays(void);
+
 	int32 get_machine_index_by_identifier(struct s_machine_identifier const* remote_machine_identifier) const;
 	bool get_player_is_in_game(int32 player_index, struct s_player_identifier const* player_identifier) const;
+
+	bool get_machine_is_host(struct s_machine_identifier const* machine_identifier) const;
+	bool get_machine_connectivity(struct s_machine_identifier const* machine_identifier) const;
 
 	uint32 get_machine_valid_mask(void) const;
 

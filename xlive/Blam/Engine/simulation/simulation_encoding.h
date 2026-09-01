@@ -1,17 +1,8 @@
 #pragma once
-#include "machine_id.h"
-#include "networking/network_constants.h"
-
-/* structures */
-
-struct simulation_machine_update
-{
-	uint32 machine_valid_mask;
-	s_machine_identifier identifiers[k_network_maximum_machines_per_session];
-};
 
 /* prototypes */
 
+void simulation_write_quantized_position(class c_bitstream* packet, real_point3d const* position, int32 axis_encoding_bit_count, bool fixup_quantized_position_inside_bsp);
 void simulation_read_quantized_position(class c_bitstream* packet, real_point3d* position, int32 axis_encoding_bit_count);
 
 void __cdecl simulation_player_update_encode(class c_bitstream* packet, const struct simulation_player_update* player_update);

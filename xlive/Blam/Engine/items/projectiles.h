@@ -1,6 +1,22 @@
 #pragma once
 #include "objects/objects.h"
 
+/* macros */
+
+#define projectile_get(index) ((struct projectile_datum*)(object_get_and_verify_type((index), _object_mask_projectile)))
+#define projectile_try_and_get(index) ((struct projectile_datum*)(object_try_and_get_and_verify_type((index), _object_mask_projectile)))
+
+/* enums */
+
+
+enum e_projectile_flags
+{
+	_projectile_has_nonzero_angular_velocity_bit = 0,
+	_projectile_tracer_bit,
+
+	// TODO: finish remaining flags
+};
+
 /* structures */
 
 struct _projectile_datum

@@ -469,7 +469,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;MINIUPNP_STATICLIB;NGHTTP2_STATICLIB;CURL_STATICLIB;_DEBUG;_WINDOWS;_USRDLL;TERMINAL_ENABLED;ASSERTS_ENABLED;EVENTS_ENABLED;ERRORS_ENABLED;DEBUG_MEMORY_ENABLED;RASTERIZER_PROFILE_ENABLED;VALIDATE_REAL_ENABLED;OBJECT_OVERRIDE_ENABLED;OBJECT_DEBUG;UI_DEBUG;DEBUG_MENU_ENABLED;HS_COMPILER_ENABLED;PROFILE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;MINIUPNP_STATICLIB;NGHTTP2_STATICLIB;CURL_STATICLIB;_DEBUG;_WINDOWS;_USRDLL;TERMINAL_ENABLED;ASSERTS_ENABLED;EVENTS_ENABLED;ERRORS_ENABLED;DEBUG_MEMORY_ENABLED;RASTERIZER_PROFILE_ENABLED;VALIDATE_REAL_ENABLED;OBJECT_OVERRIDE_ENABLED;OBJECT_DEBUG;UI_DEBUG;DEBUG_MENU_ENABLED;HS_COMPILER_ENABLED;PROFILE_ENABLED;SIMULATION_VALIDATE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -497,6 +497,7 @@
       <SupportJustMyCode>false</SupportJustMyCode>
       <TreatSpecificWarningsAsErrors>4700</TreatSpecificWarningsAsErrors>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -531,7 +532,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;LLVM;MINIUPNP_STATICLIB;NGHTTP2_STATICLIB;CURL_STATICLIB;_DEBUG;_WINDOWS;_USRDLL;TERMINAL_ENABLED;ASSERTS_ENABLED;EVENTS_ENABLED;ERRORS_ENABLED;DEBUG_MEMORY_ENABLED;RASTERIZER_PROFILE_ENABLED;VALIDATE_REAL_ENABLED;OBJECT_OVERRIDE_ENABLED;OBJECT_DEBUG;UI_DEBUG;DEBUG_MENU_ENABLED;HS_COMPILER_ENABLED;PROFILE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;LLVM;MINIUPNP_STATICLIB;NGHTTP2_STATICLIB;CURL_STATICLIB;_DEBUG;_WINDOWS;_USRDLL;TERMINAL_ENABLED;ASSERTS_ENABLED;EVENTS_ENABLED;ERRORS_ENABLED;DEBUG_MEMORY_ENABLED;RASTERIZER_PROFILE_ENABLED;VALIDATE_REAL_ENABLED;OBJECT_OVERRIDE_ENABLED;OBJECT_DEBUG;UI_DEBUG;DEBUG_MENU_ENABLED;HS_COMPILER_ENABLED;PROFILE_ENABLED;SIMULATION_VALIDATE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -840,6 +841,7 @@
     <ClCompile Include="Blam\Engine\Networking\network_configuration.cpp" />
     <ClCompile Include="Blam\Engine\networking\delivery\network_link.cpp" />
     <ClCompile Include="Blam\Engine\networking\network_event.cpp" />
+    <ClCompile Include="Blam\Engine\networking\network_game_definitions.cpp" />
     <ClCompile Include="Blam\Engine\networking\network_globals.cpp" />
     <ClCompile Include="Blam\Engine\networking\network_loading.cpp" />
     <ClCompile Include="Blam\Engine\networking\network_memory.cpp" />
@@ -860,8 +862,11 @@
     <ClCompile Include="Blam\Engine\Networking\replication\replication_entity_manager.cpp" />
     <ClCompile Include="Blam\Engine\Networking\replication\replication_entity_manager_view.cpp" />
     <ClCompile Include="Blam\Engine\Networking\replication\replication_event_manager.cpp" />
+    <ClCompile Include="Blam\Engine\networking\replication\replication_event_manager_view.cpp" />
+    <ClCompile Include="Blam\Engine\networking\replication\replication_scheduler.cpp" />
     <ClCompile Include="Blam\Engine\networking\session\network_session_manager.cpp" />
     <ClCompile Include="Blam\Engine\networking\Session\network_text_chat_manager.cpp" />
+    <ClCompile Include="Blam\Engine\networking\tools\network_webstats_submit.cpp" />
     <ClCompile Include="Blam\Engine\networking\transport\transport.cpp" />
     <ClCompile Include="Blam\Engine\networking\transport\transport_address.cpp" />
     <ClCompile Include="Blam\Engine\networking\transport\transport_qos.cpp" />
@@ -874,6 +879,7 @@
     <ClCompile Include="Blam\Engine\objects\object_identifier.cpp" />
     <ClCompile Include="Blam\Engine\objects\object_types.cpp" />
     <ClCompile Include="Blam\Engine\objects\widgets\widgets.cpp" />
+    <ClCompile Include="Blam\Engine\physics\breakable_surfaces.cpp" />
     <ClCompile Include="Blam\Engine\physics\bsp3d.cpp" />
     <ClCompile Include="Blam\Engine\physics\character_physics.cpp" />
     <ClCompile Include="Blam\Engine\physics\character_physics_mode_dead.cpp" />
@@ -1327,6 +1333,7 @@
     <ClInclude Include="Blam\Engine\networking\replication\replication_event.h" />
     <ClInclude Include="Blam\Engine\networking\replication\replication_event_manager_view.h" />
     <ClInclude Include="Blam\Engine\networking\replication\replication_scheduler.h" />
+    <ClInclude Include="Blam\Engine\networking\tools\network_webstats_submit.h" />
     <ClInclude Include="Blam\Engine\objects\object_scenario_definitions.h" />
     <ClCompile Include="Blam\Engine\scenario\scenario.cpp" />
     <ClCompile Include="Blam\Engine\scenario\scenario_fog.cpp" />
@@ -1339,27 +1346,39 @@
     <ClCompile Include="Blam\Engine\shell\shell_windows_pcc.cpp" />
     <ClCompile Include="Blam\Engine\shell\windows\crash_report_window\crash_report_window.cpp" />
     <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_action.cpp" />
+    <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_damage.cpp" />
     <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_device_machines.cpp" />
+    <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_engine_globals.cpp" />
+    <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_engine_player.cpp" />
+    <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_engine_slayer.cpp" />
     <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_entities.cpp" />
     <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_events.cpp" />
+    <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_generics.cpp" />
     <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_interface.cpp" />
     <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_internal.cpp" />
+    <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_items.cpp" />
     <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_objects.cpp" />
+    <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_projectiles.cpp" />
+    <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_statborg.cpp" />
     <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_units.cpp" />
+    <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_weapons.cpp" />
     <ClCompile Include="Blam\Engine\simulation\simulation.cpp" />
     <ClCompile Include="Blam\Engine\simulation\simulation_actors.cpp" />
     <ClCompile Include="Blam\Engine\simulation\simulation_encoding.cpp" />
     <ClCompile Include="Blam\Engine\simulation\simulation_entity_database.cpp" />
+    <ClCompile Include="Blam\Engine\simulation\simulation_entity_definition.cpp" />
     <ClCompile Include="Blam\Engine\simulation\simulation_event_handler.cpp" />
     <ClCompile Include="Blam\Engine\simulation\simulation_gamestate_entities.cpp" />
     <ClCompile Include="Blam\Engine\simulation\game_interface\simulation_game_vehicles.cpp" />
     <ClCompile Include="Blam\Engine\simulation\simulation_players.cpp" />
+    <ClCompile Include="Blam\Engine\simulation\simulation_priority.cpp" />
     <ClCompile Include="Blam\Engine\simulation\simulation_queue.cpp" />
     <ClCompile Include="Blam\Engine\simulation\simulation_queue_entities.cpp" />
     <ClCompile Include="Blam\Engine\simulation\simulation_queue_events.cpp" />
     <ClCompile Include="Blam\Engine\simulation\simulation_queue_global_events.cpp" />
     <ClCompile Include="Blam\Engine\simulation\simulation_type_collection.cpp" />
     <ClCompile Include="Blam\Engine\simulation\simulation_view.cpp" />
+    <ClCompile Include="Blam\Engine\simulation\simulation_view_telemetry.cpp" />
     <ClCompile Include="Blam\Engine\simulation\simulation_watcher.cpp" />
     <ClCompile Include="Blam\Engine\simulation\simulation_world.cpp" />
     <ClCompile Include="Blam\Engine\sound\game_sound.cpp" />
@@ -1564,6 +1583,7 @@
     <ClInclude Include="Blam\Engine\objects\scenery.h" />
     <ClInclude Include="Blam\Engine\objects\widgets\antenna_definitions.h" />
     <ClInclude Include="Blam\Engine\objects\widgets\widgets.h" />
+    <ClInclude Include="Blam\Engine\physics\breakable_surfaces.h" />
     <ClInclude Include="Blam\Engine\physics\breakable_surface_definitions.h" />
     <ClInclude Include="Blam\Engine\physics\bsp3d.h" />
     <ClInclude Include="Blam\Engine\physics\character_physics.h" />
@@ -2431,7 +2451,10 @@
     <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_action.h" />
     <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_damage.h" />
     <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_device_machines.h" />
+    <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_engine.h" />
+    <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_engine_globals.h" />
     <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_engine_player.h" />
+    <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_engine_slayer.h" />
     <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_entities.h" />
     <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_events.h" />
     <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_generics.h" />
@@ -2441,23 +2464,26 @@
     <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_objects.h" />
     <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_object_constants.h" />
     <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_projectiles.h" />
+    <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_statborg.h" />
     <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_turrets.h" />
     <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_units.h" />
     <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_vehicles.h" />
     <ClInclude Include="Blam\Engine\simulation\game_interface\simulation_game_weapons.h" />
-    <ClInclude Include="Blam\Engine\simulation\machine_id.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_actors.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_encoding.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_entity_database.h" />
+    <ClInclude Include="Blam\Engine\simulation\simulation_entity_definition.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_event_handler.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_gamestate_entities.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_players.h" />
+    <ClInclude Include="Blam\Engine\simulation\simulation_priority.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_queue.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_queue_entities.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_queue_events.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_queue_global_events.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_type_collection.h" />
+    <ClInclude Include="Blam\Engine\simulation\simulation_update.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_view.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_view_telemetry.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_watcher.h" />

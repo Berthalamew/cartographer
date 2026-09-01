@@ -28,7 +28,7 @@
 /* macros */
 
 #ifdef HS_COMPILER_ENABLED
-#define HS_FUNCTION_DEFINITION_CREATE(global_name, return_type, name, flags, parse, evaluate, documentation, parameters, formal_parameter_count, ...) \
+#define HS_GLOBAL_EXTERNAL_CREATE(global_name, return_type, name, flags, parse, evaluate, documentation, parameters, formal_parameter_count, ...) \
 static const hs_function_definition (global_name) = \
 {													\
 	return_type,									\
@@ -42,7 +42,7 @@ static const hs_function_definition (global_name) = \
 	{__VA_ARGS__}									\
 }
 #else
-#define HS_FUNCTION_DEFINITION_CREATE(global_name, return_type, name, flags, parse, evaluate, documentation, parameters, formal_parameter_count, ...) \
+#define HS_GLOBAL_EXTERNAL_CREATE(global_name, return_type, name, flags, parse, evaluate, documentation, parameters, formal_parameter_count, ...) \
 static const hs_function_definition (global_name) = \
 {													\
 	return_type,									\
@@ -221,7 +221,7 @@ static void user_interface_test_confirmation_evaluate(int16 function_index, int3
 
 extern void __cdecl hs_evaluate_begin(int16 function_index, int32 thread_index, bool initialize);
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	begin_definition,
 	_hs_passthrough,
 	"begin",
@@ -234,7 +234,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	begin_random_definition,
 	_hs_passthrough,
 	"begin_random",
@@ -247,7 +247,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	if_definition,
 	_hs_passthrough,
 	"if",
@@ -260,7 +260,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	cond_definition,
 	_hs_passthrough,
 	"cond",
@@ -273,7 +273,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	set_definition,
 	_hs_passthrough,
 	"set",
@@ -286,7 +286,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	and_definition,
 	_hs_type_boolean,
 	"and",
@@ -299,7 +299,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	or_definition,
 	_hs_type_boolean,
 	"or",
@@ -312,7 +312,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	add_definition,
 	_hs_type_real,
 	"+",
@@ -325,7 +325,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	subtract_definition,
 	_hs_type_real,
 	"-",
@@ -338,7 +338,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	multiply_definition,
 	_hs_type_real,
 	"*",
@@ -351,7 +351,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	divide_definition,
 	_hs_type_real,
 	"/",
@@ -364,7 +364,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	min_definition,
 	_hs_type_real,
 	"min",
@@ -377,7 +377,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	max_definition,
 	_hs_type_real,
 	"max",
@@ -390,7 +390,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	equal_definition,
 	_hs_type_boolean,
 	"=",
@@ -403,7 +403,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	not_equal_definition,
 	_hs_type_boolean,
 	"!=",
@@ -416,7 +416,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	gt_definition,
 	_hs_type_boolean,
 	">",
@@ -429,7 +429,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	lt_definition,
 	_hs_type_boolean,
 	"<",
@@ -442,7 +442,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	gte_definition,
 	_hs_type_boolean,
 	">=",
@@ -455,7 +455,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	lte_definition,
 	_hs_type_boolean,
 	"<=",
@@ -468,7 +468,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	sleep_definition,
 	_hs_type_void,
 	"sleep",
@@ -481,7 +481,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	sleep_forever_definition,
 	_hs_type_void,
 	"sleep_forever",
@@ -494,7 +494,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	sleep_until_definition,
 	_hs_type_void,
 	"sleep_until",
@@ -507,7 +507,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	wake_definition,
 	_hs_type_void,
 	"wake",
@@ -520,7 +520,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	inspect_definition,
 	_hs_type_void,
 	"inspect",
@@ -533,7 +533,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_to_unit_definition,
 	_hs_type_unit,
 	"unit",
@@ -546,7 +546,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	not_definition,
 	_hs_type_boolean,
 	"not",
@@ -559,7 +559,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_boolean
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	pin_definition,
 	_hs_type_real,
 	"pin",
@@ -572,7 +572,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_real, _hs_type_real, _hs_type_real
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	print_definition,
 	_hs_type_void,
 	"print",
@@ -585,7 +585,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_string
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	players_definition,
 	_hs_type_object_list,
 	"players",
@@ -599,7 +599,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 );
 
 	
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	kill_volume_enable_definition,
 	_hs_type_void,
 	"kill_volume_enable",
@@ -612,7 +612,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_trigger_volume
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	kill_volume_disable_definition,
 	_hs_type_void,
 	"kill_volume_disable",
@@ -626,7 +626,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 );
 
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	volume_teleport_players_not_inside_definition,
 	_hs_type_void,
 	"volume_teleport_players_not_inside",
@@ -639,7 +639,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_trigger_volume, _hs_type_cutscene_flag
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	volume_test_object_definition,
 	_hs_type_boolean,
 	"volume_test_object",
@@ -652,7 +652,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_trigger_volume, _hs_type_object
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	volume_test_objects_definition,
 	_hs_type_boolean,
 	"volume_test_objects",
@@ -665,7 +665,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_trigger_volume, _hs_type_object_list
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	volume_test_objects_all_definition,
 	_hs_type_boolean,
 	"volume_test_objects_all",
@@ -678,7 +678,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_trigger_volume, _hs_type_object_list
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	volume_return_objects_definition,
 	_hs_type_object_list,
 	"volume_return_objects",
@@ -691,7 +691,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_trigger_volume
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	volume_return_objects_by_type_definition,
 	_hs_type_object_list,
 	"volume_return_objects_by_type",
@@ -704,7 +704,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_trigger_volume, _hs_type_long_integer
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	list_get_definition,
 	_hs_type_object,
 	"list_get",
@@ -717,7 +717,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object_list, _hs_type_short_integer
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	list_count_definition,
 	_hs_type_short_integer,
 	"list_count",
@@ -730,7 +730,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object_list
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	list_count_not_dead_definition,
 	_hs_type_short_integer,
 	"list_count_not_dead",
@@ -743,7 +743,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object_list
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	effect_new_definition,
 	_hs_type_void,
 	"effect_new",
@@ -756,7 +756,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_effect, _hs_type_cutscene_flag
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	effect_new_on_object_marker_definition,
 	_hs_type_void,
 	"effect_new_on_object_marker",
@@ -769,7 +769,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_effect, _hs_type_object, _hs_type_string_id
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	damage_new_definition,
 	_hs_type_void,
 	"damage_new",
@@ -782,7 +782,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_damage, _hs_type_cutscene_flag
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	damage_object_definition,
 	_hs_type_void,
 	"damage_object",
@@ -795,7 +795,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_damage, _hs_type_object
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	damage_objects_definition,
 	_hs_type_void,
 	"damage_objects",
@@ -808,7 +808,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_damage, _hs_type_object_list
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	damage_players_definition,
 	_hs_type_void,
 	"damage_players",
@@ -821,7 +821,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_damage
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_create_definition,
 	_hs_type_void,
 	"object_create",
@@ -834,7 +834,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object_name
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_create_clone_definition,
 	_hs_type_void,
 	"object_create_clone",
@@ -847,7 +847,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object_name
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_create_anew_definition,
 	_hs_type_void,
 	"object_create_anew",
@@ -860,7 +860,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object_name
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_create_containing_definition,
 	_hs_type_void,
 	"object_create_containing",
@@ -873,7 +873,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_string
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_create_clone_containing_definition,
 	_hs_type_void,
 	"object_create_clone_containing",
@@ -886,7 +886,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_string
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_create_anew_containing_definition,
 	_hs_type_void,
 	"object_create_anew_containing",
@@ -899,7 +899,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_string
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_destroy_definition,
 	_hs_type_void,
 	"object_destroy",
@@ -912,7 +912,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_destroy_containing_definition,
 	_hs_type_void,
 	"object_destroy_containing",
@@ -925,7 +925,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_string
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_destroy_all_definition,
 	_hs_type_void,
 	"object_destroy_all",
@@ -938,7 +938,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_destroy_type_mask_definition,
 	_hs_type_void,
 	"object_destroy_type_mask",
@@ -951,7 +951,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_long_integer
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	objects_delete_by_definition_definition,
 	_hs_type_void,
 	"objects_delete_by_definition",
@@ -964,7 +964,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object_definition
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_hide_definition,
 	_hs_type_void,
 	"object_hide",
@@ -977,7 +977,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object, _hs_type_boolean
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_set_shadowless_definition,
 	_hs_type_void,
 	"object_set_shadowless",
@@ -990,7 +990,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object, _hs_type_boolean
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_function_set_definition,
 	_hs_type_void,
 	"object_function_set",
@@ -1003,7 +1003,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_long_integer, _hs_type_real
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_set_function_variable_definition,
 	_hs_type_void,
 	"object_set_function_variable",
@@ -1016,7 +1016,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object, _hs_type_string_id, _hs_type_real, _hs_type_real
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_clear_function_variable_definition,
 	_hs_type_void,
 	"object_clear_function_variable",
@@ -1029,7 +1029,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object, _hs_type_string_id
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_clear_all_function_variables_definition,
 	_hs_type_void,
 	"object_clear_all_function_variables",
@@ -1042,7 +1042,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_dynamic_simulation_disable_definition,
 	_hs_type_void,
 	"object_dynamic_simulation_disable",
@@ -1055,7 +1055,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object, _hs_type_boolean
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_set_phantom_power_definition,
 	_hs_type_void,
 	"object_set_phantom_power",
@@ -1068,7 +1068,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object, _hs_type_boolean
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_wake_physics_definition,
 	_hs_type_void,
 	"object_wake_physics",
@@ -1081,7 +1081,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_set_ranged_attack_inhibited_definition,
 	_hs_type_void,
 	"object_set_ranged_attack_inhibited",
@@ -1094,7 +1094,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object, _hs_type_boolean
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	object_set_melee_attack_inhibited_definition,
 	_hs_type_void,
 	"object_set_melee_attack_inhibited",
@@ -1107,7 +1107,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_object, _hs_type_boolean
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	objects_dump_memory_definition,
 	_hs_type_void,
 	"objects_dump_memory",
@@ -1333,7 +1333,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	script_doc_definition,
 */
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	help_definition,
 	_hs_type_void,
 	"help",
@@ -1963,7 +1963,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	cheats_load_definition,
 */
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	drop_definition,
 	_hs_type_void,
 	"drop",
@@ -2905,7 +2905,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	structure_bsp_index_definition,
 */
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	crash_definition,
 	_hs_type_void,
 	"crash",
@@ -2935,7 +2935,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	screenshot_big_jittered_definition,
 */
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	screenshot_cubemap_definition,
 	_hs_type_void,
 	"screenshot_cubemap",
@@ -2948,7 +2948,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_string
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	main_menu_definition,
 	_hs_type_void,
 	"main_menu",
@@ -2961,7 +2961,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	main_halt_definition,
 	_hs_type_void,
 	"main_halt",
@@ -2974,7 +2974,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	map_name_definition,
 	_hs_type_void,
 	"map_name",
@@ -2987,7 +2987,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_string
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	game_multiplayer_definition,
 	_hs_type_void,
 	"game_multiplayer",
@@ -3000,7 +3000,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_string
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	game_splitscreen_definition,
 	_hs_type_void,
 	"game_splitscreen",
@@ -3013,7 +3013,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_long_integer
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	game_difficulty_definition,
 	_hs_type_void,
 	"game_difficulty",
@@ -3026,7 +3026,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_enum_game_difficulty
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	game_coop_players_definition,
 	_hs_type_void,
 	"game_coop_players",
@@ -3140,7 +3140,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	ai_dialogue_break_on_vocalization_definition,
 */
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	fade_in_definition,
 	_hs_type_void,
 	"fade_in",
@@ -3246,7 +3246,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 );
 */
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	core_load_definition,
 	_hs_type_void,
 	"core_load",
@@ -3259,7 +3259,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	core_load_name_definition,
 	_hs_type_void,
 	"core_load_name",
@@ -3272,7 +3272,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_string
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	core_save_definition,
 	_hs_type_void,
 	"core_save",
@@ -3285,7 +3285,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	core_save_name_definition,
 	_hs_type_void,
 	"core_save_name",
@@ -3298,7 +3298,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_string
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	core_load_game_definition,
 	_hs_type_void,
 	"core_load_game",
@@ -3311,7 +3311,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	core_load_game_name_definition,
 	_hs_type_void,
 	"core_load_game_name",
@@ -3933,7 +3933,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	user_interface_controller_get_last_level_played_definition,
 */
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	ui_debug_load_main_menu_definition,
 	_hs_type_void,
 	"ui_debug_load_main_menu",
@@ -3946,7 +3946,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	ui_debug_text_bounds_definition,
 	_hs_type_void,
 	"ui_debug_text_bounds",
@@ -3959,7 +3959,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_boolean
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	ui_debug_show_title_safe_bounds_definition,
 	_hs_type_void,
 	"ui_debug_show_title_safe_bounds",
@@ -3972,7 +3972,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_boolean
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	ui_debug_element_bounds_definition,
 	_hs_type_void,
 	"ui_debug_element_bounds",
@@ -3985,7 +3985,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_boolean
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	ui_debug_screen_tag_definition,
 	_hs_type_void,
 	"ui_debug_screen_tag",
@@ -3998,7 +3998,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_string
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	ui_transition_out_console_window_definition,
 	_hs_type_void,
 	"ui_transition_out_console_window",
@@ -4011,7 +4011,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_unparsed
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	ui_debug_show_screen_tag_path_definition,
 	_hs_type_void,
 	"ui_debug_show_screen_tag_path",
@@ -4024,7 +4024,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_boolean
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	ui_debug_show_current_screen_tag_definition,
 	_hs_type_void,
 	"ui_debug_show_current_screen_tag",
@@ -4037,7 +4037,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_string
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	ui_set_beta_definition,
 	_hs_type_void,
 	"ui_set_beta",
@@ -4187,7 +4187,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	net_set_machine_name_definition,
 */
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	net_event_display_category_definition,
 	_hs_type_void,
 	"net_event_display_category",
@@ -4200,7 +4200,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_string, _hs_type_enum_network_event
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	net_event_log_category_definition,
 	_hs_type_void,
 	"net_event_log_category",
@@ -4213,7 +4213,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_string, _hs_type_enum_network_event
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	net_event_list_categories_definition,
 	_hs_type_void,
 	"net_event_list_categories",
@@ -4707,7 +4707,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	sound_suppress_ambience_update_on_revert_definition,
 */
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	ui_test_error_ok_definition,
 	_hs_type_void,
 	"ui_test_error_ok",
@@ -4720,7 +4720,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_short_integer
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	ui_test_error_ok_cancel_definition,
 	_hs_type_void,
 	"ui_test_error_ok_cancel",
@@ -4733,7 +4733,7 @@ HS_FUNCTION_DEFINITION_CREATE(
 	_hs_type_short_integer
 );
 
-HS_FUNCTION_DEFINITION_CREATE(
+HS_GLOBAL_EXTERNAL_CREATE(
 	ui_test_confirmation_definition,
 	_hs_type_void,
 	"ui_test_confirmation",

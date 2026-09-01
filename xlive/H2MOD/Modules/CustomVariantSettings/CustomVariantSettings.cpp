@@ -12,6 +12,7 @@
 #include "networking/session/network_observer.h"
 #include "networking/session/network_session.h"
 #include "simulation/game_interface/simulation_game_action.h"
+#include "simulation/game_interface/simulation_game_object_constants.h"
 #include "physics/physics_constants.h"
 #include "shell/shell.h"
 #include "units/units.h"
@@ -65,30 +66,36 @@ namespace CustomVariantSettings
 			&& session->is_host() 
 			&& session->get_transport_session_id(&data.session_data.identifier))
 		{
-			auto customVariantSetting = customVariantSettingsMap.find(session->m_session_parameters.game_variant.variant_name);
+			auto customVariantSetting = customVariantSettingsMap.find(session->get_session_parameters()->game_variant.variant_name);
 			if (customVariantSetting != customVariantSettingsMap.end())
 			{
 				currentVariantSettings = customVariantSetting->second;
 				if (currentVariantSettings != defaultCustomVariantSettings) 
 				{
-					c_network_observer* observer = session->m_network_observer;
-					s_session_peer* peer = session->get_session_peer(peer_index);
 					if (peer_index != NONE && !session->is_peer_local(peer_index))
 					{
-						data.settings = currentVariantSettings;
+						s_session_peer* peer = session->get_session_peer(peer_index);
+
 						if (peer->is_remote_peer)
+						{
+							c_network_observer* observer = session->get_observer();
+
+							data.settings = currentVariantSettings;
+
 							observer->send_message(
-								session->m_session_index, 
-								peer->observer_channel_index, 
-								false, 
-								_network_message_type_custom_variant_settings, 
-								k_custom_variant_settings_packet_size, 
+								session->observer_owner(),
+								peer->observer_channel_index,
+								false,
+								_network_message_type_custom_variant_settings,
+								k_custom_variant_settings_packet_size,
 								&data);
+						}
 					}
 				}
 			}
 		}
 	}
+
 	void ResetSettings()
 	{
 		currentVariantSettings = defaultCustomVariantSettings;
@@ -105,7 +112,7 @@ namespace CustomVariantSettings
 				
 				unit->unit.grenade_counts[_unit_grenade_human_fragmentation] = 4;
 				unit->unit.grenade_counts[_unit_grenade_covenant_plasma] = 4;
-				simulation_action_object_update(player->unit_index, FLAG(_simulation_action_update_grenade_count_bit));
+				simulation_action_object_update(player->unit_index, FLAG(_simulation_unit_update_grenade_counts_bit));
 			}
 		}
 	}

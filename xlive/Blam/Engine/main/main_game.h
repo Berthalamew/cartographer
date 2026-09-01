@@ -22,15 +22,17 @@ void main_game_apply_patches(void);
 // Initialize options structure for the map_name command
 void main_game_initialize(void);
 
-bool __cdecl main_game_loaded_map(void);
+bool main_game_loaded_pregame(void);
 
-bool __cdecl main_game_loaded_pregame(void);
+bool main_game_loaded_map(void);
+
+wchar_t const* main_game_loaded_map_name(void);
 
 void __cdecl main_game_launch_default(void);
 
 void __cdecl main_game_reset_map(void);
 
-void __cdecl main_game_unload_and_prepare_for_next_game(void);
+void main_game_unload_and_prepare_for_next_game(void);
 
 bool  __cdecl main_game_change_update(void);
 

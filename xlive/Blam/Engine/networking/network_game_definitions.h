@@ -91,3 +91,8 @@ struct s_network_squad_status_data
 	int8 gap[1538];
 };
 ASSERT_STRUCT_SIZE(s_network_squad_status_data, 2616);
+
+/* prototypes */
+
+void player_appearance_encode(class c_bitstream* packet, struct s_player_appearance const* appearance);
+bool player_appearance_decode(class c_bitstream* packet, struct s_player_appearance* appearance);

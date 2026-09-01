@@ -82,7 +82,7 @@ void ShowNetworkStatsOverlay(bool* p_open)
 		c_network_session* session = NULL;
 		if (network_life_cycle_in_squad_session(&session))
 		{
-			ImGui::Text("Network protocol: %s", session->describe_network_protocol_type());
+			ImGui::Text("Network protocol: %s", session->get_class_string(session->session_class()));
 		}
 		else
 		{

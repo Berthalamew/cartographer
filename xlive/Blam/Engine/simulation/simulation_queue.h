@@ -82,7 +82,8 @@ public:
 		dispose();
 	}
 
-	void initialize()
+	void initialize(
+		void)
 	{
 		m_allocated_count = 0;
 		m_allocated_size = 0;
@@ -92,6 +93,8 @@ public:
 		m_tail = NULL;
 		m_initialized = true;
 		csmemset(&m_stats, 0, sizeof(m_stats));
+
+		return;
 	}
 
 	bool initialized() const
@@ -99,31 +102,30 @@ public:
 		return m_initialized;
 	}
 
-	const s_simulation_queue_element* get_head() const
+	s_simulation_queue_element* get_first_element(
+		void) const
 	{
+		s_simulation_queue_element* first_element = NULL;
+
 		if (initialized())
 		{
-			return m_head;
+			first_element = m_head;
 		}
-		return NULL;
+
+		return first_element;
 	}
 
-	const s_simulation_queue_element* get_first_element() const
+	s_simulation_queue_element* get_next_element(
+		s_simulation_queue_element* element) const
 	{
-		if (initialized())
-		{
-			return get_head();
-		}
-		return NULL;
-	}
+		s_simulation_queue_element* next_element = NULL;
 
-	const s_simulation_queue_element* get_next_element(const s_simulation_queue_element* element) const
-	{
 		if (initialized())
 		{
-			return element->next;
+			next_element = element->next;
 		}
-		return NULL;
+
+		return next_element;
 	}
 
 	int32 allocated_count() const

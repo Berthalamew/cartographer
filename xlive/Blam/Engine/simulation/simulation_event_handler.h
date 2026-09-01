@@ -1,10 +1,17 @@
 #pragma once
 #include "game_interface/simulation_game_events.h"
+#include "networking/network_constants.h"
 
 class c_replication_event_manager_client
 {
 public:
-    virtual int32 read_incoming_event(int32 a2, int32 a3, int32 a4, uint32* a5, int32 a6, int32 a7) = 0;
+    virtual e_network_read_result read_incoming_event(
+        int32 event_type,
+        int32 const* entity_reference_indices,
+        int32 maximum_block_count,
+        int32* block_count,
+        struct s_replication_allocation_block* blocks,
+        class c_bitstream* packet) = 0;
     virtual void process_incoming_event(e_simulation_event_type simulation_event_type, int32* entity_reference_indices, int32 block_count, struct s_replication_allocation_block* block) = 0;
     virtual void write_outgoing_event(int32 a2, int32 a3, uint32* a4, int8* a5) = 0;
     virtual void notify_outgoing_event_retired(int32 a2) = 0;
@@ -23,7 +30,13 @@ public:
 
     void destroy(void);
 
-    int32 read_incoming_event(int32 a2, int32 a3, int32 a4, uint32* a5, int32 a6, int32 a7) override;
+    e_network_read_result read_incoming_event(
+        int32 event_type,
+        int32 const* entity_reference_indices,
+        int32 maximum_block_count,
+        int32* block_count,
+        struct s_replication_allocation_block* blocks,
+        class c_bitstream* packet) override;
     void process_incoming_event(e_simulation_event_type simulation_event_type, int32* entity_reference_indices, int32 block_count, struct s_replication_allocation_block* payload_block) override;
     void write_outgoing_event(int32 a2, int32 a3, uint32* a4, int8* a5) override;
     void notify_outgoing_event_retired(int32 a2) override;

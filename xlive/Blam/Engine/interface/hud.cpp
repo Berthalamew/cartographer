@@ -122,11 +122,13 @@ void interface_draw_screen(void)
 					hud_render_nav_points(g_user_render_index);
 				}
 			}
+
 			if (g_hud_scripted_globals->show_hud_messages)
 			{
 				hud_messaging_update(g_user_render_index);
 			}
 		}
+
 		draw_hud_layer();
 	}
 

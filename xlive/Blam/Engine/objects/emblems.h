@@ -65,7 +65,8 @@ enum e_emblem_foreground : uint8
 	_emblem_foreground_number6 = 60,
 	_emblem_foreground_number7 = 61,
 	_emblem_foreground_number8 = 62,
-	_emblem_foreground_number9 = 63
+	_emblem_foreground_number9 = 63,
+	k_emblem_foreground_count
 };
 
 enum e_emblem_background : uint8
@@ -101,7 +102,8 @@ enum e_emblem_background : uint8
 	_emblem_background_upper_field = 28,
 	_emblem_background_top_and_bottom = 29,
 	_emblem_background_center_stripe = 30,
-	_emblem_background_left_and_right = 31
+	_emblem_background_left_and_right = 31,
+	k_emblem_background_count
 };
 
 enum e_emblem_flags : uint8

@@ -27,7 +27,7 @@ struct s_transport_unique_identifier
 // Return true if both secure addresses are the same
 bool transport_secure_address_compare(const s_transport_secure_address* a, const s_transport_secure_address* b);
 
-void transport_secure_address_extract_identifier(s_transport_secure_address const* address, struct s_machine_identifier* identifier);
+void transport_secure_address_extract_identifier(s_transport_secure_address const* address, struct s_transport_unique_identifier* identifier);
 
 char* transport_secure_identifier_get_string(const s_transport_secure_identifier* identifier);
 
@@ -48,3 +48,5 @@ bool __cdecl transport_secure_identifier_retrieve(
 	struct s_transport_secure_address* secure_address);
 
 bool __cdecl transport_secure_address_get(struct s_transport_secure_address* secure_address, struct transport_address* address);
+
+s_transport_unique_identifier* transport_security_get_local_unique_identifier(void);

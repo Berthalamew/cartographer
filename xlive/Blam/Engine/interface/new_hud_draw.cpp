@@ -633,7 +633,7 @@ void draw_hud_text_get_string(s_draw_hud_widget_input_results* widget_function_r
 			out_string->print(L"%d", value);
 		}
 	}
-	else if(text_widget->flags.test(text_widget_flag_talking_player_hack))
+	else if (text_widget->flags.test(text_widget_flag_talking_player_hack))
 	{
 		if(user_state->player_talking && user_state->player_index != NONE)
 		{

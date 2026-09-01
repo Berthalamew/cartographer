@@ -212,7 +212,7 @@ static void setup_game_options_text(const wchar_t* reports_path)
 	errno_t error = _wfopen_s(&file, report_info_path_game_options->get_string(), L"w+");
 
 	// We want to make sure the game is active before we get the game options, otherwise we'll crash if the game hasn't initialized it
-	if (!error && file != NULL && game_is_active())
+	if (!error && file != NULL && game_is_available())
 	{
 		const s_game_options* game_options = game_options_get();
 
@@ -270,8 +270,8 @@ static void setup_game_options_text(const wchar_t* reports_path)
 		fwprintf(file, L"Game Tick Rate: ");
 		fwprintf(file, L"%d\n", game_options->game_tick_rate);
 
-		fwprintf(file, L"Random Data: ");
-		fwprintf(file, L"%lld\n", game_options->random_data);
+		fwprintf(file, L"Game instance: ");
+		fwprintf(file, L"%lld\n", game_options->game_instance);
 
 		fwprintf(file, L"Random Seed: ");
 		fwprintf(file, L"%d\n", game_options->verify_random_seed);

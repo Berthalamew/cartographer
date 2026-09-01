@@ -1,7 +1,6 @@
 #pragma once
 #include "networking/network_constants.h"
 
-// TODO reverse class
 class c_replication_event_manager
 {
 public:
@@ -10,6 +9,14 @@ public:
 
 	void reset(void);
 	
+	e_network_read_result read_incoming_event(
+		int32 event_type,
+		int32 const* entity_reference_indices,
+		int32 maximum_block_count,
+		int32* block_count,
+		struct s_replication_allocation_block* blocks,
+		class c_bitstream* packet);
+
 	void register_client(
 		class c_simulation_event_handler* client)
 	{
