@@ -1,6 +1,4 @@
 #pragma once
-#include "bitmaps/bitmap_group.h"
-#include "render/render.h"
 
 /* structures */
 
@@ -18,7 +16,7 @@ struct s_screenshot_globals
 	int8 tile_count_jittered;
 	int8 pad[3];
 	char camera_name[256];
-	bitmap_data* bloom_bitmap;
+	struct bitmap_data* bloom_bitmap;
 };
 ASSERT_STRUCT_SIZE(s_screenshot_globals, 276);
 
@@ -54,6 +52,6 @@ void movie_stop(void);
 
 real32 movie_recording_timestep(void);
 
-void screenshot_cubemap(const char* name);
+void screenshot_cubemap(char const* name);
 
-bool __cdecl screenshot_render(window_bound* window);
+bool __cdecl screenshot_render(struct window_bound* window);

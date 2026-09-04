@@ -2,7 +2,6 @@
 #include "game/materials.h"
 #include "objects/damage_reporting.h"
 #include "physics/physics_models.h"
-#include "tag_files/data_reference.h"
 #include "tag_files/tag_block.h"
 
 enum
@@ -490,7 +489,7 @@ struct s_scenario_load_parameters
 	* flags: 6
 	* alignment_bit: 0
 	****************************************/
-	data_reference paramaters;
+	tag_data paramaters;
 	int8 pad[32];
 };
 

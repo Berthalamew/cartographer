@@ -1,5 +1,26 @@
 #pragma once
-#include "language.h"
+
+/* constants */
+
+enum e_none_sentinel
+{
+	NONE = -1,
+};
+
+enum
+{
+	INT64_BITS = 64,
+	INT64_BITS_BITS = 4,
+
+	k_short_bits = 16,
+
+	UNSIGNED_LONG_MAX = 0xFFFFFFFF,
+	BYTE_MAX = 255,
+	k_kilo = 1024,
+	SHORT_MAX = 32767,
+	k_unsigned_short_max = 0xffff,
+	k_tag_string_length = 32,
+};
 
 // 8-bit character that's specified as a multibyte utf8 string
 typedef char utf8;
@@ -48,30 +69,6 @@ static_assert(sizeof(real64) == 8);
 typedef long datum;
 static_assert(sizeof(datum) == 4);
 
-// 32-bit character that's specified as a utf32 string
-struct utf32
-{
-	uint32 character;
-};
-
-
-enum
-{
-	INT64_BITS = 64,
-	INT64_BITS_BITS = 4,
-
-	k_short_bits= 16,
-
-	UNSIGNED_LONG_MAX = 0xFFFFFFFF,
-	BYTE_MAX = 255,
-	k_kilo = 1024,
-	SHORT_MAX = 32767,
-	k_unsigned_short_max = 0xffff,
-	NONE = -1,
-
-	k_tag_string_length = 32,
-};
-
 #define EOL_STRING "\r\n"
 
 #define SIZEOF_BITS(value) (8 * sizeof(value))
@@ -87,6 +84,12 @@ enum
 
 /* structures */
 
+// 32-bit character that's specified as a utf32 string
+struct utf32
+{
+	uint32 character;
+};
+
 struct csstrtok_data
 {
 	char* next_string;
@@ -96,6 +99,13 @@ union long_point3d
 {
 	int32 n[3];
 	struct { int32 x, y, z; };
+};
+
+struct s_location
+{
+	int32 leaf_index;
+	int16 cluster_index;
+	int16 bsp_index;
 };
 
 /* globals */
@@ -287,7 +297,7 @@ char* csstrtok(char* s, const char* delimiters, bool skip_multiple_delimiters, s
 
 char* strchr(char* str, int32 ch);
 
-char const* get_language_display_name(e_language language);
+char const* get_language_display_name(enum e_language language);
 
 /* used for stubs, otherwise DO NOT USE */
 void cseries_stub_internal(...);

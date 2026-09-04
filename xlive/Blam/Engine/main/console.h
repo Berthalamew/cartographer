@@ -1,6 +1,5 @@
 #pragma once
 #ifdef TERMINAL_ENABLED
-#include "math/color_math.h"
 #endif
 
 /* enums */

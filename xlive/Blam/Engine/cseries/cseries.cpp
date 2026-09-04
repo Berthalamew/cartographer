@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "cseries.h"
 
+#include "language.h"
+
 #ifdef ASSERTS_ENABLED
 #include "stack_walk_windows.h"
 

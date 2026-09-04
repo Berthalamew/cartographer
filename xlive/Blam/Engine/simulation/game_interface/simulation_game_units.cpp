@@ -5,7 +5,6 @@
 
 #include "game/game_globals.h"
 #include "game/game_engine.h"
-#include "math/color_math.h"
 #include "networking/network_event.h"
 #include "units/units.h"
 

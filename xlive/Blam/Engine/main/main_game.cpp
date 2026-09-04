@@ -8,6 +8,7 @@
 #include "game/game.h"
 #include "game/game_globals.h"
 #include "game/game_options.h"
+#include "game/player_constants.h"
 #include "interface/damaged_media.h"
 #include "interface/user_interface.h"
 #include "networking/network_event.h"

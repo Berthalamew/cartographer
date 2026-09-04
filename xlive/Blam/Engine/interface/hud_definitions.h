@@ -1,6 +1,5 @@
 #pragma once
 #include "interface/new_hud_definitions.h"
-#include "math/color_math.h"
 
 enum e_scaling_flags : short
 {

@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "text_group.h"
+
 #include "cache/cache_files.h"
-#include "main/game_preferences.h"
 #include "game/game_globals.h"
+#include "main/game_preferences.h"
 #include "memory/data.h"
 #include "networking/network_event.h"
 

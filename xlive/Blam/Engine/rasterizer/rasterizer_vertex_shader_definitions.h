@@ -1,5 +1,4 @@
 #pragma once
-#include "tag_files/data_reference.h"
 #include "tag_files/tag_block.h"
 
 /* enums */
@@ -60,7 +59,7 @@ public:
 	* alignment_bit: 0
 	****************************************/
 	// DataSize(8192)
-	data_reference compiled_shader;
+	tag_data compiled_shader;
 
 	/****************************************
 	* definition_name: code_block
@@ -68,7 +67,7 @@ public:
 	* alignment_bit: 0
 	****************************************/
 	// DataSize(65535)
-	data_reference code;
+	tag_data code;
 };
 ASSERT_STRUCT_SIZE(c_vertex_shader_classification, 20);
 

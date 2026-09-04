@@ -1,6 +1,5 @@
 #pragma once
 #include "leaf_map.h"
-#include "math/color_math.h"
 
 enum
 {

@@ -1,6 +1,4 @@
 #pragma once
-#include "tag_files/data_reference.h"
-#include "tag_files/tag_reference.h"
 
 /* constants */
 
@@ -194,7 +192,7 @@ ASSERT_STRUCT_SIZE(hs_tag_reference, 8);
 struct hs_source_file
 {
 	 char name[k_tag_string_length];
-	 data_reference source;		// DataSize: 262144
+	 tag_data source;		// DataSize: 262144
 };
 ASSERT_STRUCT_SIZE(hs_tag_reference, 8);
 
@@ -293,7 +291,9 @@ extern const int32 hs_type_weapon_default;
 extern const int32 hs_type_device_default;
 extern const int32 hs_type_scenery_default;
 
+#ifdef HS_COMPILER_ENABLED
 extern const hs_enum_definition hs_enum_table[NUMBER_OF_HS_ENUM_TYPES];
+#endif
 
 /* globals */
 

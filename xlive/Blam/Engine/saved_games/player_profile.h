@@ -13,15 +13,15 @@ enum
 
 /* enums */
 
-enum e_saved_game_profile_input_preference_flags : uint32
+enum e_saved_game_profile_input_preference_flags
 {
 	_saved_game_profile_input_preference_bit_controller_look_inversion = 0x0,
-	_saved_game_profile_input_preference_bit_mouse_look_inversion = 0x1,
-	_saved_game_profile_input_preference_bit_vibration_disabled = 0x2,
-	_saved_game_profile_input_preference_bit_4 = 0x3,
-	_saved_game_profile_input_preference_bit_controller_auto_look_centering = 0x4,
-	_saved_game_profile_input_preference_bit_mouse_auto_look_centering = 0x5,
-	_saved_game_profile_input_preference_bit_mouse_dual_wield_inversion = 0x6,
+	_saved_game_profile_input_preference_bit_mouse_look_inversion,
+	_saved_game_profile_input_preference_bit_vibration_disabled,
+	_saved_game_profile_input_preference_bit_4,
+	_saved_game_profile_input_preference_bit_controller_auto_look_centering,
+	_saved_game_profile_input_preference_bit_mouse_auto_look_centering,
+	_saved_game_profile_input_preference_bit_mouse_dual_wield_inversion,
 	k_saved_game_profile_input_preferences_count
 };
 

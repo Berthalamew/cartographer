@@ -65,8 +65,10 @@ bool saved_game_player_profile_read_file(uint32 enumerated_file_index, s_saved_g
 	//if (profile->gap2[0x29] >= 3u)
 	//	profile->gap2[0x29] = 0;
 
-	if(!saved_game_player_profile_read_post_verify_profile_traits(&profile->appearance))
+	if (!saved_game_player_profile_read_post_verify_profile_traits(&profile->appearance))
+	{
 		csmemset(&profile->appearance, 0, sizeof(s_player_appearance));
+	}
 	
 	return result;
 }
@@ -91,7 +93,8 @@ bool saved_game_player_profile_load(uint32 enumerated_file_index, s_saved_game_p
 	}
 }
 
-void player_profile_traits_initialize(s_player_appearance* appearance)
+void player_profile_traits_initialize(
+	s_player_appearance* appearance)
 {
 	appearance->change_color_index[0] = _player_color_white;
 	appearance->change_color_index[1] = _player_color_white;
@@ -103,4 +106,5 @@ void player_profile_traits_initialize(s_player_appearance* appearance)
 	appearance->emblem_info.emblem_flags.clear();
 	appearance->gap_48 = 0;
 	appearance->gap_4C = 0;
+	return;
 }

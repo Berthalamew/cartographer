@@ -4,7 +4,6 @@
 #include "game/game.h"
 #include "game/players.h"
 #include "interface/hud.h"
-#include "interface/new_hud_definitions.h"
 #include "main/main_screenshot.h"
 #include "networking/logic/network_life_cycle.h"
 #include "render/render.h"
@@ -59,6 +58,30 @@ void new_hud_apply_patches(void)
 	// Hook ui_get_hud_elements for modifying the hud anchor for text
 	PatchCall(Memory::GetAddress(0x22D25A), ui_get_hud_element_position_hook);
 	return;
+}
+
+e_screen_split_type new_hud_get_screen_split_type(
+	int32 render_user_index)
+{
+	e_screen_split_type result;
+
+	switch (get_global_render_window_count())
+	{
+	case 2:
+		result = _screen_split_type_half;
+		break;
+	case 3:
+		result = render_user_index == 0 ? _screen_split_type_half : _screen_split_type_quarter;
+		break;
+	case 4:
+		result = _screen_split_type_quarter;
+		break;
+	default:
+		result = _screen_split_type_full;
+		break;
+	}
+
+	return result;
 }
 
 void should_draw_hud_override_set(bool flag)

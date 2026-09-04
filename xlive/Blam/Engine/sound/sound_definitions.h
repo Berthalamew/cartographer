@@ -57,3 +57,14 @@ struct sound_definition_v1
 	uint32 maximum_play_time;
 };
 ASSERT_STRUCT_SIZE(sound_definition_v1, 20);
+
+// max count: 1
+struct s_sound_globals_definition
+{
+	tag_reference sound_classes;                    // sncl
+	tag_reference sound_effects;                    // sfx+
+	tag_reference sound_mix;                        // snmx
+	tag_reference sound_combat_dialogue_constants;  // spk!
+	datum sound_gesalt;                             // ugh!
+};
+ASSERT_STRUCT_SIZE(s_sound_globals_definition, 36);

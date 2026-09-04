@@ -1,24 +1,9 @@
 #pragma once
-
 #include "game/aim_assist.h"
-#include "units/units.h"
+#include "game/players.h"
+#include "units/unit_control.h"
 
 /* structs */
-
-struct s_player_interaction
-{
-	int16 type;
-	int16 data;
-	datum object_index;
-};
-ASSERT_STRUCT_SIZE(s_player_interaction, 8);
-
-struct s_player_action_context
-{
-	s_player_interaction interaction;
-	datum melee_target_unit_index;
-};
-ASSERT_STRUCT_SIZE(s_player_action_context, 12);
 
 struct s_player_control_state
 {

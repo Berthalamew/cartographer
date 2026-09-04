@@ -47,7 +47,7 @@ enum
 
 /* enums */
 
-enum e_observer_channel_state : int32
+enum e_observer_channel_state
 {
 	_observer_channel_state_none = 0,
 	_observer_channel_state_pending_transport_layer = 3, // waiting for xnet connection to be established
@@ -69,7 +69,7 @@ enum e_network_observer_owner
 
 struct s_observer_channel
 {
-	int32 state;
+	e_observer_channel_state state;
 	int32 field_4;
 	uint8 observer_flags;
 	uint8 owner_flags;

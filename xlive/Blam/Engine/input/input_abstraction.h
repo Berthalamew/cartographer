@@ -24,17 +24,17 @@ extern const real_point2d k_default_right_thumbstick_deadzone_axial_percentage;
 
 /* enums */
 
-enum e_input_device_types :int32
+enum e_input_device_types
 {
 	_input_device_type_general = NONE,
-	_input_device_type_mouse,
+	_input_device_type_mouse = 0,
 	_input_device_type_keyboard,
 	_input_device_type_gamepad
 };
 
 enum e_joystick_preset_types : int8
 {
-	_joystick_preset_default,
+	_joystick_preset_default = 0,
 	_joystick_preset_south_paw,
 	_joystick_preset_legacy,
 	_joystick_preset_legacy_south_paw,
@@ -43,7 +43,7 @@ enum e_joystick_preset_types : int8
 
 enum e_button_preset_types : int8
 {
-	_button_preset_default,
+	_button_preset_default = 0,
 	_button_preset_south_paw,
 	_button_preset_boxer,
 	_button_preset_green_thumb,
@@ -54,17 +54,17 @@ enum e_button_preset_types : int8
 
 enum e_custom_keyboard_preset_types : int8
 {
-	_custom_keyboard_preset_right_hold,	//default
-	_custom_keyboard_preset_right_split,//skirmish
-	_custom_keyboard_preset_left_hold,	//southpaw
-	_custom_keyboard_preset_left_split,	//southpaw_boxer
+	_custom_keyboard_preset_right_hold = 0,	//default
+	_custom_keyboard_preset_right_split,	//skirmish
+	_custom_keyboard_preset_left_hold,		//southpaw
+	_custom_keyboard_preset_left_split,		//southpaw_boxer
 	_custom_keyboard_preset_custom
 };
 
 enum e_abstract_gamepad_stick_types
 {
-	_abstract_gamepad_stick_unknown = -1,
-	_abstract_gamepad_stick_left,
+	_abstract_gamepad_stick_unknown = NONE,
+	_abstract_gamepad_stick_left = 0,
 	_abstract_gamepad_stick_right,
 	k_abstract_gamepad_stick_count
 };

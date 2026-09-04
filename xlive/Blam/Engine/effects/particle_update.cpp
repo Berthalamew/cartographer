@@ -3,6 +3,8 @@
 
 #include "particle_system.h"
 
+#include "memory/data.h"
+
 void particle_update(real32 delta)
 {
 	data_iterator particle_system_it;

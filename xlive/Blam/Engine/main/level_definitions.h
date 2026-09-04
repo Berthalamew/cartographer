@@ -1,7 +1,6 @@
 #pragma once
 #include "main/game_preferences.h"
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_reference.h"
 
 #define k_maximum_number_of_campaigns 4
 #define k_maximum_number_of_campaign_maps 20
@@ -35,7 +34,7 @@ struct s_multiplayer_ui_level_definition
 	int32 map_id;
 	tag_reference bitmap;   // bitm
 	s_ui_level_descriptions level_descriptions;
-	char path[256];
+	char path[k_maximum_filename_length];
 	int32 sort_order;
 	e_multiplayer_ui_level_definition_flags flags;
 	int8 pad[3];
@@ -63,7 +62,7 @@ struct s_campaign_runtime_level_definition
 {
 	int32 campaign_id;
 	int32 map_id;
-	char path[256];
+	char path[k_maximum_filename_length];
 };
 ASSERT_STRUCT_SIZE(s_campaign_runtime_level_definition, 264);
 

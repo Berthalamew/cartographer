@@ -2,10 +2,8 @@
 #include "damage.h"
 #include "emblems.h"
 #include "object_identifier.h"
-#include "object_location.h"
 #include "object_scenario_definitions.h"
 
-#include "math/color_math.h"
 
 /* enum */
 

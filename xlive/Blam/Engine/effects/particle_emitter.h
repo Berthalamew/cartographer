@@ -1,8 +1,4 @@
 #pragma once
-#include "math/matrix_math.h"
-#include "memory/data.h"
-
-#include "particle_system.h"
 
 struct c_particle_emitter
 {
@@ -20,17 +16,17 @@ struct c_particle_emitter
 	void __stdcall pulse(
 		c_particle_emitter* _this,
 		real32 delta,
-		c_particle_system* particle_system,
-		c_particle_emitter_definition* emitter_definition,
-		s_particle_state* particle_state,
+		class c_particle_system* particle_system,
+		class c_particle_emitter_definition* emitter_definition,
+		struct s_particle_state* particle_state,
 		const real_matrix4x3* in_martix,
 		real32 alpha
 	);
 
 	void spawn_particle(
-		s_particle_state* particle_state,
-		c_particle_system* particle_system,
-		c_particle_emitter_definition* emitter_definition,
+		struct s_particle_state* particle_state,
+		class c_particle_system* particle_system,
+		class c_particle_emitter_definition* emitter_definition,
 		real32 a5,
 		real32 a6,
 		real32 delta,
@@ -38,12 +34,12 @@ struct c_particle_emitter
 	);
 
 	void calc_matrix(
-		c_particle_emitter_definition* definition,
-		c_particle_system* particle_system,
+		class c_particle_emitter_definition* definition,
+		class c_particle_system* particle_system,
 		real32 scale,
 		const real_matrix4x3* matrix
 	);
 };
 ASSERT_STRUCT_SIZE(c_particle_emitter, 0x4C);
 
-data_array* get_particle_emitter_table();
+struct data_array* get_particle_emitter_table();

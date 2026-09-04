@@ -90,7 +90,7 @@ static real32 __cdecl draw_hud_widget_get_value(int32 unused, string_id input_na
 static void hud_widget_effect_evaluate(
 	uint32 local_render_user_index,
 	s_new_hud_temporary_user_state* user_state,
-	s_hud_widget_effect_definition* widget_effect,
+	s_hud_widget_effect_definition const* widget_effect,
 	real_point2d* out_offset,
 	real_point2d* out_scale,
 	real32* out_theta);
@@ -146,7 +146,9 @@ void new_hud_draw_apply_patches(void)
 void hud_draw_on_map_load()
 {
 	if (g_draw_hud_crosshair_bitmap_cache)
+	{
 		free(g_draw_hud_crosshair_bitmap_cache);
+	}
 
 	g_draw_hud_crosshair_bitmap_cache_count = 0;
 
@@ -174,7 +176,8 @@ void hud_draw_on_map_load()
 			g_draw_hud_crosshair_bitmap_cache[i++] = it.current_tag_index;
 		}
 		// Exit when we've cached all the bitmap datums
-		else if (i >= g_draw_hud_crosshair_bitmap_cache_count) {
+		else if (i >= g_draw_hud_crosshair_bitmap_cache_count)
+		{
 			break;
 		}
 	}
@@ -279,7 +282,7 @@ static void draw_hud_get_bitmap_data(
 	// If returned bitmap index is NONE the draw call will exit early.
 	*out_bitmap_index = NONE;
 
-	const int32 sequence_index = bitmap_widget->screen_sequence_indices[get_screen_split_type(local_render_user_index)];
+	const int32 sequence_index = bitmap_widget->screen_sequence_indices[new_hud_get_screen_split_type(local_render_user_index)];
 
 	if (bitmap_widget->shader.index == NONE || bitmap_widget->bitmap.index == NONE || sequence_index < 0)
 		return;
@@ -356,19 +359,19 @@ static real32 __cdecl draw_hud_widget_get_value(
 static void hud_widget_effect_evaluate(
 	uint32 local_render_user_index,
 	s_new_hud_temporary_user_state* user_state,
-	s_hud_widget_effect_definition* widget_effect,
+	s_hud_widget_effect_definition const* widget_effect,
 	real_point2d* out_offset,
 	real_point2d* out_scale,
 	real32* out_theta)
 {
-	if (out_theta && widget_effect->flags.test(hud_widget_effect_flag_apply_theta))
+	if (out_theta && widget_effect->flags.test(_hud_widget_effect_flag_apply_theta))
 	{
 		const real32 theta_value = draw_hud_widget_get_value(NONE, widget_effect->theta.input_name);
 		const real32 theta_result = widget_effect->theta.function.evaluate(theta_value, 1.f);
 		*out_theta += widget_effect->theta.function.unknown_post_evaluate_function(theta_result);
 	}
 
-	if (out_offset && widget_effect->flags.test(hud_widget_effect_flag_apply_offset))
+	if (out_offset && widget_effect->flags.test(_hud_widget_effect_flag_apply_offset))
 	{
 		ASSERT(out_scale);
 
@@ -382,7 +385,7 @@ static void hud_widget_effect_evaluate(
 		out_offset->y += out_scale->y * widget_effect->vertical_offset.function.unknown_post_evaluate_function(vertical_result);
 	}
 
-	if (out_scale && widget_effect->flags.test(hud_widget_effect_flag_apply_scale))
+	if (out_scale && widget_effect->flags.test(_hud_widget_effect_flag_apply_scale))
 	{
 		const real32 horizontal_value = draw_hud_widget_get_value(NONE, widget_effect->horizontal_scale.input_name);
 		const real32 vertical_value = draw_hud_widget_get_value(NONE, widget_effect->vertical_scale.input_name);
@@ -441,7 +444,9 @@ static void __cdecl draw_hud_bitmap_widget(
 
 	if (bitmap_widget->effect.count > 0)
 	{
-		hud_widget_effect_evaluate(local_render_user_index, user_state, bitmap_widget->effect[0], &offset_result, &scale_result, &theta_result);
+		s_hud_widget_effect_definition const* effect = TAG_BLOCK_GET_ELEMENT(&bitmap_widget->effect, 0, s_hud_widget_effect_definition);
+
+		hud_widget_effect_evaluate(local_render_user_index, user_state, effect, &offset_result, &scale_result, &theta_result);
 	}
 
 	bitmap_width = (int16)(bitmap_width * scale_result.x);
@@ -465,8 +470,8 @@ static void __cdecl draw_hud_bitmap_widget(
 	real_point2d anchor_point;
 	new_hud_widget_anchor_calculate_point(bitmap_widget->anchor, &anchor_point);
 
-	const point2d screen_offset = bitmap_widget->screen_offsets[get_screen_split_type(local_render_user_index)];
-	const real_point2d registration_point = bitmap_widget->registration_points[get_screen_split_type(local_render_user_index)];
+	const point2d screen_offset = bitmap_widget->screen_offsets[new_hud_get_screen_split_type(local_render_user_index)];
+	const real_point2d registration_point = bitmap_widget->registration_points[new_hud_get_screen_split_type(local_render_user_index)];
 	const real_point2d bitmap_size{ (real32)bitmap_width, (real32)bitmap_height };
 
 	const real_point2d calc_registration =
@@ -486,14 +491,14 @@ static void __cdecl draw_hud_bitmap_widget(
 	final_location.y = (((calc_offset.y - calc_registration.y) + bitmap_bounds.y0) * hud_scale) + anchor_point.y;
 
 
-	if (bitmap_widget->flags.test(bitmap_widget_flag_flip_horizontally))
+	if (bitmap_widget->flags.test(_bitmap_widget_flag_flip_horizontally))
 	{
 		const real32 bounds_left = bitmap_bounds.x0;
 		bitmap_bounds.x0 = bitmap_bounds.x1;
 		bitmap_bounds.x1 = bounds_left;
 	}
 
-	if (bitmap_widget->flags.test(bitmap_widget_flag_flip_vertically))
+	if (bitmap_widget->flags.test(_bitmap_widget_flag_flip_vertically))
 	{
 		const real32 bounds_top = bitmap_bounds.y0;
 		bitmap_bounds.y0 = bitmap_bounds.y1;
@@ -504,23 +509,23 @@ static void __cdecl draw_hud_bitmap_widget(
 
 	switch (bitmap_widget->special_hud_type)
 	{
-	case special_hud_type_sb_player_emblem:
+	case _special_hud_type_sb_player_emblem:
 		new_hud_engine_globals_set_drawing_player_index(user_state->local_player_datum);
 		*global_hud_draw_widget_special_hud_type_color_primary_get() = user_state->local_player_color;
 		break;
-	case special_hud_type_sb_other_player_emblem:
+	case _special_hud_type_sb_other_player_emblem:
 		new_hud_engine_globals_set_drawing_player_index(user_state->other_player_datum);
 		*global_hud_draw_widget_special_hud_type_color_primary_get() = user_state->other_player_color;
 		break;
-	case special_hud_type_sb_player_score_meter:
+	case _special_hud_type_sb_player_score_meter:
 		*global_hud_draw_widget_special_hud_type_color_primary_get() = user_state->local_player_color;
 		*global_hud_draw_widget_special_hud_type_secondary_color_get() = user_state->local_player_color;
 		break;
-	case special_hud_type_sb_other_player_score_meter:
+	case _special_hud_type_sb_other_player_score_meter:
 		*global_hud_draw_widget_special_hud_type_color_primary_get() = user_state->other_player_color;
 		*global_hud_draw_widget_special_hud_type_secondary_color_get() = user_state->other_player_color;
 		break;
-	case special_hud_type_unit_shield_meter:
+	case _special_hud_type_unit_shield_meter:
 	{
 		special_draw_case = true;
 
@@ -561,7 +566,9 @@ static void __cdecl draw_hud_bitmap_widget(
 			shield_meter_damage_color.blue *= shield_damage_color_intensity;
 
 			if (!shield_damaged)
+			{
 				player_unk_0 = shield_vitality;
+			}
 
 			if (player_unk_0 <= 0.0f && shield_vitality <= 0.0f)
 				break;
@@ -600,7 +607,7 @@ static void __cdecl draw_hud_bitmap_widget(
 		}
 		break;
 	}
-	case special_hud_type_territory_meter:
+	case _special_hud_type_territory_meter:
 	{
 		special_draw_case = true;
 
@@ -642,7 +649,8 @@ static void __cdecl draw_hud_bitmap_widget(
 
 	if (!special_draw_case)
 	{
-		if (!bitmap_widget->flags.test(bitmap_widget_flag_scope_stretch)) {
+		if (!bitmap_widget->flags.test(_bitmap_widget_flag_scope_stretch))
+		{
 			render_ingame_user_interface_hud_element(
 				final_location.x,
 				final_location.y,
@@ -677,7 +685,7 @@ static void __cdecl draw_hud_bitmap_widget(
 				&bitmap_bounds,
 				bitmap_widget->shader.index);
 		}
-		if (bitmap_widget->flags.test(bitmap_widget_flag_scope_mirror_horizontally))
+		if (bitmap_widget->flags.test(_bitmap_widget_flag_scope_mirror_horizontally))
 		{
 			real_rectangle2d flipped_bounds;
 			flipped_bounds.y0 = bitmap_bounds.y0;
@@ -697,7 +705,7 @@ static void __cdecl draw_hud_bitmap_widget(
 				&flipped_bounds,
 				bitmap_widget->shader.index);
 		}
-		if (bitmap_widget->flags.test(bitmap_widget_flag_scope_mirror_vertically))
+		if (bitmap_widget->flags.test(_bitmap_widget_flag_scope_mirror_vertically))
 		{
 			real_rectangle2d flipped_bounds;
 			flipped_bounds.y0 = bitmap_bounds.y1;
@@ -718,7 +726,8 @@ static void __cdecl draw_hud_bitmap_widget(
 				&flipped_bounds,
 				bitmap_widget->shader.index);
 		}
-		if (bitmap_widget->flags.test(bitmap_widget_flag_scope_mirror_horizontally) && bitmap_widget->flags.test(bitmap_widget_flag_scope_mirror_vertically))
+		if (bitmap_widget->flags.test(_bitmap_widget_flag_scope_mirror_horizontally) &&
+			bitmap_widget->flags.test(_bitmap_widget_flag_scope_mirror_vertically))
 		{
 			real_rectangle2d flipped_bounds;
 			flipped_bounds.y0 = bitmap_bounds.y1;
@@ -758,11 +767,19 @@ static void __cdecl draw_hud_fixup_private_characters(
 static int32 draw_hud_get_draw_string_font_index(
 	int32 font_index)
 {
-	if (!font_index)
-		return 6;
-	if (font_index == 1)
-		return 8;
-	return NONE;
+	int32 result = NONE;
+
+	switch (font_index)
+	{
+	case _font_index_defualt:
+		result = _text_font_full_screen_hud_message_font;
+		break;
+	case _font_index_number_font:
+		result = _text_font_hud_number_font;
+		break;
+	}
+
+	return result;
 }
 
 static void draw_hud_text_get_string(
@@ -775,10 +792,10 @@ static void draw_hud_text_get_string(
 	s_draw_hud_widget_input_results* hud_input_results = global_hud_draw_widget_function_results_get();
 	*hud_input_results = *widget_function_results;
 
-	if (text_widget->flags.test(text_widget_flag_string_is_a_number))
+	if (text_widget->flags.test(_text_widget_flag_string_is_a_number))
 	{
-		int32 value = (int32)draw_hud_widget_get_value(-1, text_widget->string);
-		if (text_widget->flags.test(text_widget_flag_force_2digit_number))
+		int32 value = (int32)draw_hud_widget_get_value(NONE, text_widget->string);
+		if (text_widget->flags.test(_text_widget_flag_force_2digit_number))
 		{
 			if (value < 0)
 			{
@@ -797,7 +814,7 @@ static void draw_hud_text_get_string(
 				out_string->print(L"%d", value);
 			}
 		}
-		else if (text_widget->flags.test(text_widget_flag_force_3digit_number))
+		else if (text_widget->flags.test(_text_widget_flag_force_3digit_number))
 		{
 			if (value < 0)
 			{
@@ -825,7 +842,7 @@ static void draw_hud_text_get_string(
 			out_string->print(L"%d", value);
 		}
 	}
-	else if (text_widget->flags.test(text_widget_flag_talking_player_hack))
+	else if (text_widget->flags.test(_text_widget_flag_talking_player_hack))
 	{
 		if (user_state->player_talking && user_state->player_index != NONE)
 		{
@@ -877,14 +894,15 @@ static void __cdecl draw_hud_text_widget(
 
 		if (text_widget->effect.count > 0)
 		{
-			hud_widget_effect_evaluate(local_render_user_index, user_state, text_widget->effect[0], &offset_result, &scale_result, nullptr);
-
+			s_hud_widget_effect_definition const* effect = TAG_BLOCK_GET_ELEMENT(&text_widget->effect, 0, s_hud_widget_effect_definition);
+			
+			hud_widget_effect_evaluate(local_render_user_index, user_state, effect, &offset_result, &scale_result, nullptr);
 		}
 
 		real_point2d anchor_point;
 		new_hud_widget_anchor_calculate_point(text_widget->anchor, &anchor_point);
 
-		const point2d screen_offset = text_widget->screen_offsets[get_screen_split_type(local_render_user_index)];
+		const point2d screen_offset = text_widget->screen_offsets[new_hud_get_screen_split_type(local_render_user_index)];
 		const s_render* render = render_get();
 
 		real32 final_location_x = (((screen_offset.x + offset_result.x) * *get_primary_hud_scale()) * scale_result.x + anchor_point.x) - render->camera.viewport_bounds.left;
@@ -911,13 +929,13 @@ static void __cdecl draw_hud_text_widget(
 
 		switch (text_widget->justification)
 		{
-		case text_justification_center:
+		case _text_justification_center:
 			bounds.left = (int16)(final_location.x - (real32)(ceil_text_width >> 1));
 			bounds.top = (int16)final_location.y;
 			bounds.right = (int16)(final_location.x + (real32)(ceil_text_width - (ceil_text_width >> 1)));
 			bounds.bottom = (int16)(ceil_text_height + final_location.y);
 			break;
-		case text_justification_right:
+		case _text_justification_right:
 			bounds.left = (int16)(final_location.x - ceil_text_width);
 			bounds.top = (int16)final_location.y;
 			bounds.right = (int16)final_location.x;

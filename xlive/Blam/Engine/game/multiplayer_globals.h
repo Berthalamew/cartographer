@@ -1,10 +1,7 @@
 #pragma once
 #include "game_engine.h"
 
-#include "math/color_math.h"
-#include "memory/static_arrays.h"
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_reference.h"
 
 /* constants */
 

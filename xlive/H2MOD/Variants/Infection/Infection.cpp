@@ -4,7 +4,6 @@
 #include "cache/cache_files.h"
 #include "game/game.h"
 #include "game/game_engine_util.h"
-#include "game/game_options.h"
 #include "game/game_time.h"
 #include "game/players.h"
 #include "interface/user_interface_controller.h"
@@ -399,7 +398,7 @@ CustomVariantId Infection::GetVariantId()
 	return CustomVariantId::_id_infection;
 }
 
-void Infection::OnMapLoad(ExecTime execTime, s_game_options* options)
+void Infection::OnMapLoad(ExecTime execTime, e_game_mode game_mode)
 {
 	switch (execTime)
 	{
@@ -407,7 +406,7 @@ void Infection::OnMapLoad(ExecTime execTime, s_game_options* options)
 		break;
 
 	case ExecTime::_postEventExec:
-		switch (options->game_mode)
+		switch (game_mode)
 		{
 			// cleanup when loading main menu
 		case _game_mode_multiplayer:

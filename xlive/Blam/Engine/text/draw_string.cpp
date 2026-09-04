@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "draw_string.h"
 
-#include "math/color_math.h"
 
 /* public code */
 

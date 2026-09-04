@@ -1,9 +1,9 @@
 #pragma once
 #include "user_interface_widget_text.h"
-#include "main/game_preferences.h"
+
+#include "cseries/language.h"
 #include "saved_games/game_variant.h"
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_reference.h"
 
 enum
 {

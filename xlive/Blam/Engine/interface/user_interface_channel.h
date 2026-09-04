@@ -6,7 +6,7 @@
 enum e_focussed_widget_type
 {
 	_focussed_widget_type_selected = 0,
-	_focussed_widget_type_hovered, //doesnt exist in h2x
+	_focussed_widget_type_hovered,		//doesnt exist in h2x
 	k_focussed_widget_types
 };
 

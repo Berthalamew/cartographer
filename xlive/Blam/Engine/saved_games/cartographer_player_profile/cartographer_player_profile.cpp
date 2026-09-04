@@ -92,15 +92,17 @@ s_saved_game_cartographer_player_profile* cartographer_player_profile_get_by_con
 
 s_saved_game_cartographer_player_profile* cartographer_player_profile_get_by_user_index(int32 user_index)
 {
-	const s_players_globals* player_globals = get_players_globals();
+	int16 player_count = local_player_count();
+	datum const* user_mapping = player_user_mapping_get();
+	datum const* controller_mapping = player_controller_mapping_get();
 
-	if ((int16)user_index < player_globals->local_player_count)
+	if ((int16)user_index < player_count)
 	{
-		datum user_datum = player_globals->player_user_mapping[user_index];
+		datum user_datum = user_mapping[user_index];
 		for (uint32 index = 0; index < k_number_of_controllers; ++index)
 		{
 			s_cartographer_profile_run_time* profile = &g_cartographer_profiles[index];
-			if (player_globals->player_controller_mapping[index] == user_datum && profile->enumerated_file_index != NONE && !ENUMERATED_INDEX_IS_DEFAULT_SAVE(profile->enumerated_file_index))
+			if (controller_mapping[index] == user_datum && profile->enumerated_file_index != NONE && !ENUMERATED_INDEX_IS_DEFAULT_SAVE(profile->enumerated_file_index))
 			{
 				return &profile->profile.current;
 			}

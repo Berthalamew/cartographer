@@ -12,6 +12,11 @@ enum
 	k_weapon_barrel_effect_count = 3
 };
 
+/* macros */
+
+#define weapon_get(index) ((struct weapon_datum*)(object_get_and_verify_type((index), _object_mask_weapon)))
+#define weapon_try_and_get(index) ((struct weapon_datum*)(object_try_and_get_and_verify_type((index), _object_mask_weapon)))
+
 /* enums */
 
 enum e_weapon_barrel_state : uint8
@@ -191,8 +196,3 @@ int32 __cdecl weapon_get_rounds_total(datum object_index, int32 magazine_index, 
 void __cdecl weapons_fire_barrels(void);
 
 void weapons_apply_patches();
-
-/* macros */
-
-#define weapon_get(index) ((weapon_datum*)(object_get_and_verify_type((index), _object_mask_weapon)))
-#define weapon_try_and_get(index) ((weapon_datum*)(object_try_and_get_and_verify_type((index), _object_mask_weapon)))

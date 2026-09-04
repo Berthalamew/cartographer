@@ -3,7 +3,6 @@
 
 #include "bitmaps/bitmap_group.h"
 #include "bitmaps/bitmap_types.h"
-#include "math/color_math.h"
 #include "rasterizer/rasterizer_globals.h"
 
 /* enums */

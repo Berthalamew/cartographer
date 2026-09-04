@@ -1643,9 +1643,11 @@
     <ClInclude Include="Blam\Engine\game\game_results.h" />
     <ClInclude Include="Blam\Engine\game\game_statborg.h" />
     <ClInclude Include="Blam\Engine\game\materials.h" />
+    <ClInclude Include="Blam\Engine\game\multiplayer_definitions.h" />
     <ClInclude Include="Blam\Engine\game\multiplayer_globals.h" />
     <ClInclude Include="Blam\Engine\game\player_constants.h" />
     <ClInclude Include="Blam\Engine\game\player_mapping.h" />
+    <ClInclude Include="Blam\Engine\game\player_training.h" />
     <ClInclude Include="Blam\Engine\game\player_vibration.h" />
     <ClInclude Include="Blam\Engine\game\preferences.h" />
     <ClInclude Include="Blam\Engine\geometry\geometry_block.h" />
@@ -1746,6 +1748,7 @@
     <ClInclude Include="Blam\Engine\interface\user_interface_bitmap_block.h" />
     <ClInclude Include="Blam\Engine\interface\user_interface_channel.h" />
     <ClInclude Include="Blam\Engine\interface\user_interface_controller.h" />
+    <ClInclude Include="Blam\Engine\interface\user_interface_errors.h" />
     <ClInclude Include="Blam\Engine\interface\user_interface_group_widget.h" />
     <ClInclude Include="Blam\Engine\interface\user_interface_guide.h" />
     <ClInclude Include="Blam\Engine\interface\user_interface_hud_block.h" />
@@ -2163,7 +2166,6 @@
     <ClInclude Include="Blam\Engine\objects\lights_scenario_definitions.h" />
     <ClInclude Include="Blam\Engine\objects\light_definitions.h" />
     <ClInclude Include="Blam\Engine\objects\object_constants.h" />
-    <ClInclude Include="Blam\Engine\objects\object_location.h" />
     <ClInclude Include="Blam\Engine\objects\object_definition.h" />
     <ClInclude Include="Blam\Engine\objects\object_early_movers.h" />
     <ClInclude Include="Blam\Engine\objects\object_globals.h" />
@@ -3065,6 +3067,7 @@
     <ClInclude Include="Blam\Engine\simulation\simulation_queue_events.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_queue_global_events.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_type_collection.h" />
+    <ClInclude Include="Blam\Engine\simulation\simulation_update.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_view.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_view_telemetry.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_watcher.h" />
@@ -3086,7 +3089,6 @@
     <ClInclude Include="Blam\Engine\structures\structure_lightmap.h" />
     <ClInclude Include="Blam\Engine\structures\structure_lightmap_definitions.h" />
     <ClInclude Include="Blam\Engine\structures\structure_runtime_decals.h" />
-    <ClInclude Include="Blam\Engine\tag_files\data_reference.h" />
     <ClInclude Include="Blam\Engine\tag_files\files.h" />
     <ClInclude Include="Blam\Engine\tag_files\tag_block.h" />
     <ClInclude Include="Blam\Engine\tag_files\tag_files.h" />
@@ -3101,7 +3103,6 @@
     <ClInclude Include="Blam\Engine\tag_files\tag_loader\xml\xml_agent.h" />
     <ClInclude Include="Blam\Engine\tag_files\tag_loader\xml\xml_definition_block.h" />
     <ClInclude Include="Blam\Engine\tag_files\tag_loader\xml\xml_definition_loader.h" />
-    <ClInclude Include="Blam\Engine\tag_files\tag_reference.h" />
     <ClInclude Include="Blam\Engine\text\draw_string.h" />
     <ClInclude Include="Blam\Engine\text\font_cache.h" />
     <ClInclude Include="Blam\Engine\text\font_group.h" />

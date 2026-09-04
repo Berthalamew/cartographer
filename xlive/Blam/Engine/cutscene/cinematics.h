@@ -1,5 +1,4 @@
 #pragma once
-#include "math/color_math.h"
 
 struct s_cinematic_globals_flags
 {

@@ -6,8 +6,6 @@
 #include "networking/logic/network_logic.h"
 #include "networking/transport/transport_security.h"
 
-#include <XLive/ServerList/ServerList.h>
-
 /* constants */
 
 enum

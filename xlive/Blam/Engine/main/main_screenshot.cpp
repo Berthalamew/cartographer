@@ -2,6 +2,7 @@
 #include "main_screenshot.h"
 
 #include "bitmaps/bitmaps.h"
+#include "bitmaps/bitmap_group.h"
 #include "bitmaps/bitmap_utilities.h"
 #include "bitmaps/targa_file.h"
 #include "bitmaps/tiff_file.h"
@@ -59,9 +60,9 @@ static void screenshot_cubemap_retrieve_rotation_info(
 	int32 width);
 
 /* dumps camera info to a text file */
-static void __cdecl dump_camera_to_file(const char* camera_name, const render_camera* camera);
+static void __cdecl dump_camera_to_file(char const* camera_name, render_camera const* camera);
 
-static void __cdecl screenshot_cubemap_set_camera_rotation(int32 face_index, int32 resolution, const real_point3d* location, render_camera* camera);
+static void __cdecl screenshot_cubemap_set_camera_rotation(int32 face_index, int32 resolution, real_point3d const* location, render_camera* camera);
 
 static void screenshot_calculate_bloom(bitmap_data* bitmap, int32 horizontal_tile, int32 vertical_tile);
 
@@ -119,7 +120,8 @@ real32 movie_recording_timestep(void)
 	return movie_globals->in_progress ? movie_globals->recording_dt : 0.f;
 }
 
-void screenshot_cubemap(const char* name)
+void screenshot_cubemap(
+	char const* name)
 {
 	s_screenshot_globals* screenshot_globals = get_screenshot_globals();
 	screenshot_globals->take_screenshot = true;
@@ -131,7 +133,8 @@ void screenshot_cubemap(const char* name)
 }
 
 // TODO: maybe fix screenshots while in splitscreen?
-bool __cdecl screenshot_render(window_bound* window)
+bool __cdecl screenshot_render(
+	window_bound* window)
 {
 	ASSERT(window);
 
@@ -570,7 +573,10 @@ static bool movie_should_continue(void)
 	return movie_globals->in_progress && (!movie_globals->field_1C || movie_globals->recording_frame_index % movie_globals->field_14 == movie_globals->field_10);
 }
 
-static bool render_bloom_screenshot(int16 width, int16 height, window_bound* window_bound)
+static bool render_bloom_screenshot(
+	int16 width,
+	int16 height,
+	window_bound* window_bound)
 {
 	bool result = false;
 	s_screenshot_globals* screenshot_globals = get_screenshot_globals();
@@ -701,19 +707,28 @@ static void screenshot_cubemap_retrieve_rotation_info(
 	return;
 }
 
-static void __cdecl dump_camera_to_file(const char* camera_name, const render_camera* camera)
+static void __cdecl dump_camera_to_file(
+	char const* camera_name,
+	render_camera const* camera)
 {
 	INVOKE(0x2735CA, 0x0, dump_camera_to_file, camera_name, camera);
 	return;
 }
 
-static void __cdecl screenshot_cubemap_set_camera_rotation(int32 face_index, int32 resolution, const real_point3d* location, render_camera* camera)
+static void __cdecl screenshot_cubemap_set_camera_rotation(
+	int32 face_index,
+	int32 resolution,
+	real_point3d const* location,
+	render_camera* camera)
 {
 	INVOKE(0x2788CB, 0x0, screenshot_cubemap_set_camera_rotation, face_index, resolution, location, camera);
 	return;
 }
 
-static void screenshot_calculate_bloom(bitmap_data* screenshot_bitmap, int32 horizontal_tile, int32 vertical_tile)
+static void screenshot_calculate_bloom(
+	bitmap_data* screenshot_bitmap,
+	int32 horizontal_tile,
+	int32 vertical_tile)
 {
 	s_screenshot_globals* screenshot_globals = get_screenshot_globals();
 

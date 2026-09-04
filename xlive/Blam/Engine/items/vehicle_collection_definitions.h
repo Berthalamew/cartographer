@@ -1,6 +1,5 @@
 #pragma once
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_reference.h"
 
 // max: 32
 struct vehicle_permutation_definition

@@ -33,7 +33,7 @@ public:
 	CustomVariantId GetVariantId();
 
 	// on map load can be used as Initialize
-	virtual void OnMapLoad(ExecTime execTime, struct s_game_options* options) override;
+	virtual void OnMapLoad(ExecTime execTime, enum e_game_mode game_mode) override;
 	virtual void OnPlayerSpawn(ExecTime execTime, datum playerIdx) override;
 	virtual void OnPlayerDeath(ExecTime execTime, datum playerIdx) override;
 	virtual bool OnAutoPickupHandler(ExecTime execTime, datum playerIdx, datum objectIdx) override;
@@ -50,7 +50,7 @@ public:
 	static void InitializeClient();
 	static void SpawnSkull(datum playerIdx);
 	static void PickupSkull(datum playerIdx, datum skullDatum);
-	static void TriggerSound(e_graverobber_sounds sound, int sleep);
+	static void TriggerSound(e_graverobber_sounds sound, int32 sleep);
 	static void SpawnPlayerClientSetup();
 };
 

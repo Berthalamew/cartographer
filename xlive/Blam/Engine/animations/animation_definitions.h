@@ -2,10 +2,8 @@
 #include "animation_id.h"
 
 #include "cache/cache_files.h"
-#include "tag_files/data_reference.h"
 
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_reference.h"
 
 
 
@@ -323,7 +321,7 @@ class c_model_animation
 	* alignment_bit: 16
 	****************************************/
 	// DataSize(33724160)
-	data_reference resource;
+	tag_data resource;
 	c_animation_data_sizes animation_data_sizes;
 
 	tag_block<s_frame_event> frame_events;
@@ -557,7 +555,7 @@ class c_model_animation_graph
 	* alignment_bit: 0
 	=============================================
 	DataSize(131072) */
-	data_reference last_import_results;
+	tag_data last_import_results;
 	tag_block<s_additional_node_data> additional_node_data;
 
 public:

@@ -3,6 +3,7 @@
 
 #include "input/input_windows.h"
 #include "interface/user_interface.h"
+#include "interface/user_interface_errors.h"
 #include "interface/user_interface_controller.h"
 
 #include "H2MOD/Modules/Accounts/AccountLogin.h"

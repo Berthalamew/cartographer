@@ -1,5 +1,4 @@
 #pragma once
-#include "tag_files/data_reference.h"
 #include "tag_files/tag_block.h"
 
 /* structures */
@@ -23,7 +22,7 @@ struct hud_state_message_definition
 
 struct hud_state_messages
 {
-	data_reference text_data;
+	tag_data text_data;
 	tag_block<hud_state_message_element> message_elements;
 	tag_block<hud_state_message_definition> messages;
 	int8 pad[84];

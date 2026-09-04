@@ -1,5 +1,4 @@
 #pragma once
-#include "main/game_preferences.h"
 
 /* constants */
 
@@ -65,7 +64,7 @@ struct cache_file_header
 	int32 tag_offset_mask;
 	int32 shared_tag_dependency_offset;
 	int32 shared_tag_dependency_count;
-	char path[256];
+	char path[k_maximum_filename_length];
 	char version_string[32];
 	int16 type;	// e_scenario_type
 	int16 pad;
@@ -91,8 +90,8 @@ struct cache_file_header
 	FILETIME creation_time;
 	FILETIME shared_creation_time[k_shared_resource_database_type_count];
 	char name[32];
-	e_language language;
-	char scenario_path[256];
+	int32 language;		// e_language
+	char scenario_path[k_maximum_filename_length];
 	int32 minor_version;
 	int32 debug_tag_name_count;
 	int32 tag_name_buffer_offset;

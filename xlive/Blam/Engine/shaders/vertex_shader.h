@@ -1,6 +1,13 @@
 #pragma once
 
-#define k_number_of_vertex_shader_constants k_kilo
+/* constants */
+
+enum
+{
+	k_number_of_vertex_shader_constants = k_kilo
+};
+
+/* structures */
 
 struct s_vertex_shader_constant
 {

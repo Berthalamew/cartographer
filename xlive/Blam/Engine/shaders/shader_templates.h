@@ -2,10 +2,7 @@
 #include "shader_definitions.h"
 #include "shader_postprocess_definitions.h"
 
-#include "math/color_math.h"
-#include "tag_files/data_reference.h"
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_reference.h"
 
 /* constants */
 
@@ -106,7 +103,7 @@ struct s_shader_template_parameter
 	* alignment_bit: 0
 	****************************************/
 	// DataSize(65535)
-	data_reference explanation;
+	tag_data explanation;
 	e_shader_parameter_type type;
 	c_flags_no_init<e_shader_template_parameter_flags, uint16, k_shader_template_parameter_flag_count> flags;
 
@@ -157,7 +154,7 @@ struct s_shader_template_definition
 	* alignment_bit: 0
 	****************************************/
 	// DataSize(65535)
-	data_reference documentation;
+	tag_data documentation;
 
 	string_id default_material_name;
 

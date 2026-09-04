@@ -1,5 +1,4 @@
 #pragma once
-#include "tag_files/data_reference.h"
 #include "tag_files/tag_block.h"
 
 /* structures */
@@ -26,7 +25,7 @@ struct s_structure_physics
 	* byteswap_proc: 0x00531b20
 	****************************************/
 	// DataSize(1048576)
-	data_reference mopp_code;
+	tag_data mopp_code;
 
 	int32 pad;
 
@@ -40,7 +39,7 @@ struct s_structure_physics
 	* byteswap_proc: 0x00531b20
 	****************************************/
 	// DataSize(1048576)
-	data_reference breakable_surfaces_mopp_code;
+	tag_data breakable_surfaces_mopp_code;
 	tag_block<s_structure_physics_breakable_surface_key_value> breakable_surface_keys;
 };
 ASSERT_STRUCT_SIZE(s_structure_physics, 52);

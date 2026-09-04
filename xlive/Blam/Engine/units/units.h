@@ -83,12 +83,6 @@ enum e_unit_control_flags : uint32
 
 /* structures */
 
-struct s_unit_weapon_set
-{
-	int16 set_identifier;
-	int8 weapon_indices[2];
-};
-
 struct s_unit_304
 {
 	int8 gap_0[16];

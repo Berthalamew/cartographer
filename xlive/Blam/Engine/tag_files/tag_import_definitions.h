@@ -1,19 +1,25 @@
 #pragma once
-#include "tag_files/data_reference.h"
 
-#define MAXIMUM_FILES_PER_TAG_IMPORT_INFO 1024
+/* constants */
+
+enum
+{
+	MAXIMUM_FILES_PER_TAG_IMPORT_INFO = 1024,
+};
+
+/* structures */
 
 // max count: MAXIMUM_FILES_PER_TAG_IMPORT_INFO
 struct tag_import_file
 {
-	char path[256];
+	char path[k_maximum_filename_length];
 	char modification_date[k_tag_string_length];
 	int8 pad[8];
 	int8 pad1[88];
 	int32 checksum_crc32;
 	int32 size_bytes;
 
-	data_reference zipped_data; // Data size: 134217728
+	tag_data zipped_data; // Data size: 134217728
 	int8 pad2[128];
 };
 ASSERT_STRUCT_SIZE(tag_import_file, 0x210);
@@ -21,7 +27,7 @@ ASSERT_STRUCT_SIZE(tag_import_file, 0x210);
 struct tag_import_info
 {
 	int32 build;
-	char version[256];
+	char version[k_maximum_filename_length];
 	char import_date[k_tag_string_length];
 	char culprit[k_tag_string_length];
 	int8 pad[96];

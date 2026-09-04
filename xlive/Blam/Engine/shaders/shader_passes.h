@@ -1,9 +1,6 @@
 #pragma once
 #include "shader_definitions.h"
 
-#include "math/color_math.h"
-#include "tag_files/data_reference.h"
-#include "tag_files/tag_reference.h"
 #include "tag_files/tag_block.h"
 
 /* constants */
@@ -487,7 +484,7 @@ struct s_shader_pass_parameter
 	* alignment_bit: 0
 	****************************************/
 	// DataSize(65535)
-	data_reference explanation;
+	tag_data explanation;
 
 	e_shader_parameter_type type;
 	c_flags_no_init<e_shader_pass_flags, uint16, k_shader_pass_flag_count> flags;
@@ -677,7 +674,7 @@ struct s_shader_pass_implementation
 	* alignment_bit: 0
 	****************************************/
 	// DataSize(65535)
-	data_reference pixel_shader_code;
+	tag_data pixel_shader_code;
 
 	// Explaination("STATE", "EMPTY STRING")
 
@@ -702,7 +699,7 @@ ASSERT_STRUCT_SIZE(s_shader_pass_implementation, 116)
 
 struct s_shader_pass_definition
 {
-	data_reference documentation;
+	tag_data documentation;
 	tag_block<s_shader_pass_parameter> parameters;
 	int16 pad[2];
 	tag_block<s_shader_pass_implementation> implementations;

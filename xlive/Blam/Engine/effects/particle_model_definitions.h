@@ -2,7 +2,6 @@
 #include "effect_location_definition.h"
 #include "particle_property.h"
 #include "particle_system_definition.h"
-#include "tag_files/tag_reference.h"
 #include "geometry/geometry_block.h"
 
 #include "rasterizer/rasterizer_vertex_buffers.h"

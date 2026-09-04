@@ -1,8 +1,6 @@
 #pragma once
 #include "object_constants.h"
 #include "object_identifier.h"
-#include "math/color_math.h"
-#include "tag_files/tag_reference.h"
 
 /* enums */
 

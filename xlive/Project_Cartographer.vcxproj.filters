@@ -946,8 +946,6 @@
     <ClInclude Include="Blam\Engine\simulation\simulation_queue_global_events.h" />
     <ClInclude Include="Blam\Engine\simulation\simulation_encoding.h" />
     <ClInclude Include="Blam\Engine\tag_files\tag_groups.h" />
-    <ClInclude Include="Blam\Engine\tag_files\data_reference.h" />
-    <ClInclude Include="Blam\Engine\tag_files\tag_reference.h" />
     <ClInclude Include="Blam\Engine\tag_files\tag_block.h" />
     <ClInclude Include="Blam\Engine\Networking\replication\replication_entity_manager_view.h" />
     <ClInclude Include="Blam\Engine\Networking\replication\replication_event_manager.h" />
@@ -1920,7 +1918,6 @@
     <ClInclude Include="Blam\Engine\rasterizer\dx9\vertex_shaders_dx9\preprocessed_hlsl_from_tool\compiled\debug_screenspace_world.h" />
     <ClInclude Include="H2MOD\GUI\imgui_integration\imgui_ProdigyCleanTTF.h" />
     <ClInclude Include="Blam\Engine\items\projectiles.h" />
-    <ClInclude Include="Blam\Engine\objects\object_location.h" />
     <ClInclude Include="Blam\Engine\game\player_constants.h" />
     <ClInclude Include="3rdparty\SimpleIni\SimpleIni.h" />
     <ClInclude Include="Blam\Engine\networking\network_utilities.h" />
@@ -2153,6 +2150,10 @@
     <ClInclude Include="Blam\Engine\render\render_cartographer_ingame_variant_ui.h" />
     <ClInclude Include="Blam\Engine\interface\cartographer_variant_settings.h" />
     <ClInclude Include="Blam\Engine\memory\ring_buffer.h" />
+    <ClInclude Include="Blam\Engine\simulation\simulation_update.h" />
+    <ClInclude Include="Blam\Engine\game\player_training.h" />
+    <ClInclude Include="Blam\Engine\game\multiplayer_definitions.h" />
+    <ClInclude Include="Blam\Engine\interface\user_interface_errors.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resources\Resource.rc" />

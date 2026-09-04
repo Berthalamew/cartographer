@@ -1,5 +1,4 @@
 #pragma once
-#include "math/color_math.h"
 #include "rasterizer/dx9/rasterizer_dx9_main.h"
 
 /* constants */

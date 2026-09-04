@@ -1,9 +1,7 @@
 #pragma once
 #include "geometry/geometry_block.h"
 #include "geometry/geometry_definitions_new.h"
-#include "math/color_math.h"
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_reference.h"
 
 /* structures */
 

@@ -23,7 +23,7 @@ class IGameEngineEvent
 {
 public:
 	// on map load can be used as Initialize
-	virtual void OnMapLoad(ExecTime execTime, struct s_game_options* gameOptions) = 0;
+	virtual void OnMapLoad(ExecTime execTime, enum e_game_mode game_mode) = 0;
 
 	virtual ~IGameEngineEvent() = default;
 	virtual void OnPlayerSpawn(ExecTime execTime, datum playerIdx) = 0;
@@ -48,7 +48,7 @@ namespace CustomVariantHandler
 	void GameVarianEnable(const wchar_t* variant);
 	bool ContainsGameVariant(const wchar_t* variant, CustomVariantId variantId);
 
-	void OnMapLoad(ExecTime execTime, struct s_game_options* gameOptions);
+	void OnMapLoad(ExecTime execTime, enum e_game_mode game_mode);
 	void OnPlayerSpawn(ExecTime execTime, datum playerIdx);
 	void OnPlayerDeath(ExecTime execTime, datum playerIdx);
 	bool OnAutoPickupHandler(ExecTime execTime, datum playerIdx, datum objectIdx);

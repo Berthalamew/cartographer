@@ -3,7 +3,6 @@
 
 #include "game/game.h"
 #include "hs/hs_runtime.h"
-#include "math/color_math.h"
 
 /* structures */
 

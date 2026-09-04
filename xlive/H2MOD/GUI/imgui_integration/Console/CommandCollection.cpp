@@ -319,7 +319,7 @@ static int CommandCollection::LogSelectedMapFilenameCmd(const std::vector<std::s
 	std::wstring mapFilenameWide;
 	MapManager::GetMapFilename(mapFilenameWide);
 
-	utf8 map_name[256];
+	utf8 map_name[k_maximum_filename_length];
 	wchar_string_to_utf8_string(mapFilenameWide.c_str(), map_name, NUMBEROF(map_name));
 	outputCb(StringFlag_None, "# map file name: %s", map_name);
 	return 0;

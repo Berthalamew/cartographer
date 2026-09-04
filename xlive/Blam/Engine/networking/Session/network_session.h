@@ -1,5 +1,6 @@
 #pragma once
 #include "network_observer.h"
+
 #include "game/game_allegiance.h"
 #include "game/players.h"
 #include "game/player_constants.h"
@@ -209,7 +210,7 @@ struct s_session_parameters
 	uint32 field_4DD4;
 	uint32 field_4DD8;
 	wchar_t custom_map_name[32];
-	uint8 custom_map_sha256_hash[32];
+	s_sha256_hash custom_map_hash;
 	s_game_variant game_variant;
 	uint8 gap_4E40[404];
 	uint32 field_5100;

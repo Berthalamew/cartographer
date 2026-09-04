@@ -7,7 +7,6 @@
 #include "creatures/creature_definitions.h"
 #include "game/game_engine.h"
 #include "game/game_globals.h"
-#include "objects/object_location.h"
 #include "physics/bsp3d.h"
 #include "physics/collision_model_definitions.h"
 #include "physics/physics_model_definitions.h"

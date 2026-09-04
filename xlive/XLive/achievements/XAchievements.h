@@ -1,5 +1,4 @@
 #pragma once
-extern HANDLE g_dwFakeAchievementContent;
 
 #define XACHIEVEMENT_TYPE_COMPLETION            1
 #define XACHIEVEMENT_TYPE_LEVELING              2
@@ -35,6 +34,8 @@ extern HANDLE g_dwFakeAchievementContent;
 
 #define XACHIEVEMENT_INVALID_ID         ((DWORD)0xFFFFFFFF)
 
+/* structures */
+
 typedef struct
 {
 	DWORD                               dwId;
@@ -47,6 +48,8 @@ typedef struct
 	DWORD                               dwFlags;
 } XACHIEVEMENT_DETAILS, *PXACHIEVEMENT_DETAILS;
 
+/* prototypes */
+
 DWORD WINAPI XUserCreateAchievementEnumerator(
 	DWORD dwTitleId,
 	DWORD dwUserIndex,
@@ -58,3 +61,7 @@ DWORD WINAPI XUserCreateAchievementEnumerator(
 	PHANDLE phEnum);
 
 int AchievementEnumerator(DWORD cbBuffer, CHAR* pvBuffer, PDWORD pcItemsReturned, XOVERLAPPED* pOverlapped);
+
+/* globals */
+
+extern HANDLE g_dwFakeAchievementContent;

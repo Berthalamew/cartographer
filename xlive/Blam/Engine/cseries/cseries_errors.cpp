@@ -9,7 +9,6 @@
 
 #include "interface/terminal.h"
 #include "main/console.h"
-#include "math/color_math.h"
 #include "multithreading/synchronization.h"
 #include "networking/network_event.h"
 #include "shell/shell.h"

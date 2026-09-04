@@ -3,7 +3,6 @@
 #include "effects_creation.h"
 #include "effect_location_definition.h"
 #include "tag_files/tag_block.h"
-#include "tag_files/tag_reference.h"
 #include "math/function_definitions.h"
 
 #include "particle_system_definition.h"

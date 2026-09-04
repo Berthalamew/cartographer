@@ -3,6 +3,12 @@
 
 /* structures */
 
+struct s_unit_weapon_set
+{
+	int16 set_identifier;
+	int8 weapon_indices[2];
+};
+
 struct unit_control_data
 {
 	string_id animation_state;

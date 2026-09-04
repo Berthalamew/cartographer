@@ -1,12 +1,14 @@
 #include "stdafx.h"
-
 #include "particle_draw.h"
 
-#include "particle_state.h"
-#include "particle_system.h"
 #include "particle.h"
 #include "particle_emitter.h"
 #include "particle_location.h"
+#include "particle_state.h"
+#include "particle_system.h"
+#include "particle_system_definition.h"
+
+#include "math/matrix_math.h"
 #include "render/render_sky.h"
 
 typedef void(__cdecl* particle_draw_callback_t)(c_particle*, s_particle_state*, real_vector3d*, real_vector3d*, real32, real_argb_color*, c_particle_definition**);

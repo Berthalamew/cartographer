@@ -4,7 +4,6 @@
 #include "tag_files/tag_block.h"
 
 #include "geometry/geometry_block.h"
-#include "math/color_math.h"
 
 /* constants */
 

@@ -5,6 +5,7 @@
 #include "input/input_abstraction.h"
 #include "interface/user_interface_memory.h"
 #include "interface/user_interface_screen_widget_definition.h"
+#include "main/game_preferences.h"
 #include "saved_games/player_profile.h"
 
 #include "tag_files/tag_loader/tag_injection.h"

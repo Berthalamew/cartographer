@@ -1,6 +1,5 @@
 #pragma once
 
-#include "math/color_math.h"
 
 
 #define k_maximum_projected_decal_count 32768

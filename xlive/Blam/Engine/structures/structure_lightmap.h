@@ -2,7 +2,6 @@
 #include "errors/error_reports.h"
 #include "geometry/geometry_block.h"
 #include "geometry/geometry_definitions_new.h"
-#include "math/color_math.h"
 
 /* constants */
 
